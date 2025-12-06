@@ -1,0 +1,10 @@
+# FluxFlow UI - Runtime Dependencies
+# Install with: pip install -r requirements.txt
+
+# Training package dependency (includes core)
+fluxflow-training @ git+https://github.com/danny-mio/fluxflow-training.git
+
+# UI-specific dependencies
+gradio>=4.0.0
+flask>=3.0.0
+flask-cors>=4.0.0

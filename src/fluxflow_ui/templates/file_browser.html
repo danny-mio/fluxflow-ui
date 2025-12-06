@@ -1,0 +1,321 @@
+<!-- File Browser Modal -->
+<style>
+/* File Browser Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(3, 7, 18, 0.9);
+    backdrop-filter: blur(8px);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, var(--bg-layer1) 0%, var(--bg-layer2) 100%);
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(168, 85, 247, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(6, 182, 212, 0.2));
+    border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    background: linear-gradient(135deg, var(--neural-purple), var(--flow-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-header h3::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23A855F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 L20 9 L20 22 L4 22 L4 2 Z"/><path d="M13 2 L13 9 L20 9"/></svg>') center/contain no-repeat;
+}
+
+.close {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #EF4444;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.close:hover {
+    background: rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+    transform: scale(1.05);
+}
+
+.modal-body {
+    padding: 1.5rem 2rem;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.current-path {
+    padding: 0.875rem;
+    background: rgba(3, 7, 18, 0.6);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.875rem;
+    color: var(--flow-cyan);
+    word-break: break-all;
+}
+
+.file-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.file-item {
+    padding: 0.875rem;
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    background: rgba(15, 23, 42, 0.4);
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.file-item:hover {
+    background: rgba(168, 85, 247, 0.1);
+    border-color: var(--neural-purple);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+    transform: translateX(4px);
+}
+
+.file-item.selected {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(6, 182, 212, 0.2));
+    border-color: var(--flow-cyan);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+}
+
+.file-item-name {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    color: var(--text-bright);
+    font-size: 0.875rem;
+}
+
+.file-icon {
+    font-size: 1.25rem;
+    width: 24px;
+    text-align: center;
+}
+
+.file-size {
+    color: var(--text-dim);
+    font-size: 0.813rem;
+    font-family: 'Source Code Pro', monospace;
+}
+
+.modal-footer {
+    padding: 1.25rem 2rem;
+    border-top: 1px solid rgba(168, 85, 247, 0.2);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    background: rgba(15, 23, 42, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(156, 163, 175, 0.2);
+    border: 1px solid rgba(156, 163, 175, 0.5);
+    color: var(--text-bright);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(156, 163, 175, 0.3);
+    box-shadow: 0 4px 12px rgba(156, 163, 175, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Scrollbar styling */
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--neural-purple), var(--flow-cyan));
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--neural-purple);
+}
+</style>
+
+<div id="fileBrowserModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Browse Files</h3>
+            <button class="close" onclick="closeFileBrowser()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="current-path" id="currentPath">/</div>
+            <ul class="file-list" id="fileList"></ul>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeFileBrowser()">Cancel</button>
+            <button class="btn btn-primary" onclick="selectFile()">Select</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentBrowserPath = '.';
+let selectedFilePath = null;
+let browserCallback = null;
+let browserFileType = 'all';
+
+function openFileBrowser(initialPath, fileType, callback) {
+    currentBrowserPath = initialPath || '.';
+    browserFileType = fileType || 'all';
+    browserCallback = callback;
+    selectedFilePath = null;
+    
+    document.getElementById('fileBrowserModal').style.display = 'block';
+    loadDirectory(currentBrowserPath);
+}
+
+function closeFileBrowser() {
+    document.getElementById('fileBrowserModal').style.display = 'none';
+}
+
+async function loadDirectory(path) {
+    try {
+        const response = await fetch('/api/files/browse', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({path: path, type: browserFileType})
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            currentBrowserPath = data.current_path;
+            document.getElementById('currentPath').textContent = data.current_path;
+            
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            data.items.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'file-item';
+                li.onclick = () => selectItem(item, li);
+                
+                if (item.type === 'dir') {
+                    li.ondblclick = () => loadDirectory(item.path);
+                }
+                
+                const icon = item.type === 'dir' ? '📁' : '📄';
+                li.innerHTML = `
+                    <div class="file-item-name">
+                        <span class="file-icon">${icon}</span>
+                        <span>${item.name}</span>
+                    </div>
+                    <span class="file-size">${item.size}</span>
+                `;
+                
+                fileList.appendChild(li);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading directory:', error);
+    }
+}
+
+function selectItem(item, element) {
+    // Remove previous selection
+    document.querySelectorAll('.file-item').forEach(el => {
+        el.classList.remove('selected');
+    });
+    
+    element.classList.add('selected');
+    
+    // Set selected path based on file type filter
+    if (browserFileType === 'dir' && item.type === 'dir') {
+        // Selecting a directory when looking for directories
+        selectedFilePath = item.path;
+    } else if (browserFileType !== 'dir' && item.type === 'file') {
+        // Selecting a file when looking for files
+        selectedFilePath = item.path;
+    } else if (item.name === '..') {
+        // Parent directory - allow for navigation but not selection
+        selectedFilePath = null;
+    } else {
+        // Don't allow selection of wrong type
+        selectedFilePath = null;
+    }
+}
+
+function selectFile() {
+    if (selectedFilePath && browserCallback) {
+        browserCallback(selectedFilePath);
+    }
+    closeFileBrowser();
+}
+
+// Close modal if clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('fileBrowserModal');
+    if (event.target === modal) {
+        closeFileBrowser();
+    }
+}
+</script>

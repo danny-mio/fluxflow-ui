@@ -1,0 +1,26 @@
+# FluxFlow UI Dependencies - Python 3.14 Compatible
+# Install with: pip install -r ui/requirements_ui.txt
+
+# Web Framework (pure Python, no Rust)
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# Image Processing
+pillow>=10.0.0
+
+# Numerical Computing
+numpy>=1.26.0
+
+# PyTorch (install separately from PyTorch index for CPU version):
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+# FluxFlow Core Dependencies
+transformers>=4.30.0
+safetensors>=0.3.0
+diffusers>=0.20.0
+accelerate>=0.20.0
+einops>=0.6.0
+lion-pytorch>=0.1.0
+webdataset>=0.2.0
+orjson>=3.0.0
+matplotlib>=3.7.0
