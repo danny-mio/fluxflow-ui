@@ -65,24 +65,37 @@ class TrainingRunner:
             cmd.extend(["--model_checkpoint", config["model_checkpoint"]])
         if config.get("pretrained_bert_model"):
             cmd.extend(["--pretrained_bert_model", config["pretrained_bert_model"]])
-        cmd.extend([
-            "--vae_dim", str(config.get("vae_dim", 64)),
-            "--text_embedding_dim", str(config.get("text_embedding_dim", 1024)),
-            "--feature_maps_dim", str(config.get("feature_maps_dim", 64)),
-            "--feature_maps_dim_disc", str(config.get("feature_maps_dim_disc", 128)),
-        ])
+        cmd.extend(
+            [
+                "--vae_dim",
+                str(config.get("vae_dim", 64)),
+                "--text_embedding_dim",
+                str(config.get("text_embedding_dim", 1024)),
+                "--feature_maps_dim",
+                str(config.get("feature_maps_dim", 64)),
+                "--feature_maps_dim_disc",
+                str(config.get("feature_maps_dim_disc", 128)),
+            ]
+        )
         return cmd
 
     def _build_training_args(self, config: Dict[str, Any]) -> List[str]:
         """Build training-related command arguments."""
         cmd = [
-            "--n_epochs", str(config.get("n_epochs", 10)),
-            "--batch_size", str(config.get("batch_size", 1)),
-            "--lr", str(config.get("lr", 1e-5)),
-            "--lr_min", str(config.get("lr_min", 0.1)),
-            "--workers", str(config.get("workers", 4)),
-            "--training_steps", str(config.get("training_steps", 1)),
-            "--initial_clipping_norm", str(config.get("initial_clipping_norm", 1.0)),
+            "--n_epochs",
+            str(config.get("n_epochs", 10)),
+            "--batch_size",
+            str(config.get("batch_size", 1)),
+            "--lr",
+            str(config.get("lr", 1e-5)),
+            "--lr_min",
+            str(config.get("lr_min", 0.1)),
+            "--workers",
+            str(config.get("workers", 4)),
+            "--training_steps",
+            str(config.get("training_steps", 1)),
+            "--initial_clipping_norm",
+            str(config.get("initial_clipping_norm", 1.0)),
         ]
         # Training flags
         if config.get("preserve_lr"):
@@ -94,19 +107,27 @@ class TrainingRunner:
             if config.get(flag):
                 cmd.append(f"--{flag}")
         # KL divergence
-        cmd.extend([
-            "--kl_beta", str(config.get("kl_beta", 1.0)),
-            "--kl_warmup_steps", str(config.get("kl_warmup_steps", 100000)),
-            "--kl_free_bits", str(config.get("kl_free_bits", 0.0)),
-        ])
+        cmd.extend(
+            [
+                "--kl_beta",
+                str(config.get("kl_beta", 1.0)),
+                "--kl_warmup_steps",
+                str(config.get("kl_warmup_steps", 100000)),
+                "--kl_free_bits",
+                str(config.get("kl_free_bits", 0.0)),
+            ]
+        )
         return cmd
 
     def _build_output_args(self, config: Dict[str, Any]) -> List[str]:
         """Build output and logging command arguments."""
         cmd = [
-            "--lambda_adv", str(config.get("lambda_adv", 0.9)),
-            "--sample_interval", str(config.get("sample_interval", 50)),
-            "--log_interval", str(config.get("log_interval", 10)),
+            "--lambda_adv",
+            str(config.get("lambda_adv", 0.9)),
+            "--sample_interval",
+            str(config.get("sample_interval", 50)),
+            "--log_interval",
+            str(config.get("log_interval", 10)),
         ]
         if config.get("no_samples"):
             cmd.append("--no_samples")
@@ -118,11 +139,16 @@ class TrainingRunner:
                 if caption.strip():
                     cmd.extend(["--sample_captions", caption.strip()])
         # Misc
-        cmd.extend([
-            "--tokenizer_name", config.get("tokenizer_name", "distilbert-base-uncased"),
-            "--img_size", str(config.get("img_size", 1024)),
-            "--channels", str(config.get("channels", 3)),
-        ])
+        cmd.extend(
+            [
+                "--tokenizer_name",
+                config.get("tokenizer_name", "distilbert-base-uncased"),
+                "--img_size",
+                str(config.get("img_size", 1024)),
+                "--channels",
+                str(config.get("channels", 3)),
+            ]
+        )
         return cmd
 
     def _build_optim_sched_args(self, config: Dict[str, Any]) -> List[str]:

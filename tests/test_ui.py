@@ -1,7 +1,6 @@
 """Basic tests for FluxFlow UI package."""
 
 
-
 class TestUIImports:
     """Test that UI package imports work correctly."""
 

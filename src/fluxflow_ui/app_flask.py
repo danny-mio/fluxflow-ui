@@ -336,14 +336,10 @@ def browse_files():
 
         # Add parent directory option
         if path_obj.parent != path_obj:
-            items.append(
-                {"name": "..", "path": str(path_obj.parent), "type": "dir", "size": ""}
-            )
+            items.append({"name": "..", "path": str(path_obj.parent), "type": "dir", "size": ""})
 
         # List directory contents
-        for item in sorted(
-            path_obj.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower())
-        ):
+        for item in sorted(path_obj.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower())):
             # Skip hidden files
             if item.name.startswith("."):
                 continue
@@ -354,13 +350,9 @@ def browse_files():
             item_type = "dir" if item.is_dir() else "file"
             size = _format_file_size(item.stat().st_size) if item.is_file() else ""
 
-            items.append(
-                {"name": item.name, "path": str(item), "type": item_type, "size": size}
-            )
+            items.append({"name": item.name, "path": str(item), "type": item_type, "size": size})
 
-        return jsonify(
-            {"status": "success", "current_path": str(path_obj), "items": items}
-        )
+        return jsonify({"status": "success", "current_path": str(path_obj), "items": items})
 
     except PermissionError:
         logger.warning(f"Permission denied accessing path: {current_path}")

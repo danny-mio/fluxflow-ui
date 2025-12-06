@@ -17,9 +17,9 @@ class TestConfigManagerInit:
         """Should create config directory if it doesn't exist."""
         config_dir = tmp_path / "test_configs"
         assert not config_dir.exists()
-        
+
         manager = ConfigManager(str(config_dir))
-        
+
         assert config_dir.exists()
         assert config_dir.is_dir()
 
@@ -27,7 +27,7 @@ class TestConfigManagerInit:
         """Should set correct paths for config files."""
         config_dir = tmp_path / "configs"
         manager = ConfigManager(str(config_dir))
-        
+
         assert manager.training_config_path == config_dir / "training_config.json"
         assert manager.generation_config_path == config_dir / "generation_config.json"
 
@@ -39,12 +39,12 @@ class TestSaveTrainingConfig:
         """Should save valid config to file."""
         manager = ConfigManager(str(tmp_path / "configs"))
         config = {"batch_size": 4, "lr": 1e-4}
-        
+
         result = manager.save_training_config(config)
-        
+
         assert result is True
         assert manager.training_config_path.exists()
-        
+
         with open(manager.training_config_path) as f:
             saved = json.load(f)
         assert saved == config
@@ -61,9 +61,9 @@ class TestSaveTrainingConfig:
                 "flow": {"type": "CosineAnnealingLR"},
             },
         }
-        
+
         result = manager.save_training_config(config)
-        
+
         assert result is True
         with open(manager.training_config_path) as f:
             saved = json.load(f)
@@ -72,10 +72,10 @@ class TestSaveTrainingConfig:
     def test_save_overwrites_existing(self, tmp_path):
         """Should overwrite existing config file."""
         manager = ConfigManager(str(tmp_path / "configs"))
-        
+
         manager.save_training_config({"version": 1})
         manager.save_training_config({"version": 2})
-        
+
         with open(manager.training_config_path) as f:
             saved = json.load(f)
         assert saved["version"] == 2
@@ -85,10 +85,10 @@ class TestSaveTrainingConfig:
         config_dir = tmp_path / "configs"
         config_dir.mkdir()
         manager = ConfigManager(str(config_dir))
-        
+
         # Make directory read-only
         os.chmod(config_dir, 0o444)
-        
+
         try:
             result = manager.save_training_config({"test": True})
             assert result is False
@@ -104,41 +104,41 @@ class TestLoadTrainingConfig:
         """Should load existing config file."""
         manager = ConfigManager(str(tmp_path / "configs"))
         config = {"batch_size": 8, "epochs": 10}
-        
+
         with open(manager.training_config_path, "w") as f:
             json.dump(config, f)
-        
+
         loaded = manager.load_training_config()
-        
+
         assert loaded == config
 
     def test_load_returns_none_when_missing(self, tmp_path):
         """Should return None when config file doesn't exist."""
         manager = ConfigManager(str(tmp_path / "configs"))
-        
+
         loaded = manager.load_training_config()
-        
+
         assert loaded is None
 
     def test_load_returns_none_on_corrupted_json(self, tmp_path):
         """Should return None when config file is corrupted."""
         manager = ConfigManager(str(tmp_path / "configs"))
-        
+
         with open(manager.training_config_path, "w") as f:
             f.write("not valid json {{{")
-        
+
         loaded = manager.load_training_config()
-        
+
         assert loaded is None
 
     def test_load_returns_none_on_empty_file(self, tmp_path):
         """Should return None when config file is empty."""
         manager = ConfigManager(str(tmp_path / "configs"))
-        
+
         manager.training_config_path.touch()
-        
+
         loaded = manager.load_training_config()
-        
+
         assert loaded is None
 
 
@@ -149,22 +149,22 @@ class TestSaveGenerationConfig:
         """Should save valid generation config."""
         manager = ConfigManager(str(tmp_path / "configs"))
         config = {"img_size": 512, "ddim_steps": 50}
-        
+
         result = manager.save_generation_config(config)
-        
+
         assert result is True
         assert manager.generation_config_path.exists()
 
     def test_save_returns_false_on_invalid_data(self, tmp_path):
         """Should return False when data cannot be serialized."""
         manager = ConfigManager(str(tmp_path / "configs"))
-        
+
         # Circular reference cannot be serialized
         config = {}
         config["self"] = config
-        
+
         result = manager.save_generation_config(config)
-        
+
         assert result is False
 
 
@@ -175,20 +175,20 @@ class TestLoadGenerationConfig:
         """Should load existing generation config."""
         manager = ConfigManager(str(tmp_path / "configs"))
         config = {"model_checkpoint": "/path/to/model.safetensors"}
-        
+
         with open(manager.generation_config_path, "w") as f:
             json.dump(config, f)
-        
+
         loaded = manager.load_generation_config()
-        
+
         assert loaded == config
 
     def test_load_returns_none_when_missing(self, tmp_path):
         """Should return None when config doesn't exist."""
         manager = ConfigManager(str(tmp_path / "configs"))
-        
+
         loaded = manager.load_generation_config()
-        
+
         assert loaded is None
 
 
@@ -198,9 +198,9 @@ class TestDefaultConfigs:
     def test_default_training_config_has_required_keys(self, tmp_path):
         """Default training config should have all required keys."""
         manager = ConfigManager(str(tmp_path / "configs"))
-        
+
         config = manager.get_default_training_config()
-        
+
         # Check essential keys
         assert "batch_size" in config
         assert "lr" in config
@@ -212,9 +212,9 @@ class TestDefaultConfigs:
     def test_default_training_config_has_valid_values(self, tmp_path):
         """Default training config should have sensible values."""
         manager = ConfigManager(str(tmp_path / "configs"))
-        
+
         config = manager.get_default_training_config()
-        
+
         assert config["batch_size"] > 0
         assert config["lr"] > 0
         assert config["n_epochs"] > 0
@@ -222,9 +222,9 @@ class TestDefaultConfigs:
     def test_default_generation_config_has_required_keys(self, tmp_path):
         """Default generation config should have all required keys."""
         manager = ConfigManager(str(tmp_path / "configs"))
-        
+
         config = manager.get_default_generation_config()
-        
+
         assert "img_size" in config
         assert "ddim_steps" in config
         assert "vae_dim" in config
@@ -233,9 +233,9 @@ class TestDefaultConfigs:
     def test_default_generation_config_has_valid_values(self, tmp_path):
         """Default generation config should have sensible values."""
         manager = ConfigManager(str(tmp_path / "configs"))
-        
+
         config = manager.get_default_generation_config()
-        
+
         assert config["img_size"] > 0
         assert config["ddim_steps"] > 0
 
@@ -247,18 +247,18 @@ class TestRoundTrip:
         """Saving and loading training config should preserve data."""
         manager = ConfigManager(str(tmp_path / "configs"))
         original = manager.get_default_training_config()
-        
+
         manager.save_training_config(original)
         loaded = manager.load_training_config()
-        
+
         assert loaded == original
 
     def test_generation_config_round_trip(self, tmp_path):
         """Saving and loading generation config should preserve data."""
         manager = ConfigManager(str(tmp_path / "configs"))
         original = manager.get_default_generation_config()
-        
+
         manager.save_generation_config(original)
         loaded = manager.load_generation_config()
-        
+
         assert loaded == original
