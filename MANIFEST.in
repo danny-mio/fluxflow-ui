@@ -1,0 +1,15 @@
+include README.md
+include LICENSE
+include USER_GUIDE.md
+include SECURITY.md
+include pyproject.toml
+
+recursive-include src/fluxflow_ui *.py
+recursive-include src/fluxflow_ui py.typed
+recursive-include src/fluxflow_ui/templates *.html
+recursive-include src/fluxflow_ui/static *.css *.js *.png *.jpg *.svg
+recursive-include src/fluxflow_ui/components *.py
+
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store
