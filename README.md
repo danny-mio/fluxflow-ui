@@ -6,7 +6,7 @@ Web interface for FluxFlow text-to-image generation and training.
 
 **Training In Progress**: FluxFlow models are currently being trained. The UI is fully functional, but trained model checkpoints are not yet available for download.
 
-**When Available**: Trained checkpoints will be published to [MODEL_ZOO.md](../MODEL_ZOO.md) upon completion of the [TRAINING_VALIDATION_PLAN.md](../TRAINING_VALIDATION_PLAN.md).
+**When Available**: Trained checkpoints will be published to [MODEL_ZOO.md](https://github.com/danny-mio/fluxflow-core/blob/main/MODEL_ZOO.md) upon completion of the [TRAINING_VALIDATION_PLAN.md](https://github.com/danny-mio/fluxflow-core/blob/main/TRAINING_VALIDATION_PLAN.md).
 
 **Current Capabilities**: You can use this UI to:
 - Configure and launch training runs with your own datasets
@@ -23,6 +23,12 @@ Web interface for FluxFlow text-to-image generation and training.
 pip install fluxflow-ui
 ```
 
+**What gets installed:**
+- `fluxflow-ui` - Web interface for training and generation
+- `fluxflow-training` - Training capabilities (automatically installed as dependency)
+- `fluxflow` core package (transitively installed)
+- CLI command: `fluxflow-ui`
+
 **Package available on PyPI**: [fluxflow-ui v0.1.0](https://pypi.org/project/fluxflow-ui/)
 
 ### Development Install
@@ -32,6 +38,20 @@ git clone https://github.com/danny-mio/fluxflow-ui.git
 cd fluxflow-ui
 pip install -e ".[dev]"
 ```
+
+## ⚠️ Security Warning
+
+**FluxFlow UI is designed for local development use only.**
+
+- No authentication or authorization
+- File browser can access entire filesystem
+- Not hardened for production deployment
+
+See [SECURITY.md](SECURITY.md) for details on security measures, limitations, and production deployment warnings.
+
+**Do not expose this application to the internet without additional security hardening.**
+
+---
 
 ## Features
 
@@ -85,18 +105,6 @@ Then open your browser to `http://localhost:7860`
 ## Configuration
 
 The UI runs on `http://0.0.0.0:7860` by default. To customize the host and port, modify the `main()` function in `app_flask.py`.
-
-## Security Warning
-
-⚠️ **FluxFlow UI is designed for local development use only.**
-
-- No authentication or authorization
-- File browser can access entire filesystem
-- Not hardened for production deployment
-
-See [SECURITY.md](SECURITY.md) for details on security measures, limitations, and production deployment warnings.
-
-**Do not expose this application to the internet without additional security hardening.**
 
 ## Development
 
