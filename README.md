@@ -29,7 +29,7 @@ pip install fluxflow-ui
 - `fluxflow` core package (transitively installed)
 - CLI command: `fluxflow-ui`
 
-**Package available on PyPI**: [fluxflow-ui v0.1.0](https://pypi.org/project/fluxflow-ui/)
+**Package available on PyPI**: [fluxflow-ui v0.1.1](https://pypi.org/project/fluxflow-ui/)
 
 ### Development Install
 
