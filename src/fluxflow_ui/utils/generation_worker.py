@@ -76,7 +76,9 @@ class GenerationWorker:
             )
             if self.tokenizer.pad_token is None:  # type: ignore[union-attr]
                 self.tokenizer.pad_token = self.tokenizer.eos_token  # type: ignore[union-attr]
-                self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})  # type: ignore[union-attr]
+                self.tokenizer.add_special_tokens(  # type: ignore[union-attr]
+                    {"pad_token": "[PAD]"}
+                )
 
             # Initialize models
             self.text_encoder = BertTextEncoder(embed_dim=text_embedding_dim)
@@ -184,7 +186,9 @@ class GenerationWorker:
                 from diffusers import DPMSolverMultistepScheduler
 
                 scheduler = DPMSolverMultistepScheduler(num_train_timesteps=1000)
-                scheduler.set_timesteps(ddim_steps, device=self.device)  # type: ignore[attr-defined]
+                scheduler.set_timesteps(  # type: ignore[attr-defined]
+                    ddim_steps, device=self.device
+                )
 
                 t = torch.randint(0, 1000, (1,), device=self.device)
                 noised_img = scheduler.add_noise(img_seq, noise_img, t)  # type: ignore
