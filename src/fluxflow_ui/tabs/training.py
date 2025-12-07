@@ -184,6 +184,7 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
     if not prev_config:
         prev_config = config_mgr.get_default_training_config()
 
+    tab: gr.Tab
     with gr.Tab("🚀 Train") as tab:
         gr.Markdown("# FluxFlow Model Training")
         gr.Markdown(
