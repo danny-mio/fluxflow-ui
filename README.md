@@ -17,14 +17,21 @@ Web interface for FluxFlow text-to-image generation and training.
 
 ## Installation
 
-### Development Installation (Recommended)
+### Production Install
 
 ```bash
-# Clone and install in editable mode with development dependencies
-pip install -e ".[dev]"
+pip install fluxflow-ui
 ```
 
-**Note:** This package is not published to PyPI. Install from source only.
+**Package available on PyPI**: [fluxflow-ui v0.1.0](https://pypi.org/project/fluxflow-ui/)
+
+### Development Install
+
+```bash
+git clone https://github.com/danny-mio/fluxflow-ui.git
+cd fluxflow-ui
+pip install -e ".[dev]"
+```
 
 ## Features
 
