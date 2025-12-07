@@ -52,7 +52,8 @@ class ConfigManager:
             return None
         try:
             with open(self.training_config_path, "r") as f:
-                return json.load(f)
+                data: Dict[str, Any] = json.load(f)
+                return data
         except json.JSONDecodeError as e:
             logger.error(f"Corrupted training config file: {e}")
             return None
@@ -90,7 +91,8 @@ class ConfigManager:
             return None
         try:
             with open(self.generation_config_path, "r") as f:
-                return json.load(f)
+                data: Dict[str, Any] = json.load(f)
+                return data
         except json.JSONDecodeError as e:
             logger.error(f"Corrupted generation config file: {e}")
             return None

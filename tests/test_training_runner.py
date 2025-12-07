@@ -2,10 +2,7 @@
 
 import queue
 import threading
-import time
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from fluxflow_ui.utils.training_runner import TrainingRunner
 
@@ -264,8 +261,6 @@ class TestThreadSafety:
     @patch("subprocess.Popen")
     def test_concurrent_start_calls(self, mock_popen):
         """Should handle concurrent start calls safely."""
-        import time
-
         mock_process = MagicMock()
         mock_process.stdout = iter([])
         mock_popen.return_value = mock_process

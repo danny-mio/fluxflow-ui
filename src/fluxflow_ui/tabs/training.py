@@ -20,7 +20,7 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
         Gradio Tab component
     """
 
-    output_lines = []
+    output_lines: list[str] = []
 
     def start_training_handler(
         # Data
@@ -184,10 +184,11 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
     if not prev_config:
         prev_config = config_mgr.get_default_training_config()
 
-    with gr.Tab("🚀 Train"):
+    with gr.Tab("🚀 Train") as tab:
         gr.Markdown("# FluxFlow Model Training")
         gr.Markdown(
-            "Configure and train FluxFlow text-to-image models. See TRAINING_GUIDE.md for detailed documentation."
+            "Configure and train FluxFlow text-to-image models. "
+            "See TRAINING_GUIDE.md for detailed documentation."
         )
 
         with gr.Row():
@@ -559,4 +560,4 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
             outputs=[console_output],
         )
 
-    return gr.Tab
+    return tab

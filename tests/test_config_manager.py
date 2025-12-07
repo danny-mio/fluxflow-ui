@@ -2,10 +2,6 @@
 
 import json
 import os
-import tempfile
-from pathlib import Path
-
-import pytest
 
 from fluxflow_ui.utils.config_manager import ConfigManager
 
@@ -18,7 +14,7 @@ class TestConfigManagerInit:
         config_dir = tmp_path / "test_configs"
         assert not config_dir.exists()
 
-        manager = ConfigManager(str(config_dir))
+        ConfigManager(str(config_dir))
 
         assert config_dir.exists()
         assert config_dir.is_dir()

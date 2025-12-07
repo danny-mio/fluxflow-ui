@@ -74,9 +74,9 @@ class GenerationWorker:
             self.tokenizer = AutoTokenizer.from_pretrained(
                 "distilbert-base-uncased", cache_dir="./_cache", local_files_only=False
             )
-            if self.tokenizer.pad_token is None:
-                self.tokenizer.pad_token = self.tokenizer.eos_token
-                self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+            if self.tokenizer.pad_token is None:  # type: ignore[union-attr]
+                self.tokenizer.pad_token = self.tokenizer.eos_token  # type: ignore[union-attr]
+                self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})  # type: ignore[union-attr]
 
             # Initialize models
             self.text_encoder = BertTextEncoder(embed_dim=text_embedding_dim)
@@ -159,7 +159,7 @@ class GenerationWorker:
 
             with torch.no_grad():
                 # Tokenize prompt
-                inputs = self.tokenizer(
+                inputs = self.tokenizer(  # type: ignore[operator]
                     prompt,
                     padding="max_length",
                     truncation=True,
@@ -184,7 +184,7 @@ class GenerationWorker:
                 from diffusers import DPMSolverMultistepScheduler
 
                 scheduler = DPMSolverMultistepScheduler(num_train_timesteps=1000)
-                scheduler.set_timesteps(ddim_steps, device=self.device)
+                scheduler.set_timesteps(ddim_steps, device=self.device)  # type: ignore[attr-defined]
 
                 t = torch.randint(0, 1000, (1,), device=self.device)
                 noised_img = scheduler.add_noise(img_seq, noise_img, t)  # type: ignore

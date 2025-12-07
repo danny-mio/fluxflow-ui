@@ -89,7 +89,7 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
     if not prev_config:
         prev_config = config_mgr.get_default_generation_config()
 
-    with gr.Tab("🎨 Generate"):
+    with gr.Tab("🎨 Generate") as tab:
         gr.Markdown("# FluxFlow Image Generation")
         gr.Markdown("Generate images from text prompts using trained models")
 
@@ -205,4 +205,4 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
             outputs=[output_image, gen_status],
         )
 
-    return gr.Tab
+    return tab

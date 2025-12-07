@@ -55,3 +55,4 @@ generated/
 # Training outputs (if running training from UI)
 outputs/
 checkpoints/
+.mypy_cache/

@@ -28,6 +28,7 @@ def create_app() -> gr.Blocks:
     config_manager = ConfigManager()
 
     # Create app
+    app: gr.Blocks
     with gr.Blocks(
         title="FluxFlow UI",
         theme=gr.themes.Soft(),
