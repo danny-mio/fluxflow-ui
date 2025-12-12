@@ -277,6 +277,8 @@ class GenerationWorker:
         """
         from diffusers import DPMSolverMultistepScheduler
 
+        assert self.diffuser is not None, "Diffuser must be loaded before CFG generation"
+
         scheduler = DPMSolverMultistepScheduler(num_train_timesteps=1000)
         scheduler.set_timesteps(steps, device=self.device)  # type: ignore
 
@@ -287,10 +289,10 @@ class GenerationWorker:
             t_batch = t.unsqueeze(0).to(self.device)
 
             # Predict with conditional embeddings
-            v_cond = self.diffuser.flow_processor(latent, text_embeddings, t_batch)
+            v_cond = self.diffuser.flow_processor(latent, text_embeddings, t_batch)  # type: ignore
 
             # Predict with unconditional embeddings
-            v_uncond = self.diffuser.flow_processor(latent, negative_embeddings, t_batch)
+            v_uncond = self.diffuser.flow_processor(latent, negative_embeddings, t_batch)  # type: ignore
 
             # Apply guidance
             v_guided = v_uncond + guidance_scale * (v_cond - v_uncond)
