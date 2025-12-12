@@ -289,10 +289,10 @@ class GenerationWorker:
             t_batch = t.unsqueeze(0).to(self.device)
 
             # Predict with conditional embeddings
-            v_cond = self.diffuser.flow_processor(latent, text_embeddings, t_batch)  # type: ignore
+            v_cond = self.diffuser.flow_processor(latent, text_embeddings, t_batch)
 
             # Predict with unconditional embeddings
-            v_uncond = self.diffuser.flow_processor(latent, negative_embeddings, t_batch)  # type: ignore
+            v_uncond = self.diffuser.flow_processor(latent, negative_embeddings, t_batch)
 
             # Apply guidance
             v_guided = v_uncond + guidance_scale * (v_cond - v_uncond)
