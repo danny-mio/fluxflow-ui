@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fluxflow-ui"
-version = "0.1.1"
+version = "0.3.0"
 description = "Web UI for FluxFlow text-to-image generation"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -27,10 +27,11 @@ classifiers = [
 ]
 
 dependencies = [
-    "fluxflow-training>=0.1.0",
+    "fluxflow-training>=0.3.0,<0.4.0",
     "gradio>=4.0.0",
     "flask>=3.0.0",
     "flask-cors>=4.0.0",
+    "pyyaml>=6.0.0",
     # Core dependencies (explicit for clarity)
     "torch>=2.0.0",
     "transformers>=4.30.0",

@@ -50,10 +50,25 @@ class TrainingRunner:
             cmd.extend(["--data_path", config["data_path"]])
         if config.get("captions_file"):
             cmd.extend(["--captions_file", config["captions_file"]])
-        if config.get("use_tt2m"):
+
+        # WebDataset support (new)
+        if config.get("use_webdataset"):
+            cmd.append("--use_webdataset")
+            if config.get("webdataset_token"):
+                cmd.extend(["--webdataset_token", config["webdataset_token"]])
+            if config.get("webdataset_url"):
+                cmd.extend(["--webdataset_url", config["webdataset_url"]])
+            if config.get("webdataset_image_key"):
+                cmd.extend(["--webdataset_image_key", config["webdataset_image_key"]])
+            if config.get("webdataset_caption_key"):
+                cmd.extend(["--webdataset_caption_key", config["webdataset_caption_key"]])
+
+        # Legacy TTI-2M support (deprecated, maps to webdataset)
+        elif config.get("use_tt2m"):
             cmd.append("--use_tt2m")
-        if config.get("tt2m_token"):
-            cmd.extend(["--tt2m_token", config["tt2m_token"]])
+            if config.get("tt2m_token"):
+                cmd.extend(["--tt2m_token", config["tt2m_token"]])
+
         return cmd
 
     def _build_model_args(self, config: Dict[str, Any]) -> List[str]:
@@ -102,10 +117,32 @@ class TrainingRunner:
             cmd.append("--preserve_lr")
         if config.get("use_fp16"):
             cmd.append("--use_fp16")
+        if config.get("use_gradient_checkpointing"):
+            cmd.append("--use_gradient_checkpointing")
+
         # Training modes
         for flag in ["train_vae", "train_no_gan", "train_spade", "train_diff", "train_diff_full"]:
             if config.get(flag):
                 cmd.append(f"--{flag}")
+
+        # Advanced loss options
+        if config.get("use_lpips"):
+            cmd.append("--use_lpips")
+            cmd.extend(["--lambda_lpips", str(config.get("lambda_lpips", 0.1))])
+
+        # CFG training
+        if config.get("cfg_dropout_prob", 0.0) > 0.0:
+            cmd.extend(["--cfg_dropout_prob", str(config["cfg_dropout_prob"])])
+
+        # Multi-resolution training
+        if config.get("reduced_min_sizes"):
+            sizes_str = config["reduced_min_sizes"].strip()
+            if sizes_str:
+                # Parse comma-separated list
+                sizes = [s.strip() for s in sizes_str.split(",")]
+                for size in sizes:
+                    cmd.extend(["--reduced_min_sizes", size])
+
         # KL divergence
         cmd.extend(
             [
@@ -177,7 +214,7 @@ class TrainingRunner:
         """Start training process in background.
 
         Args:
-            config: Training configuration dictionary
+            config: Training configuration dictionary (or pipeline YAML path)
             on_output: Callback for each line of output
 
         Returns:
@@ -187,13 +224,17 @@ class TrainingRunner:
             if self._is_running:
                 return False
 
-            # Build command using helper methods
-            cmd = ["fluxflow-train"]
-            cmd.extend(self._build_data_args(config))
-            cmd.extend(self._build_model_args(config))
-            cmd.extend(self._build_training_args(config))
-            cmd.extend(self._build_output_args(config))
-            cmd.extend(self._build_optim_sched_args(config))
+            # Check if using pipeline mode (YAML config)
+            if config.get("pipeline_yaml_content"):
+                cmd = self._build_pipeline_command(config)
+            else:
+                # Build command using helper methods (simple mode)
+                cmd = ["fluxflow-train"]
+                cmd.extend(self._build_data_args(config))
+                cmd.extend(self._build_model_args(config))
+                cmd.extend(self._build_training_args(config))
+                cmd.extend(self._build_output_args(config))
+                cmd.extend(self._build_optim_sched_args(config))
 
             # Start process
             try:
@@ -222,6 +263,28 @@ class TrainingRunner:
             except Exception as e:
                 logger.error(f"Failed to start training: {e}")
                 return False
+
+    def _build_pipeline_command(self, config: Dict[str, Any]) -> List[str]:
+        """Build command for pipeline mode training.
+
+        Args:
+            config: Config with pipeline_yaml_content
+
+        Returns:
+            Command list
+        """
+        # Save YAML to temp file
+        yaml_content = config["pipeline_yaml_content"]
+        output_path = config.get("output_path", "outputs")
+        os.makedirs(output_path, exist_ok=True)
+
+        self.temp_config_file = str(Path(output_path) / "pipeline_config.yaml")
+        with open(self.temp_config_file, "w") as f:
+            f.write(yaml_content)
+
+        # Build command with --config flag
+        cmd = ["fluxflow-train", "--config", self.temp_config_file]
+        return cmd
 
     def _read_output(self, on_output: Optional[Callable[[str], None]]) -> None:
         """Read process output line by line.

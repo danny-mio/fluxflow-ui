@@ -254,6 +254,9 @@ def generate_image():
         img_height=data.get("img_height", 512),
         ddim_steps=data.get("ddim_steps", 50),
         seed=data.get("seed") if data.get("use_seed") else None,
+        use_cfg=data.get("use_cfg", False),
+        guidance_scale=data.get("guidance_scale", 5.0),
+        negative_prompt=data.get("negative_prompt"),
     )
 
     if image is not None:

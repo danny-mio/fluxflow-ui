@@ -61,6 +61,9 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
         steps: int,
         seed: Optional[int],
         use_seed: bool,
+        use_cfg: bool,
+        guidance_scale: float,
+        negative_prompt: str,
     ) -> Tuple[Optional[np.ndarray], str]:
         """Handle image generation.
 
@@ -80,6 +83,9 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
             img_height=img_size,
             ddim_steps=steps,
             seed=actual_seed,
+            use_cfg=use_cfg,
+            guidance_scale=guidance_scale if use_cfg else 1.0,
+            negative_prompt=negative_prompt if use_cfg and negative_prompt.strip() else None,
         )
 
         return image, message
@@ -166,6 +172,43 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
                         precision=0,
                     )
 
+                with gr.Accordion("Classifier-Free Guidance", open=False):
+                    gr.Markdown(
+                        """
+                        **CFG** increases prompt adherence. Requires model trained with CFG dropout.
+                        """
+                    )
+                    use_cfg_checkbox = gr.Checkbox(
+                        label="Enable CFG",
+                        value=False,
+                        info="Model must be trained with cfg_dropout_prob > 0",
+                    )
+                    guidance_scale_input = gr.Slider(
+                        label="Guidance Scale",
+                        minimum=1.0,
+                        maximum=15.0,
+                        step=0.5,
+                        value=5.0,
+                        info="Higher = stronger prompt adherence (3-7 recommended)",
+                        visible=False,
+                    )
+                    negative_prompt_input = gr.Textbox(
+                        label="Negative Prompt (Optional)",
+                        placeholder="blurry, low quality, distorted",
+                        lines=2,
+                        info="What to avoid in the image",
+                        visible=False,
+                    )
+
+                    def toggle_cfg_gen(enabled):
+                        return gr.update(visible=enabled), gr.update(visible=enabled)
+
+                    use_cfg_checkbox.change(
+                        fn=toggle_cfg_gen,
+                        inputs=[use_cfg_checkbox],
+                        outputs=[guidance_scale_input, negative_prompt_input],
+                    )
+
                 generate_btn = gr.Button("✨ Generate Image", variant="primary", size="lg")
                 gen_status = gr.Textbox(
                     label="Generation Status",
@@ -202,7 +245,16 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
 
         generate_btn.click(
             fn=generate_handler,
-            inputs=[prompt_input, img_size_input, steps_input, seed_input, use_seed_checkbox],
+            inputs=[
+                prompt_input,
+                img_size_input,
+                steps_input,
+                seed_input,
+                use_seed_checkbox,
+                use_cfg_checkbox,
+                guidance_scale_input,
+                negative_prompt_input,
+            ],
             outputs=[output_image, gen_status],
         )
 
