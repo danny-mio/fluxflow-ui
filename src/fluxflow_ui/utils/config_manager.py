@@ -110,6 +110,12 @@ class ConfigManager:
             # Data
             "data_path": "",
             "captions_file": "",
+            "use_webdataset": False,
+            "webdataset_token": "",
+            "webdataset_url": "",
+            "webdataset_image_key": "jpg",
+            "webdataset_caption_key": "prompt",
+            # Legacy (deprecated but kept for compatibility)
             "use_tt2m": False,
             "tt2m_token": "",
             # Model
@@ -131,6 +137,12 @@ class ConfigManager:
             "training_steps": 1,
             "use_fp16": False,
             "initial_clipping_norm": 1.0,
+            # Advanced training
+            "use_gradient_checkpointing": False,
+            "use_lpips": True,
+            "lambda_lpips": 0.1,
+            "cfg_dropout_prob": 0.0,
+            "reduced_min_sizes": "",
             # Training modes
             "train_vae": True,
             "train_no_gan": False,
@@ -216,4 +228,8 @@ class ConfigManager:
             "vae_dim": 64,
             "feature_maps_dim": 64,
             "text_embedding_dim": 1024,
+            # CFG parameters
+            "use_cfg": False,
+            "guidance_scale": 5.0,
+            "negative_prompt": "",
         }

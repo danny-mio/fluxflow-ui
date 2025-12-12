@@ -129,6 +129,9 @@ class GenerationWorker:
         img_height: int = 512,
         ddim_steps: int = 50,
         seed: Optional[int] = None,
+        use_cfg: bool = False,
+        guidance_scale: float = 5.0,
+        negative_prompt: Optional[str] = None,
     ) -> Tuple[Optional[np.ndarray], str]:
         """Generate image from text prompt.
 
@@ -138,6 +141,9 @@ class GenerationWorker:
             img_height: Image height (must be multiple of 16)
             ddim_steps: Number of diffusion steps
             seed: Random seed (optional)
+            use_cfg: Enable classifier-free guidance
+            guidance_scale: CFG strength (only used if use_cfg=True)
+            negative_prompt: Negative prompt for CFG (optional)
 
         Returns:
             Tuple of (image array, status message)
@@ -174,6 +180,26 @@ class GenerationWorker:
                 # Encode text
                 text_embeddings = self.text_encoder(input_ids, attention_mask=attention_mask)
 
+                # Encode negative prompt if CFG is enabled
+                negative_embeddings = None
+                if use_cfg and guidance_scale > 1.0:
+                    if negative_prompt:
+                        neg_inputs = self.tokenizer(  # type: ignore[operator]
+                            negative_prompt,
+                            padding="max_length",
+                            truncation=True,
+                            max_length=512,
+                            return_tensors="pt",
+                        )
+                        neg_input_ids = neg_inputs["input_ids"].to(self.device)
+                        neg_attention_mask = neg_inputs["attention_mask"].to(self.device)
+                        negative_embeddings = self.text_encoder(
+                            neg_input_ids, attention_mask=neg_attention_mask
+                        )
+                    else:
+                        # Use null conditioning (zeros)
+                        negative_embeddings = torch.zeros_like(text_embeddings)
+
                 # Create random latent with specified dimensions
                 z_img = (torch.rand((1, 3, img_height, img_width), device=self.device) * 2) - 1
                 latent_z = self.diffuser.compressor(z_img)
@@ -194,14 +220,25 @@ class GenerationWorker:
                 noised_img = scheduler.add_noise(img_seq, noise_img, t)  # type: ignore
                 noised_latent = torch.cat([noised_img, hw_vec], dim=1)
 
-                # Denoise
-                denoised_latent = generate_latent_images(
-                    batch_z=noised_latent,
-                    text_embeddings=text_embeddings,
-                    diffuser=self.diffuser,
-                    steps=ddim_steps,
-                    prediction_type="v_prediction",
-                )
+                # Denoise with or without CFG
+                if use_cfg and guidance_scale > 1.0 and negative_embeddings is not None:
+                    # Use CFG-guided generation
+                    denoised_latent = self._generate_with_cfg(
+                        noised_latent=noised_latent,
+                        text_embeddings=text_embeddings,
+                        negative_embeddings=negative_embeddings,
+                        guidance_scale=guidance_scale,
+                        steps=ddim_steps,
+                    )
+                else:
+                    # Standard generation
+                    denoised_latent = generate_latent_images(
+                        batch_z=noised_latent,
+                        text_embeddings=text_embeddings,
+                        diffuser=self.diffuser,
+                        steps=ddim_steps,
+                        prediction_type="v_prediction",
+                    )
 
                 # Decode
                 decoded_image = self.diffuser.expander(denoised_latent)
@@ -217,6 +254,53 @@ class GenerationWorker:
 
         except Exception as e:
             return None, f"Generation failed: {str(e)}"
+
+    def _generate_with_cfg(
+        self,
+        noised_latent: torch.Tensor,
+        text_embeddings: torch.Tensor,
+        negative_embeddings: torch.Tensor,
+        guidance_scale: float,
+        steps: int,
+    ) -> torch.Tensor:
+        """Generate image with classifier-free guidance.
+
+        Args:
+            noised_latent: Initial noised latent
+            text_embeddings: Conditional text embeddings
+            negative_embeddings: Unconditional/negative text embeddings
+            guidance_scale: CFG strength
+            steps: Number of denoising steps
+
+        Returns:
+            Denoised latent
+        """
+        from diffusers import DPMSolverMultistepScheduler
+
+        assert self.diffuser is not None, "Diffuser must be loaded before CFG generation"
+
+        scheduler = DPMSolverMultistepScheduler(num_train_timesteps=1000)
+        scheduler.set_timesteps(steps, device=self.device)  # type: ignore
+
+        latent = noised_latent
+
+        for t in scheduler.timesteps:  # type: ignore
+            # Expand t to batch dimension
+            t_batch = t.unsqueeze(0).to(self.device)
+
+            # Predict with conditional embeddings
+            v_cond = self.diffuser.flow_processor(latent, text_embeddings, t_batch)
+
+            # Predict with unconditional embeddings
+            v_uncond = self.diffuser.flow_processor(latent, negative_embeddings, t_batch)
+
+            # Apply guidance
+            v_guided = v_uncond + guidance_scale * (v_cond - v_uncond)
+
+            # Step the scheduler
+            latent = scheduler.step(v_guided, t, latent).prev_sample  # type: ignore
+
+        return latent
 
     def is_loaded(self) -> bool:
         """Check if model is loaded.

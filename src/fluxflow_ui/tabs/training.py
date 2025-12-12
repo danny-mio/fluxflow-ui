@@ -26,8 +26,11 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
         # Data
         data_path: str,
         captions_file: str,
-        use_tt2m: bool,
-        tt2m_token: str,
+        use_webdataset: bool,
+        webdataset_token: str,
+        webdataset_url: str,
+        webdataset_image_key: str,
+        webdataset_caption_key: str,
         # Model
         output_path: str,
         model_checkpoint: str,
@@ -47,6 +50,14 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
         training_steps: int,
         use_fp16: bool,
         initial_clipping_norm: float,
+        # Advanced training
+        use_gradient_checkpointing: bool,
+        use_lpips: bool,
+        lambda_lpips: float,
+        use_cfg: bool,
+        cfg_dropout_prob: float,
+        use_multires: bool,
+        reduced_min_sizes: str,
         # Training modes
         train_vae: bool,
         train_no_gan: bool,
@@ -78,22 +89,29 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
             return "⚠️ Training is already running", "⏸️ Training...", "⏹️ Stop Training"
 
         # Validate inputs
-        if not use_tt2m:
+        if not use_webdataset:
             if not data_path or not Path(data_path).exists():
                 return "❌ Invalid data path", "▶️ Start Training", "⏹️ Stop Training"
             if not captions_file or not Path(captions_file).exists():
                 return "❌ Invalid captions file", "▶️ Start Training", "⏹️ Stop Training"
         else:
-            if not tt2m_token or tt2m_token == "your_token_here":
-                return "❌ Invalid TTI-2M token", "▶️ Start Training", "⏹️ Stop Training"
+            if not webdataset_token or webdataset_token == "your_token_here":
+                return "❌ Invalid HuggingFace token", "▶️ Start Training", "⏹️ Stop Training"
+            if not webdataset_url:
+                return "❌ Invalid WebDataset URL", "▶️ Start Training", "⏹️ Stop Training"
 
         # Build config
         config = {
             # Data
             "data_path": data_path,
             "captions_file": captions_file,
-            "use_tt2m": use_tt2m,
-            "tt2m_token": tt2m_token if tt2m_token else None,
+            "use_webdataset": use_webdataset,
+            "webdataset_token": webdataset_token if webdataset_token else None,
+            "webdataset_url": webdataset_url if webdataset_url else None,
+            "webdataset_image_key": webdataset_image_key if webdataset_image_key else "jpg",
+            "webdataset_caption_key": (
+                webdataset_caption_key if webdataset_caption_key else "prompt"
+            ),
             # Model
             "output_path": output_path,
             "model_checkpoint": model_checkpoint if model_checkpoint else None,
@@ -113,6 +131,12 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
             "training_steps": int(training_steps),
             "use_fp16": use_fp16,
             "initial_clipping_norm": float(initial_clipping_norm),
+            # Advanced training
+            "use_gradient_checkpointing": use_gradient_checkpointing,
+            "use_lpips": use_lpips,
+            "lambda_lpips": float(lambda_lpips),
+            "cfg_dropout_prob": float(cfg_dropout_prob) if use_cfg else 0.0,
+            "reduced_min_sizes": reduced_min_sizes if use_multires else "",
             # Training modes
             "train_vae": train_vae,
             "train_no_gan": train_no_gan,
@@ -197,12 +221,15 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
             with gr.Column(scale=1):
                 gr.Markdown("### Dataset Configuration")
 
-                use_tt2m_checkbox = gr.Checkbox(
-                    label="Use TTI-2M Streaming Dataset",
-                    value=prev_config.get("use_tt2m", False),
+                use_webdataset_checkbox = gr.Checkbox(
+                    label="Use WebDataset Streaming",
+                    value=prev_config.get("use_webdataset", False),
+                    info="Stream from HuggingFace datasets (no download needed)",
                 )
 
-                with gr.Column(visible=not prev_config.get("use_tt2m", False)) as local_data_group:
+                with gr.Column(
+                    visible=not prev_config.get("use_webdataset", False)
+                ) as local_data_group:
                     data_path_input = gr.Textbox(
                         label="Data Path",
                         placeholder="/path/to/images",
@@ -214,13 +241,32 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                         value=prev_config.get("captions_file", ""),
                     )
 
-                with gr.Column(visible=prev_config.get("use_tt2m", False)) as tt2m_data_group:
-                    tt2m_token_input = gr.Textbox(
+                with gr.Column(
+                    visible=prev_config.get("use_webdataset", False)
+                ) as webdataset_data_group:
+                    webdataset_token_input = gr.Textbox(
                         label="HuggingFace Token",
                         placeholder="hf_your_token_here",
-                        value=prev_config.get("tt2m_token", ""),
+                        value=prev_config.get("webdataset_token", ""),
                         type="password",
                     )
+                    webdataset_url_input = gr.Textbox(
+                        label="WebDataset URL Pattern",
+                        placeholder="hf://datasets/username/dataset/*.tar",
+                        value=prev_config.get("webdataset_url", ""),
+                        info="HuggingFace dataset URL with tar pattern",
+                    )
+                    with gr.Row():
+                        webdataset_image_key_input = gr.Textbox(
+                            label="Image Key",
+                            value=prev_config.get("webdataset_image_key", "jpg"),
+                            info="File extension in tar (e.g., jpg, png)",
+                        )
+                        webdataset_caption_key_input = gr.Textbox(
+                            label="Caption Key",
+                            value=prev_config.get("webdataset_caption_key", "prompt"),
+                            info="JSON field for captions",
+                        )
 
                 output_path_input = gr.Textbox(
                     label="Output Path",
@@ -409,7 +455,89 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                         lines=3,
                     )
 
-                with gr.Accordion("Advanced Settings", open=False):
+                with gr.Accordion("Advanced Training Parameters", open=False):
+                    with gr.Row():
+                        use_gradient_checkpointing_checkbox = gr.Checkbox(
+                            label="Gradient Checkpointing",
+                            value=prev_config.get("use_gradient_checkpointing", False),
+                            info="Save VRAM at cost of speed",
+                        )
+                        use_lpips_checkbox = gr.Checkbox(
+                            label="Use LPIPS Perceptual Loss",
+                            value=prev_config.get("use_lpips", True),
+                            info="Improves perceptual quality (adds ~2GB VRAM)",
+                        )
+
+                    lambda_lpips_input = gr.Slider(
+                        label="LPIPS Weight",
+                        minimum=0.0,
+                        maximum=1.0,
+                        step=0.05,
+                        value=prev_config.get("lambda_lpips", 0.1),
+                        info="Perceptual loss strength (0.1 recommended)",
+                    )
+
+                with gr.Accordion("Classifier-Free Guidance (CFG)", open=False):
+                    gr.Markdown(
+                        """
+                        **CFG Training** enables guided generation at inference time.
+                        Train with CFG dropout to support guidance_scale > 1.0.
+                        """
+                    )
+                    use_cfg_checkbox = gr.Checkbox(
+                        label="Enable CFG Training",
+                        value=prev_config.get("cfg_dropout_prob", 0.0) > 0.0,
+                        info="Required for guided generation",
+                    )
+                    cfg_dropout_prob_input = gr.Slider(
+                        label="CFG Dropout Probability",
+                        minimum=0.0,
+                        maximum=0.20,
+                        step=0.01,
+                        value=prev_config.get("cfg_dropout_prob", 0.10),
+                        info="Recommended: 0.10 (10% null conditioning)",
+                        visible=prev_config.get("cfg_dropout_prob", 0.0) > 0.0,
+                    )
+
+                    def toggle_cfg(enabled):
+                        return gr.update(visible=enabled)
+
+                    use_cfg_checkbox.change(
+                        fn=toggle_cfg,
+                        inputs=[use_cfg_checkbox],
+                        outputs=[cfg_dropout_prob_input],
+                    )
+
+                with gr.Accordion("Multi-Resolution Training", open=False):
+                    gr.Markdown(
+                        """
+                        **Progressive resolution** trains on smaller images first,
+                        then gradually increases. Improves convergence and reduces
+                        initial VRAM usage.
+                        """
+                    )
+                    use_multires_checkbox = gr.Checkbox(
+                        label="Enable Progressive Resolution",
+                        value=bool(prev_config.get("reduced_min_sizes", "")),
+                    )
+                    reduced_min_sizes_input = gr.Textbox(
+                        label="Resolution Stages (comma-separated)",
+                        placeholder="256, 384, 512, 768, 1024",
+                        value=prev_config.get("reduced_min_sizes", ""),
+                        info="Trains progressively from smallest to img_size",
+                        visible=bool(prev_config.get("reduced_min_sizes", "")),
+                    )
+
+                    def toggle_multires(enabled):
+                        return gr.update(visible=enabled)
+
+                    use_multires_checkbox.change(
+                        fn=toggle_multires,
+                        inputs=[use_multires_checkbox],
+                        outputs=[reduced_min_sizes_input],
+                    )
+
+                with gr.Accordion("Misc Settings", open=False):
                     tokenizer_name_input = gr.Textbox(
                         label="Tokenizer Name",
                         value=prev_config.get("tokenizer_name", "distilbert-base-uncased"),
@@ -480,14 +608,14 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                 """
                 )
 
-        # Toggle dataset inputs based on use_tt2m
-        def toggle_dataset_inputs(use_tt2m):
-            return gr.update(visible=not use_tt2m), gr.update(visible=use_tt2m)
+        # Toggle dataset inputs based on use_webdataset
+        def toggle_dataset_inputs(use_webdataset):
+            return gr.update(visible=not use_webdataset), gr.update(visible=use_webdataset)
 
-        use_tt2m_checkbox.change(
+        use_webdataset_checkbox.change(
             fn=toggle_dataset_inputs,
-            inputs=[use_tt2m_checkbox],
-            outputs=[local_data_group, tt2m_data_group],
+            inputs=[use_webdataset_checkbox],
+            outputs=[local_data_group, webdataset_data_group],
         )
 
         # Event handlers
@@ -497,8 +625,11 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                 # Data
                 data_path_input,
                 captions_file_input,
-                use_tt2m_checkbox,
-                tt2m_token_input,
+                use_webdataset_checkbox,
+                webdataset_token_input,
+                webdataset_url_input,
+                webdataset_image_key_input,
+                webdataset_caption_key_input,
                 # Model
                 output_path_input,
                 model_checkpoint_input,
@@ -518,6 +649,14 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                 training_steps_input,
                 use_fp16_checkbox,
                 initial_clipping_norm_input,
+                # Advanced training
+                use_gradient_checkpointing_checkbox,
+                use_lpips_checkbox,
+                lambda_lpips_input,
+                use_cfg_checkbox,
+                cfg_dropout_prob_input,
+                use_multires_checkbox,
+                reduced_min_sizes_input,
                 # Training modes
                 train_vae_checkbox,
                 train_no_gan_checkbox,

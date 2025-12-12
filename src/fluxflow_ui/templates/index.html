@@ -843,6 +843,32 @@
                         </div>
                     </div>
 
+                    <!-- CFG Training Collapsible Section -->
+                    <div class="form-group">
+                        <button type="button" class="collapsible-btn" onclick="toggleCollapsible('cfgTraining')">
+                            <span class="collapsible-icon">▶</span> Classifier-Free Guidance (CFG) Training
+                        </button>
+                        <div id="cfgTraining" class="collapsible-content" style="display: none;">
+                            <p style="color: var(--text-dim); font-size: 0.875rem; margin-bottom: 1rem;">
+                                <strong>CFG Training</strong> enables guided generation at inference time. 
+                                Train with CFG dropout to support guidance_scale > 1.0.
+                            </p>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="use_cfg_training">
+                                <label for="use_cfg_training">Enable CFG Training</label>
+                            </div>
+                            
+                            <div class="form-group" id="cfg_dropout_group" style="display: none;">
+                                <label>CFG Dropout Probability</label>
+                                <input type="number" id="cfg_dropout_prob" value="0.10" step="0.01" min="0.0" max="0.20">
+                                <small style="color: var(--text-dim); font-size: 0.75rem;">
+                                    Recommended: 0.10 (10% null conditioning)
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="checkbox-group">
                         <input type="checkbox" id="train_vae" checked>
                         <label for="train_vae">Train VAE</label>
@@ -968,6 +994,39 @@
                         <input type="number" id="seed" value="42" style="width: 100px; margin-left: 1rem;">
                     </div>
                     
+                    <!-- CFG Settings Collapsible Section -->
+                    <div class="form-group">
+                        <button type="button" class="collapsible-btn" onclick="toggleCollapsible('cfgSettings')">
+                            <span class="collapsible-icon">▶</span> Classifier-Free Guidance (CFG)
+                        </button>
+                        <div id="cfgSettings" class="collapsible-content" style="display: none;">
+                            <p style="color: var(--text-dim); font-size: 0.875rem; margin-bottom: 1rem;">
+                                <strong>CFG</strong> increases prompt adherence. Requires model trained with CFG dropout (cfg_dropout_prob > 0).
+                            </p>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="use_cfg">
+                                <label for="use_cfg">Enable CFG</label>
+                            </div>
+                            
+                            <div class="form-group" id="cfg_controls" style="display: none;">
+                                <label>Guidance Scale</label>
+                                <input type="number" id="guidance_scale" value="5.0" step="0.5" min="1.0" max="15.0">
+                                <small style="color: var(--text-dim); font-size: 0.75rem;">
+                                    Higher = stronger prompt adherence (3-7 recommended)
+                                </small>
+                            </div>
+                            
+                            <div class="form-group" id="negative_prompt_group" style="display: none;">
+                                <label>Negative Prompt (Optional)</label>
+                                <textarea id="negative_prompt" placeholder="blurry, low quality, distorted" rows="2"></textarea>
+                                <small style="color: var(--text-dim); font-size: 0.75rem;">
+                                    What to avoid in the image
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
                         <button class="btn btn-primary" onclick="generateImage()">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1035,6 +1094,25 @@
             }
         }
 
+        // CFG checkbox toggle
+        document.getElementById('use_cfg').addEventListener('change', function() {
+            const cfgControls = document.getElementById('cfg_controls');
+            const negPromptGroup = document.getElementById('negative_prompt_group');
+            if (this.checked) {
+                cfgControls.style.display = 'block';
+                negPromptGroup.style.display = 'block';
+            } else {
+                cfgControls.style.display = 'none';
+                negPromptGroup.style.display = 'none';
+            }
+        });
+
+        // CFG training toggle
+        document.getElementById('use_cfg_training').addEventListener('change', function() {
+            const dropoutGroup = document.getElementById('cfg_dropout_group');
+            dropoutGroup.style.display = this.checked ? 'block' : 'none';
+        });
+
         function getOptimizerConfig(modelName) {
             const optimizer = document.getElementById(`${modelName}_optimizer`).value;
             const config = { type: optimizer };
@@ -1097,6 +1175,9 @@
                 sample_interval: 50,
                 log_interval: 10,
                 workers: 4,
+                cfg_dropout_prob: document.getElementById('use_cfg_training').checked 
+                    ? parseFloat(document.getElementById('cfg_dropout_prob').value) 
+                    : 0.0,
                 optimizers: {
                     flow: getOptimizerConfig('flow'),
                     vae: getOptimizerConfig('vae'),
@@ -1255,7 +1336,10 @@
                 img_height: parseInt(document.getElementById('img_height').value),
                 ddim_steps: parseInt(document.getElementById('ddim_steps').value),
                 use_seed: document.getElementById('use_seed').checked,
-                seed: parseInt(document.getElementById('seed').value)
+                seed: parseInt(document.getElementById('seed').value),
+                use_cfg: document.getElementById('use_cfg').checked,
+                guidance_scale: parseFloat(document.getElementById('guidance_scale').value),
+                negative_prompt: document.getElementById('negative_prompt').value
             };
             
             showStatus('genStatus', `Generating ${config.img_width}x${config.img_height} image...`, 'info');

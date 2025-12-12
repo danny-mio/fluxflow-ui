@@ -95,6 +95,45 @@ Then open your browser to `http://localhost:7860`
 - Adjust sampling parameters
 - Batch generation support
 
+## Classifier-Free Guidance (CFG)
+
+**New in v0.3.0**: FluxFlow UI supports training and generation with Classifier-Free Guidance.
+
+### Training with CFG
+
+To train models with CFG support:
+
+1. Navigate to the **Training** tab
+2. Expand the **CFG Training** section
+3. Set `cfg_dropout_prob` between 0.0-0.20 (recommended: 0.10-0.15)
+   - This randomly drops text conditioning during training
+   - Higher values = stronger CFG effect but may reduce unconditional quality
+   - Set to 0.0 to disable CFG training
+
+### Generating with CFG
+
+To use CFG during generation:
+
+1. Navigate to the **Generation** tab
+2. Load a checkpoint trained with `cfg_dropout_prob > 0`
+3. Expand the **CFG Settings** section
+4. Enable CFG and set parameters:
+   - **Enable CFG**: Toggle on
+   - **Guidance Scale**: 1.0-15.0 (recommended: 3.0-7.0)
+     - 1.0 = no guidance
+     - 3.0-7.0 = balanced quality/creativity
+     - 7.0-15.0 = strong guidance (may oversaturate)
+   - **Negative Prompt** (optional): Text to avoid in generation
+
+**Note**: CFG requires 2× forward passes per sampling step, doubling generation time.
+
+### CFG Benefits
+
+- **Better prompt adherence**: Images follow text descriptions more closely
+- **Higher quality**: Improved coherence and detail
+- **Negative prompts**: Ability to steer away from unwanted features
+- **Flexible control**: Adjust guidance strength per generation
+
 ## Package Contents
 
 - `fluxflow_ui.tabs` - UI tab implementations

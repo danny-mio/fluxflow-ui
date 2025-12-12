@@ -10,3 +10,5 @@ exclude =
     dist,
     *.egg-info
 max-complexity = 15
+per-file-ignores =
+    src/fluxflow_ui/tabs/training.py:C901
