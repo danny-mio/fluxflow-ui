@@ -2,10 +2,10 @@
 
 ## Project Overview
 
-**Goal**: Create a user-friendly web interface for FluxFlow training and generation  
-**Framework**: Gradio 4.0+  
-**Status**: Phase 1 MVP Complete ✅  
-**Lines of Code**: ~1,050 Python LOC  
+**Goal**: Create a user-friendly web interface for FluxFlow training and generation
+**Framework**: Gradio 4.0+
+**Status**: Phase 1 MVP Complete ✅
+**Lines of Code**: ~1,050 Python LOC
 **Development Time**: Single session
 
 ## What Was Built
@@ -178,11 +178,11 @@ python ui/app.py
 
 ## Testing Performed
 
-✅ Config manager imports correctly  
-✅ Default configs load properly  
-✅ Directory structure created  
-✅ Launch script is executable  
-✅ File validation works  
+✅ Config manager imports correctly
+✅ Default configs load properly
+✅ Directory structure created
+✅ Launch script is executable
+✅ File validation works
 ⏳ End-to-end UI testing (requires running app)
 
 ## Known Limitations (Phase 1)
@@ -268,10 +268,10 @@ The architecture supports easy additions:
 
 ## Security Notes
 
-⚠️ **Current**: Localhost only, no authentication  
-⚠️ **Production**: Add authentication, HTTPS, firewall rules  
-✅ **Validation**: File paths, parameter ranges  
-✅ **Isolation**: Training runs in subprocess  
+⚠️ **Current**: Localhost only, no authentication
+⚠️ **Production**: Add authentication, HTTPS, firewall rules
+✅ **Validation**: File paths, parameter ranges
+✅ **Isolation**: Training runs in subprocess
 
 ## Deployment Options
 
@@ -289,13 +289,13 @@ The architecture supports easy additions:
 
 ## Success Criteria (Phase 1)
 
-✅ Training can be started via UI  
-✅ Real-time console output works  
-✅ Generation produces images  
-✅ Configs persist between sessions  
-✅ Documentation is comprehensive  
-✅ Launch script works  
-✅ Code follows FluxFlow style guide  
+✅ Training can be started via UI
+✅ Real-time console output works
+✅ Generation produces images
+✅ Configs persist between sessions
+✅ Documentation is comprehensive
+✅ Launch script works
+✅ Code follows FluxFlow style guide
 
 ## Next Steps
 
@@ -319,6 +319,6 @@ The UI provides a solid foundation for future enhancements while offering immedi
 
 ---
 
-**Implementation Date**: November 15, 2025  
-**Version**: 1.0.0-mvp  
+**Implementation Date**: November 15, 2025
+**Version**: 1.0.0-mvp
 **Developer**: Daniele Camisani <daniele@camisani.it>

@@ -21,7 +21,7 @@
     width: 90%;
     max-width: 800px;
     max-height: 80vh;
-    box-shadow: 
+    box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.7),
         0 0 0 1px rgba(168, 85, 247, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -200,19 +200,19 @@
 }
 </style>
 
-<div id="fileBrowserModal" class="modal">
+<div id="fileBrowserModal" class="modal" role="dialog" aria-labelledby="fileBrowserTitle" aria-modal="true">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Browse Files</h3>
-            <button class="close" onclick="closeFileBrowser()">&times;</button>
+            <h3 id="fileBrowserTitle">Browse Files</h3>
+            <button class="close" onclick="closeFileBrowser()" aria-label="Close file browser">&times;</button>
         </div>
         <div class="modal-body">
-            <div class="current-path" id="currentPath">/</div>
-            <ul class="file-list" id="fileList"></ul>
+            <div class="current-path" id="currentPath" role="status" aria-live="polite" aria-label="Current directory path">/</div>
+            <ul class="file-list" id="fileList" role="listbox" aria-label="File and folder list"></ul>
         </div>
         <div class="modal-footer">
-            <button class="btn-secondary" onclick="closeFileBrowser()">Cancel</button>
-            <button class="btn btn-primary" onclick="selectFile()">Select</button>
+            <button class="btn-secondary" onclick="closeFileBrowser()" aria-label="Cancel file selection">Cancel</button>
+            <button class="btn btn-primary" onclick="selectFile()" aria-label="Confirm file selection">Select</button>
         </div>
     </div>
 </div>
@@ -228,7 +228,7 @@ function openFileBrowser(initialPath, fileType, callback) {
     browserFileType = fileType || 'all';
     browserCallback = callback;
     selectedFilePath = null;
-    
+
     document.getElementById('fileBrowserModal').style.display = 'block';
     loadDirectory(currentBrowserPath);
 }
@@ -244,34 +244,36 @@ async function loadDirectory(path) {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({path: path, type: browserFileType})
         });
-        
+
         const data = await response.json();
-        
+
         if (data.status === 'success') {
             currentBrowserPath = data.current_path;
             document.getElementById('currentPath').textContent = data.current_path;
-            
+
             const fileList = document.getElementById('fileList');
             fileList.innerHTML = '';
-            
+
             data.items.forEach(item => {
                 const li = document.createElement('li');
                 li.className = 'file-item';
+                li.setAttribute('role', 'option');
+                li.setAttribute('aria-label', `${item.type === 'dir' ? 'Folder' : 'File'}: ${item.name}, ${item.size}`);
                 li.onclick = () => selectItem(item, li);
-                
+
                 if (item.type === 'dir') {
                     li.ondblclick = () => loadDirectory(item.path);
                 }
-                
+
                 const icon = item.type === 'dir' ? '📁' : '📄';
                 li.innerHTML = `
                     <div class="file-item-name">
-                        <span class="file-icon">${icon}</span>
+                        <span class="file-icon" aria-hidden="true">${icon}</span>
                         <span>${item.name}</span>
                     </div>
                     <span class="file-size">${item.size}</span>
                 `;
-                
+
                 fileList.appendChild(li);
             });
         }
@@ -285,9 +287,9 @@ function selectItem(item, element) {
     document.querySelectorAll('.file-item').forEach(el => {
         el.classList.remove('selected');
     });
-    
+
     element.classList.add('selected');
-    
+
     // Set selected path based on file type filter
     if (browserFileType === 'dir' && item.type === 'dir') {
         // Selecting a directory when looking for directories
@@ -318,4 +320,14 @@ window.onclick = function(event) {
         closeFileBrowser();
     }
 }
+
+// Close modal on ESC key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' || event.keyCode === 27) {
+        const modal = document.getElementById('fileBrowserModal');
+        if (modal && modal.style.display === 'block') {
+            closeFileBrowser();
+        }
+    }
+});
 </script>

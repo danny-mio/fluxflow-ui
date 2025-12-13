@@ -56,3 +56,4 @@ generated/
 outputs/
 checkpoints/
 .mypy_cache/
+_cache/

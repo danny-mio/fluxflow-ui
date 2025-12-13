@@ -7,7 +7,7 @@
 - **`ui/templates/file_browser.html`** - Reusable file browser component
 - **New API endpoint**: `/api/files/browse` - Browse filesystem
 
-### 2. Model Auto-Detection  
+### 2. Model Auto-Detection
 - **New API endpoint**: `/api/generation/inspect` - Detect model dimensions from checkpoint
 - Uses existing `comfyui_fluxflow/model_inspector.py` logic
 - Auto-fills VAE and Feature dimensions
@@ -40,7 +40,7 @@ openFileBrowser(initialPath, fileType, callback)
 **File Types:**
 - `'all'` - All files and directories
 - `'dir'` - Directories only
-- `'file'` - Files only  
+- `'file'` - Files only
 - `'safetensors'` - Only .safetensors files
 
 **Example Usage:**
@@ -95,7 +95,7 @@ In `<head>` section, add:
     <label>Data Path</label>
     <div class="input-with-browse">
         <input type="text" id="data_path" placeholder="/path/to/images">
-        <button class="btn-browse" type="button" 
+        <button class="btn-browse" type="button"
                 onclick="openFileBrowser('.', 'dir', (p) => document.getElementById('data_path').value = p)">
             📁 Browse
         </button>
@@ -144,23 +144,23 @@ In `<head>` section, add:
 ```javascript
 async function autoDetectDimensions() {
     const checkpoint = document.getElementById('checkpoint_path').value;
-    
+
     if (!checkpoint) {
         showStatus('loadStatus', 'Please select a checkpoint first', 'error');
         return;
     }
-    
+
     showStatus('loadStatus', 'Inspecting checkpoint...', 'info');
-    
+
     try {
         const response = await fetch('/api/generation/inspect', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({checkpoint_path: checkpoint})
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
             document.getElementById('gen_vae_dim').value = data.vae_dim;
             document.getElementById('gen_feature_dim').value = data.feature_maps_dim;
@@ -194,12 +194,12 @@ At the end of `<body>`, before closing `</body>`:
 
 ## Benefits
 
-✅ No more manual path typing  
-✅ Browse filesystem visually  
-✅ Filter by file type (.safetensors, .txt, etc.)  
-✅ Auto-detect model architecture  
-✅ Prevent dimension mismatch errors  
-✅ Better UX for non-technical users  
+✅ No more manual path typing
+✅ Browse filesystem visually
+✅ Filter by file type (.safetensors, .txt, etc.)
+✅ Auto-detect model architecture
+✅ Prevent dimension mismatch errors
+✅ Better UX for non-technical users
 
 ## Future Enhancements
 
@@ -211,5 +211,5 @@ At the end of `<body>`, before closing `</body>`:
 
 ---
 
-**Status**: Backend complete, frontend integration pending  
+**Status**: Backend complete, frontend integration pending
 **Files Ready**: `ui/static/style.css`, `ui/templates/file_browser.html`, `ui/app_flask.py`

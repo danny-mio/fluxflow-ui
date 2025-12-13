@@ -161,8 +161,6 @@ class TrainingRunner:
         cmd = [
             "--lambda_adv",
             str(config.get("lambda_adv", 0.9)),
-            "--sample_interval",
-            str(config.get("sample_interval", 50)),
             "--log_interval",
             str(config.get("log_interval", 10)),
         ]
@@ -238,6 +236,7 @@ class TrainingRunner:
 
             # Start process
             try:
+                logger.info(f"Starting training with command: {' '.join(cmd)}")
                 self.process = subprocess.Popen(
                     cmd,
                     stdout=subprocess.PIPE,

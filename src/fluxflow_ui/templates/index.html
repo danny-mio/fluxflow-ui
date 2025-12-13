@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Source+Code+Pro:wght@400;500&display=swap');
-        
+
         :root {
             --neural-purple: #A855F7;
             --flow-cyan: #06B6D4;
@@ -22,13 +22,13 @@
             --text-dim: #94A3B8;
             --glow-primary: rgba(168, 85, 247, 0.4);
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Poppins', sans-serif;
             background: var(--bg-deep);
@@ -36,7 +36,7 @@
             overflow-x: hidden;
             position: relative;
         }
-        
+
         /* Neural network background */
         body::before {
             content: '';
@@ -45,14 +45,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
+            background:
                 radial-gradient(circle at 20% 30%, rgba(168, 85, 247, 0.15), transparent 40%),
                 radial-gradient(circle at 80% 60%, rgba(6, 182, 212, 0.1), transparent 40%),
                 radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.1), transparent 40%);
             z-index: 0;
             pointer-events: none;
         }
-        
+
         /* Animated connecting lines */
         body::after {
             content: '';
@@ -61,19 +61,19 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
+            background-image:
                 repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(168, 85, 247, 0.03) 100px, rgba(168, 85, 247, 0.03) 101px),
                 repeating-linear-gradient(-45deg, transparent, transparent 100px, rgba(6, 182, 212, 0.03) 100px, rgba(6, 182, 212, 0.03) 101px);
             z-index: 0;
             pointer-events: none;
             animation: flow-lines 20s linear infinite;
         }
-        
+
         @keyframes flow-lines {
             0% { background-position: 0 0, 0 0; }
             100% { background-position: 100px 100px, -100px -100px; }
         }
-        
+
         .container {
             position: relative;
             z-index: 1;
@@ -81,7 +81,7 @@
             margin: 0 auto;
             padding: 2rem;
         }
-        
+
         /* Glowing header with neural aesthetic */
         header {
             background: linear-gradient(135deg, var(--bg-layer1) 0%, var(--bg-layer2) 100%);
@@ -90,11 +90,11 @@
             margin-bottom: 1.5rem;
             position: relative;
             overflow: hidden;
-            box-shadow: 
+            box-shadow:
                 0 0 60px var(--glow-primary),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
-        
+
         header::before {
             content: '';
             position: absolute;
@@ -102,25 +102,25 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: 
+            background:
                 radial-gradient(circle, var(--neural-purple), transparent 30%),
                 radial-gradient(circle, var(--flow-cyan), transparent 30%);
             animation: neural-pulse 8s ease-in-out infinite;
             opacity: 0.2;
         }
-        
+
         @keyframes neural-pulse {
             0%, 100% { transform: rotate(0deg) scale(1); }
             50% { transform: rotate(180deg) scale(1.2); }
         }
-        
+
         .logo-wordmark {
             position: relative;
             z-index: 1;
             text-align: center;
             margin-bottom: 0.75rem;
         }
-        
+
         .visually-hidden {
             position: absolute;
             width: 1px;
@@ -132,7 +132,7 @@
             white-space: nowrap;
             border: 0;
         }
-        
+
         .subtitle {
             font-size: 0.875rem;
             color: var(--text-dim);
@@ -143,14 +143,14 @@
             text-transform: uppercase;
             letter-spacing: 0.1em;
         }
-        
+
         /* Tabs */
         .tabs {
             display: flex;
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
-        
+
         .tab-button {
             flex: 1;
             background: var(--bg-layer1);
@@ -168,11 +168,11 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .tab-button svg {
             margin-right: 0.5rem;
         }
-        
+
         .tab-button::before {
             content: '';
             position: absolute;
@@ -186,46 +186,46 @@
             opacity: 0;
             transition: opacity 0.4s ease;
         }
-        
+
         .tab-button:hover::before,
         .tab-button.active::before {
             opacity: 1;
         }
-        
+
         .tab-button.active {
             color: var(--text-bright);
             background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(6, 182, 212, 0.1));
             box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
         }
-        
+
         .tab-content {
             display: none;
         }
-        
+
         .tab-content.active {
             display: block;
         }
-        
+
         /* Panels */
         .panel {
             background: linear-gradient(135deg, var(--bg-layer1) 0%, var(--bg-layer2) 100%);
             border-radius: 16px;
             padding: 1.5rem;
             position: relative;
-            box-shadow: 
+            box-shadow:
                 0 10px 40px rgba(0, 0, 0, 0.5),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
             transition: all 0.4s ease;
             margin-bottom: 1.5rem;
         }
-        
+
         .panel:hover {
             transform: translateY(-4px);
-            box-shadow: 
+            box-shadow:
                 0 15px 60px rgba(168, 85, 247, 0.4),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
-        
+
         .panel h3 {
             font-size: 1.25rem;
             background: linear-gradient(135deg, var(--neural-purple), var(--flow-cyan));
@@ -234,18 +234,18 @@
             background-clip: text;
             margin-bottom: 1.25rem;
         }
-        
+
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1.5rem;
         }
-        
+
         /* Forms */
         .form-group {
             margin-bottom: 1rem;
         }
-        
+
         label {
             display: block;
             margin-bottom: 0.375rem;
@@ -253,7 +253,7 @@
             color: var(--text-dim);
             font-size: 0.813rem;
         }
-        
+
         input, textarea, select {
             width: 100%;
             padding: 0.625rem 0.875rem;
@@ -265,22 +265,22 @@
             font-size: 0.875rem;
             transition: all 0.3s ease;
         }
-        
+
         input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: var(--neural-purple);
             background: rgba(15, 23, 42, 0.8);
-            box-shadow: 
+            box-shadow:
                 0 0 0 3px rgba(168, 85, 247, 0.2),
                 0 0 20px rgba(168, 85, 247, 0.3);
         }
-        
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
         }
-        
+
         /* Buttons */
         .btn {
             padding: 0.75rem 1.5rem;
@@ -297,11 +297,11 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .btn svg {
             margin-right: 0.5rem;
         }
-        
+
         .btn::before {
             content: '';
             position: absolute;
@@ -314,39 +314,39 @@
             transform: translate(-50%, -50%);
             transition: width 0.6s, height 0.6s;
         }
-        
+
         .btn:hover::before {
             width: 300px;
             height: 300px;
         }
-        
+
         .btn-primary {
             background: linear-gradient(135deg, var(--neural-purple), var(--flow-cyan));
             color: white;
             box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
         }
-        
+
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 30px rgba(168, 85, 247, 0.6);
         }
-        
+
         .btn-danger {
             background: linear-gradient(135deg, #EF4444, #DC2626);
             color: white;
             box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
         }
-        
+
         .btn-danger:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 30px rgba(239, 68, 68, 0.6);
         }
-        
+
         .btn-group {
             display: flex;
             gap: 0.75rem;
         }
-        
+
         /* Console */
         .console {
             background: rgba(3, 7, 18, 0.8);
@@ -358,13 +358,13 @@
             color: var(--flow-cyan);
             height: 350px;
             overflow-y: auto;
-            box-shadow: 
+            box-shadow:
                 inset 0 0 40px rgba(6, 182, 212, 0.2),
                 0 0 20px rgba(6, 182, 212, 0.3);
             position: relative;
             line-height: 1.5;
         }
-        
+
         .console::before {
             content: '';
             position: absolute;
@@ -372,7 +372,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
+            background:
                 repeating-linear-gradient(
                     0deg,
                     rgba(6, 182, 212, 0.03),
@@ -382,7 +382,7 @@
                 );
             pointer-events: none;
         }
-        
+
         /* Status */
         .status {
             padding: 0.75rem 1rem;
@@ -394,12 +394,12 @@
             display: flex;
             align-items: flex-start;
         }
-        
+
         .status svg {
             margin-right: 0.5rem;
             flex-shrink: 0;
         }
-        
+
         .status::before {
             content: '';
             position: absolute;
@@ -410,33 +410,33 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
             animation: shimmer 3s infinite;
         }
-        
+
         @keyframes shimmer {
             0% { left: -100%; }
             100% { left: 100%; }
         }
-        
+
         .status.success {
             background: linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(16, 185, 129, 0.2));
             border: 1px solid var(--encoder-teal);
             color: var(--encoder-teal);
             box-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
         }
-        
+
         .status.info {
             background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.2));
             border: 1px solid var(--flow-cyan);
             color: var(--flow-cyan);
             box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
         }
-        
+
         .status.error {
             background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
             border: 1px solid #EF4444;
             color: #EF4444;
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
         }
-        
+
         /* Checkbox */
         .checkbox-group {
             display: flex;
@@ -444,24 +444,24 @@
             gap: 0.5rem;
             margin-bottom: 0.75rem;
         }
-        
+
         .checkbox-group input[type="checkbox"] {
             width: auto;
             cursor: pointer;
         }
-        
+
         .checkbox-group label {
             margin-bottom: 0;
             cursor: pointer;
         }
-        
+
         #generatedImage {
             max-width: 100%;
             border-radius: 12px;
             margin-top: 1rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
-        
+
         #imagePlaceholder {
             text-align: center;
             padding: 3rem;
@@ -470,17 +470,17 @@
             border-radius: 12px;
             margin-top: 1rem;
         }
-        
+
         /* Browse button and input wrapper */
         .input-with-browse {
             display: flex;
             gap: 0.5rem;
         }
-        
+
         .input-with-browse input {
             flex: 1;
         }
-        
+
         .btn-browse {
             padding: 0.625rem 1rem;
             background: rgba(168, 85, 247, 0.2);
@@ -494,7 +494,7 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
-        
+
         .btn-browse:hover {
             background: rgba(168, 85, 247, 0.3);
             box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
@@ -567,28 +567,28 @@
     <div class="container">
         <header>
             <h1 class="visually-hidden">FluxFlow - Neural Flow-Based Image Generation</h1>
-            
+
             <div class="logo-wordmark" role="img" aria-label="FluxFlow Logo">
                 <svg width="500" height="140" viewBox="0 0 500 140" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <g transform="translate(30, 30)">
-                        <path d="M 10 40 Q 20 10, 40 20 T 70 40" 
-                              stroke="url(#logoGrad1)" 
-                              stroke-width="4" 
-                              fill="none" 
+                        <path d="M 10 40 Q 20 10, 40 20 T 70 40"
+                              stroke="url(#logoGrad1)"
+                              stroke-width="4"
+                              fill="none"
                               stroke-linecap="round"/>
-                        <path d="M 10 50 Q 25 70, 45 60 T 70 50" 
-                              stroke="url(#logoGrad2)" 
-                              stroke-width="4" 
-                              fill="none" 
+                        <path d="M 10 50 Q 25 70, 45 60 T 70 50"
+                              stroke="url(#logoGrad2)"
+                              stroke-width="4"
+                              fill="none"
                               stroke-linecap="round"
                               opacity="0.7"/>
-                        <path d="M 10 60 Q 20 80, 40 70 T 70 60" 
-                              stroke="url(#logoGrad3)" 
-                              stroke-width="4" 
-                              fill="none" 
+                        <path d="M 10 60 Q 20 80, 40 70 T 70 60"
+                              stroke="url(#logoGrad3)"
+                              stroke-width="4"
+                              fill="none"
                               stroke-linecap="round"
                               opacity="0.5"/>
-                        
+
                         <circle cx="10" cy="40" r="5" fill="#A855F7">
                             <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
                         </circle>
@@ -599,14 +599,14 @@
                             <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" begin="0.5s"/>
                         </circle>
                     </g>
-                    
+
                     <text x="130" y="80" font-family="Poppins, sans-serif" font-size="56" font-weight="700" fill="url(#textGradient)">
                         FluxFlow
                     </text>
                     <text x="130" y="105" font-family="Poppins, sans-serif" font-size="14" fill="#94A3B8" letter-spacing="3">
                         NEURAL GENERATION
                     </text>
-                    
+
                     <defs>
                         <linearGradient id="logoGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
                             <stop offset="0%" style="stop-color:#A855F7;stop-opacity:1" />
@@ -628,21 +628,21 @@
                     </defs>
                 </svg>
             </div>
-            
+
             <p class="subtitle">VAE + Transformer Architecture</p>
         </header>
-        
-        <div class="tabs">
-            <button class="tab-button active" onclick="switchTab('training')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+        <nav class="tabs" role="tablist" aria-label="Main navigation">
+            <button class="tab-button active" onclick="switchTab('training')" role="tab" aria-selected="true" aria-controls="training" id="tab-training">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3 12 L8 7 L8 10 C12 10 16 10 21 15 C21 10 21 5 15 3 L15 6 L10 1"/>
                     <circle cx="8" cy="16" r="3" opacity="0.3" fill="currentColor"/>
                     <circle cx="16" cy="20" r="2" opacity="0.5" fill="currentColor"/>
                 </svg>
                 Training Pipeline
             </button>
-            <button class="tab-button" onclick="switchTab('generation')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button class="tab-button" onclick="switchTab('generation')" role="tab" aria-selected="false" aria-controls="generation" id="tab-generation">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 3 L19 8 L12 13 L5 8 Z"/>
                     <path d="M5 8 L5 16 L12 21 L19 16 L19 8" opacity="0.5"/>
                     <circle cx="12" cy="12" r="2" fill="currentColor"/>
@@ -650,36 +650,21 @@
                 </svg>
                 Generation Studio
             </button>
-        </div>
-        
+        </nav>
+
         <!-- Training Tab -->
-        <div id="training" class="tab-content active">
+        <div id="training" class="tab-content active" role="tabpanel" aria-labelledby="tab-training">
             <div class="grid">
                 <div class="panel">
                     <h3>Training Configuration</h3>
-                    
+
                     <div class="form-group">
-                        <label>Data Path</label>
+                        <label for="data_path">Dataset Path</label>
                         <div class="input-with-browse">
-                            <input type="text" id="data_path" placeholder="/path/to/images">
-                            <button class="btn-browse" type="button" 
+                            <input type="text" id="data_path" placeholder="/path/to/dataset" aria-label="Dataset directory path">
+                            <button class="btn-browse" type="button" aria-label="Browse for dataset directory"
                                     onclick="openFileBrowser('.', 'dir', (p) => document.getElementById('data_path').value = p)">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 0.25rem;">
-                                    <path d="M3 7 L10 3 L10 7 L3 11 Z"/>
-                                    <path d="M10 7 L21 7 L21 21 L3 21 L3 11 Z"/>
-                                </svg>
-                                Browse
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Captions File</label>
-                        <div class="input-with-browse">
-                            <input type="text" id="captions_file" placeholder="/path/to/captions.txt">
-                            <button class="btn-browse" type="button"
-                                    onclick="openFileBrowser('.', 'file', (p) => document.getElementById('captions_file').value = p)">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 0.25rem;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 0.25rem;" aria-hidden="true">
                                     <path d="M13 2 L20 9 L20 22 L4 22 L4 2 Z"/>
                                     <path d="M13 2 L13 9 L20 9"/>
                                 </svg>
@@ -687,46 +672,61 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label>Output Path</label>
+                        <label for="captions_file">Captions File</label>
                         <div class="input-with-browse">
-                            <input type="text" id="output_path" value="outputs/flux">
-                            <button class="btn-browse" type="button"
-                                    onclick="openFileBrowser('.', 'dir', (p) => document.getElementById('output_path').value = p)">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 0.25rem;">
-                                    <path d="M3 7 L10 3 L10 7 L3 11 Z"/>
-                                    <path d="M10 7 L21 7 L21 21 L3 21 L3 11 Z"/>
+                            <input type="text" id="captions_file" placeholder="/path/to/captions.txt" aria-label="Captions text file path">
+                            <button class="btn-browse" type="button" aria-label="Browse for captions file"
+                                    onclick="openFileBrowser('.', 'all', (p) => document.getElementById('captions_file').value = p)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 0.25rem;" aria-hidden="true">
+                                    <path d="M13 2 L20 9 L20 22 L4 22 L4 2 Z"/>
+                                    <path d="M13 2 L13 9 L20 9"/>
                                 </svg>
                                 Browse
                             </button>
                         </div>
                     </div>
-                    
+
+                    <div class="form-group">
+                        <label for="output_path">Output Path</label>
+                        <div class="input-with-browse">
+                            <input type="text" id="output_path" placeholder="/path/to/output" aria-label="Training output directory path">
+                            <button class="btn-browse" type="button" aria-label="Browse for output directory"
+                                    onclick="openFileBrowser('.', 'dir', (p) => document.getElementById('output_path').value = p)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 0.25rem;" aria-hidden="true">
+                                    <path d="M13 2 L20 9 L20 22 L4 22 L4 2 Z"/>
+                                    <path d="M13 2 L13 9 L20 9"/>
+                                </svg>
+                                Browse
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label>Epochs</label>
                             <input type="number" id="n_epochs" value="10">
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Batch Size</label>
                             <input type="number" id="batch_size" value="1">
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label>VAE Dimension</label>
                             <input type="number" id="vae_dim" value="64">
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Feature Dimension</label>
                             <input type="number" id="feature_maps_dim" value="64">
                         </div>
                     </div>
-                    
+
                     <!-- Optimizer & Scheduler Configuration -->
                     <div class="form-group">
                         <button type="button" class="collapsible-btn" onclick="toggleCollapsible('optimizerConfig')">
@@ -850,15 +850,15 @@
                         </button>
                         <div id="cfgTraining" class="collapsible-content" style="display: none;">
                             <p style="color: var(--text-dim); font-size: 0.875rem; margin-bottom: 1rem;">
-                                <strong>CFG Training</strong> enables guided generation at inference time. 
+                                <strong>CFG Training</strong> enables guided generation at inference time.
                                 Train with CFG dropout to support guidance_scale > 1.0.
                             </p>
-                            
+
                             <div class="checkbox-group">
                                 <input type="checkbox" id="use_cfg_training">
                                 <label for="use_cfg_training">Enable CFG Training</label>
                             </div>
-                            
+
                             <div class="form-group" id="cfg_dropout_group" style="display: none;">
                                 <label>CFG Dropout Probability</label>
                                 <input type="number" id="cfg_dropout_prob" value="0.10" step="0.01" min="0.0" max="0.20">
@@ -878,18 +878,18 @@
                         <input type="checkbox" id="train_spade" checked>
                         <label for="train_spade">Use SPADE</label>
                     </div>
-                    
+
                     <div class="form-group">
-                        <div class="btn-group">
-                            <button class="btn btn-primary" onclick="startTraining()">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <div class="btn-group" role="group" aria-label="Training controls">
+                            <button class="btn btn-primary" onclick="startTraining()" aria-label="Start training with current configuration">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <path d="M3 12 L8 7 L8 10 C12 10 16 10 21 15 C21 10 21 5 15 3 L15 6 L10 1"/>
                                     <circle cx="8" cy="16" r="3" opacity="0.3" fill="currentColor"/>
                                 </svg>
                                 Start Training
                             </button>
-                            <button class="btn btn-danger" onclick="stopTraining()">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <button class="btn btn-danger" onclick="stopTraining()" aria-label="Stop current training run">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                     <rect x="6" y="6" width="12" height="12" rx="2"/>
                                     <path d="M6 12 L18 12 M12 6 L12 18" opacity="0.3"/>
                                 </svg>
@@ -897,30 +897,30 @@
                             </button>
                         </div>
                     </div>
-                    
-                    <div id="trainingStatus"></div>
+
+                    <div id="trainingStatus" role="status" aria-live="polite" aria-label="Training status messages"></div>
                 </div>
-                
+
                 <div class="panel">
                     <h3>Training Console</h3>
-                    <div id="trainingConsole" class="console">Waiting to start training...</div>
+                    <div id="trainingConsole" class="console" role="log" aria-live="polite" aria-label="Training console output">Waiting to start training...</div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Generation Tab -->
-        <div id="generation" class="tab-content">
+        <div id="generation" class="tab-content" role="tabpanel" aria-labelledby="tab-generation">
             <div class="grid">
                 <div class="panel">
                     <h3>Model Configuration</h3>
-                    
+
                     <div class="form-group">
-                        <label>Model Checkpoint</label>
+                        <label for="checkpoint_path">Model Checkpoint</label>
                         <div class="input-with-browse">
-                            <input type="text" id="checkpoint_path" placeholder="outputs/flux/flxflow_final.safetensors">
-                            <button class="btn-browse" type="button"
+                            <input type="text" id="checkpoint_path" placeholder="outputs/flux/flxflow_final.safetensors" aria-label="Model checkpoint file path">
+                            <button class="btn-browse" type="button" aria-label="Browse for model checkpoint file"
                                     onclick="openFileBrowser('outputs', 'safetensors', (p) => document.getElementById('checkpoint_path').value = p)">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 0.25rem;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 0.25rem;" aria-hidden="true">
                                     <path d="M13 2 L20 9 L20 22 L4 22 L4 2 Z"/>
                                     <path d="M13 2 L13 9 L20 9"/>
                                 </svg>
@@ -928,10 +928,10 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
-                        <button class="btn btn-primary" onclick="loadModel()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <button class="btn btn-primary" onclick="loadModel()" aria-label="Load model from checkpoint file">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M21 12 C21 16.97 16.97 21 12 21 C7.03 21 3 16.97 3 12 C3 7.03 7.03 3 12 3"/>
                                 <path d="M21 3 L21 9 L15 9"/>
                                 <path d="M15 9 L21 3" stroke-width="1.5"/>
@@ -940,7 +940,7 @@
                             Load Model
                         </button>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label>VAE Dimension</label>
@@ -948,7 +948,7 @@
                                 Not loaded
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Feature Dimension</label>
                             <div id="gen_feature_dim_display" style="padding: 0.75rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; color: var(--text-dim);">
@@ -956,44 +956,44 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <input type="hidden" id="gen_vae_dim" value="64">
                     <input type="hidden" id="gen_feature_dim" value="64">
-                    
-                    <div id="loadStatus"></div>
-                    
+
+                    <div id="loadStatus" role="status" aria-live="polite" aria-label="Model loading status"></div>
+
                     <hr style="margin: 2rem 0; border: none; border-top: 1px solid rgba(168, 85, 247, 0.2);">
-                    
+
                     <h3>Generation Parameters</h3>
-                    
+
                     <div class="form-group">
-                        <label>Prompt</label>
-                        <textarea id="prompt" placeholder="A beautiful sunset over mountains" style="min-height: 100px;"></textarea>
+                        <label for="prompt">Prompt</label>
+                        <textarea id="prompt" placeholder="A beautiful sunset over mountains" style="min-height: 100px;" aria-label="Text prompt for image generation"></textarea>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label>Width (px)</label>
                             <input type="number" id="img_width" value="512" step="16" min="16" onchange="validateDimension('img_width')">
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Height (px)</label>
                             <input type="number" id="img_height" value="512" step="16" min="16" onchange="validateDimension('img_height')">
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label>Sampling Steps</label>
                         <input type="number" id="ddim_steps" value="50" min="1">
                     </div>
-                    
+
                     <div class="checkbox-group">
                         <input type="checkbox" id="use_seed">
                         <label for="use_seed">Use Seed</label>
                         <input type="number" id="seed" value="42" style="width: 100px; margin-left: 1rem;">
                     </div>
-                    
+
                     <!-- CFG Settings Collapsible Section -->
                     <div class="form-group">
                         <button type="button" class="collapsible-btn" onclick="toggleCollapsible('cfgSettings')">
@@ -1003,12 +1003,12 @@
                             <p style="color: var(--text-dim); font-size: 0.875rem; margin-bottom: 1rem;">
                                 <strong>CFG</strong> increases prompt adherence. Requires model trained with CFG dropout (cfg_dropout_prob > 0).
                             </p>
-                            
+
                             <div class="checkbox-group">
                                 <input type="checkbox" id="use_cfg">
                                 <label for="use_cfg">Enable CFG</label>
                             </div>
-                            
+
                             <div class="form-group" id="cfg_controls" style="display: none;">
                                 <label>Guidance Scale</label>
                                 <input type="number" id="guidance_scale" value="5.0" step="0.5" min="1.0" max="15.0">
@@ -1016,7 +1016,7 @@
                                     Higher = stronger prompt adherence (3-7 recommended)
                                 </small>
                             </div>
-                            
+
                             <div class="form-group" id="negative_prompt_group" style="display: none;">
                                 <label>Negative Prompt (Optional)</label>
                                 <textarea id="negative_prompt" placeholder="blurry, low quality, distorted" rows="2"></textarea>
@@ -1026,7 +1026,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <button class="btn btn-primary" onclick="generateImage()">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1037,10 +1037,10 @@
                             Generate Image
                         </button>
                     </div>
-                    
+
                     <div id="genStatus"></div>
                 </div>
-                
+
                 <div class="panel">
                     <h3>Generated Image</h3>
                     <img id="generatedImage" style="display:none;">
@@ -1051,10 +1051,10 @@
             </div>
         </div>
     </div>
-    
+
     <!-- File Browser Modal -->
     {% include 'file_browser.html' %}
-    
+
     <script>
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => {
@@ -1063,11 +1063,11 @@
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             document.getElementById(tabName).classList.add('active');
             event.target.closest('.tab-button').classList.add('active');
         }
-        
+
         function showStatus(elementId, message, type) {
             const el = document.getElementById(elementId);
             const icons = {
@@ -1175,8 +1175,8 @@
                 sample_interval: 50,
                 log_interval: 10,
                 workers: 4,
-                cfg_dropout_prob: document.getElementById('use_cfg_training').checked 
-                    ? parseFloat(document.getElementById('cfg_dropout_prob').value) 
+                cfg_dropout_prob: document.getElementById('use_cfg_training').checked
+                    ? parseFloat(document.getElementById('cfg_dropout_prob').value)
                     : 0.0,
                 optimizers: {
                     flow: getOptimizerConfig('flow'),
@@ -1191,16 +1191,16 @@
                     discriminator: getSchedulerConfig('discriminator')
                 }
             };
-            
+
             try {
                 const response = await fetch('/api/training/start', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(config)
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     showStatus('trainingStatus', data.message, 'success');
                     startConsoleUpdates();
@@ -1211,15 +1211,15 @@
                 showStatus('trainingStatus', 'Error: ' + error.message, 'error');
             }
         }
-        
+
         async function stopTraining() {
             try {
                 const response = await fetch('/api/training/stop', {
                     method: 'POST'
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     showStatus('trainingStatus', data.message, 'info');
                 } else {
@@ -1229,23 +1229,23 @@
                 showStatus('trainingStatus', 'Error: ' + error.message, 'error');
             }
         }
-        
+
         let consoleInterval;
-        
+
         function startConsoleUpdates() {
             if (consoleInterval) clearInterval(consoleInterval);
-            
+
             consoleInterval = setInterval(async () => {
                 try {
                     const response = await fetch('/api/training/status');
                     const data = await response.json();
-                    
+
                     if (data.output && data.output.length > 0) {
                         const console = document.getElementById('trainingConsole');
                         console.textContent = data.output.join('\n');
                         console.scrollTop = console.scrollHeight;
                     }
-                    
+
                     if (!data.running && consoleInterval) {
                         clearInterval(consoleInterval);
                     }
@@ -1254,55 +1254,55 @@
                 }
             }, 1000);
         }
-        
+
         async function loadModel() {
             const checkpoint = document.getElementById('checkpoint_path').value;
-            
+
             if (!checkpoint) {
                 showStatus('loadStatus', 'Please select a checkpoint first', 'error');
                 return;
             }
-            
+
             showStatus('loadStatus', 'Detecting model dimensions...', 'info');
-            
+
             try {
                 const inspectResponse = await fetch('/api/generation/inspect', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({checkpoint_path: checkpoint})
                 });
-                
+
                 const inspectData = await inspectResponse.json();
-                
+
                 if (!inspectResponse.ok) {
                     showStatus('loadStatus', inspectData.message, 'error');
                     return;
                 }
-                
+
                 document.getElementById('gen_vae_dim').value = inspectData.vae_dim;
                 document.getElementById('gen_feature_dim').value = inspectData.feature_maps_dim;
                 document.getElementById('gen_vae_dim_display').textContent = inspectData.vae_dim;
                 document.getElementById('gen_vae_dim_display').style.color = 'var(--text-bright)';
                 document.getElementById('gen_feature_dim_display').textContent = inspectData.feature_maps_dim;
                 document.getElementById('gen_feature_dim_display').style.color = 'var(--text-bright)';
-                
+
                 showStatus('loadStatus', 'Loading model with detected dimensions...', 'info');
-                
+
                 const config = {
                     checkpoint_path: checkpoint,
                     vae_dim: inspectData.vae_dim,
                     feature_maps_dim: inspectData.feature_maps_dim,
                     text_embedding_dim: 1024
                 };
-                
+
                 const loadResponse = await fetch('/api/generation/load', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(config)
                 });
-                
+
                 const loadData = await loadResponse.json();
-                
+
                 if (loadResponse.ok) {
                     showStatus('loadStatus', `Model loaded (VAE=${inspectData.vae_dim}, Feature=${inspectData.feature_maps_dim})`, 'success');
                 } else {
@@ -1312,24 +1312,24 @@
                 showStatus('loadStatus', 'Error: ' + error.message, 'error');
             }
         }
-        
+
         function validateDimension(fieldId) {
             const field = document.getElementById(fieldId);
             let value = parseInt(field.value);
-            
+
             if (value < 16) {
                 value = 16;
             }
-            
+
             value = Math.round(value / 16) * 16;
-            
+
             field.value = value;
         }
-        
+
         async function generateImage() {
             validateDimension('img_width');
             validateDimension('img_height');
-            
+
             const config = {
                 prompt: document.getElementById('prompt').value,
                 img_width: parseInt(document.getElementById('img_width').value),
@@ -1341,18 +1341,18 @@
                 guidance_scale: parseFloat(document.getElementById('guidance_scale').value),
                 negative_prompt: document.getElementById('negative_prompt').value
             };
-            
+
             showStatus('genStatus', `Generating ${config.img_width}x${config.img_height} image...`, 'info');
-            
+
             try {
                 const response = await fetch('/api/generation/generate', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(config)
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     showStatus('genStatus', data.message, 'success');
                     document.getElementById('generatedImage').src = data.image;

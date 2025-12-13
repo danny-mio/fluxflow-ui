@@ -56,7 +56,7 @@ Then open: **http://localhost:7860**
 
 ### Training
 - `POST /api/training/start` - Start training
-- `POST /api/training/stop` - Stop training  
+- `POST /api/training/stop` - Stop training
 - `GET /api/training/status` - Get status + console output
 
 ### Generation

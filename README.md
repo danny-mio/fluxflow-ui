@@ -17,7 +17,28 @@ Web interface for FluxFlow text-to-image generation and training.
 
 ## Installation
 
-### Production Install
+> **Note**: This documentation describes **v0.3.0** (upcoming release). For the current stable version (v0.1.1), see [v0.1.1 documentation](https://github.com/danny-mio/fluxflow-ui/tree/v0.1.1).
+
+### Prerequisites
+
+**Required:**
+- Python 3.10 or higher
+- pip package manager
+- 8GB+ RAM (16GB+ recommended)
+
+**For GPU Training (Recommended):**
+- **NVIDIA GPU**: CUDA 11.8+ with compatible drivers
+- **Apple Silicon**: macOS 12.3+ (for MPS support)
+- **GPU VRAM**: 8GB minimum, 16GB+ for high quality training
+
+**Verify Prerequisites:**
+```bash
+python --version  # Should show 3.10 or higher
+pip --version     # Should be installed
+nvidia-smi        # (NVIDIA only) Should show GPU info
+```
+
+### Production Install (v0.1.1 - Current Stable)
 
 ```bash
 pip install fluxflow-ui
@@ -30,6 +51,8 @@ pip install fluxflow-ui
 - CLI command: `fluxflow-ui`
 
 **Package available on PyPI**: [fluxflow-ui v0.1.1](https://pypi.org/project/fluxflow-ui/)
+
+⚠️ **Note**: v0.1.1 does NOT include CFG (Classifier-Free Guidance) features described below. For CFG support, use development install.
 
 ### Development Install
 
@@ -97,7 +120,7 @@ Then open your browser to `http://localhost:7860`
 
 ## Classifier-Free Guidance (CFG)
 
-**New in v0.3.0**: FluxFlow UI supports training and generation with Classifier-Free Guidance.
+**✨ New in v0.3.0** (upcoming release): FluxFlow UI supports training and generation with Classifier-Free Guidance.
 
 ### Training with CFG
 
@@ -143,7 +166,7 @@ To use CFG during generation:
 
 ## Configuration
 
-The UI runs on `http://0.0.0.0:7860` by default. To customize the host and port, modify the `main()` function in `app_flask.py`.
+The UI runs on `http://0.0.0.0:7860` by default. To customize the host and port, modify the `main()` function in `src/fluxflow_ui/app_flask.py`.
 
 ## Development
 
@@ -157,7 +180,8 @@ pip install -e ".[dev]"
 
 - [GitHub Repository](https://github.com/danny-mio/fluxflow-ui)
 - [Security Policy](SECURITY.md)
-- [User Guide](USER_GUIDE.md)
+- [User Guide](docs/USER_GUIDE.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
 
 ## License
 

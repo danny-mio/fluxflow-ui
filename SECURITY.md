@@ -13,22 +13,22 @@ The `safe_path()` function prevents directory traversal attacks in file operatio
 ```python
 def safe_path(user_path: str, base_dir: str = FILE_BROWSER_BASE_DIR) -> str:
     """Validate and sanitize path to prevent directory traversal.
-    
+
     Args:
         user_path: User-provided path
         base_dir: Base directory to restrict access to
-        
+
     Returns:
         Safe absolute path
-        
+
     Raises:
         ValueError: If path traversal attempt detected
     """
     full_path = os.path.realpath(os.path.join(base_dir, user_path))
-    
+
     if not full_path.startswith(os.path.realpath(base_dir)):
         raise ValueError("Path traversal attempt detected")
-    
+
     return full_path
 ```
 

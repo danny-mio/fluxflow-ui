@@ -224,5 +224,5 @@ Access API docs at: `http://localhost:7860/docs`
 
 ---
 
-**Version**: 1.0.0 (Phase 1 MVP)  
+**Version**: 1.0.0 (Phase 1 MVP)
 **Last Updated**: November 2025
