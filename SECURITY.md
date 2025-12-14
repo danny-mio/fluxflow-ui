@@ -1,143 +1,164 @@
-# Security
+# Security Policy
 
-## Overview
+## Supported Versions
 
-FluxFlow UI implements several security measures for local development use. **This application is designed for local use only and should not be exposed to the internet without additional hardening.**
+We actively maintain and provide security updates for the following versions:
 
-## Implemented Security Measures
+| Version | Supported          |
+| ------- | ------------------ |
+| 0.3.x   | :white_check_mark: |
+| 0.2.x   | :x:                |
+| < 0.2   | :x:                |
 
-### 1. Path Traversal Protection
+## Reporting a Vulnerability
 
-The `safe_path()` function prevents directory traversal attacks in file operations:
+We take security vulnerabilities seriously. If you discover a security issue in FluxFlow UI, please report it responsibly.
 
-```python
-def safe_path(user_path: str, base_dir: str = FILE_BROWSER_BASE_DIR) -> str:
-    """Validate and sanitize path to prevent directory traversal.
+### How to Report
 
-    Args:
-        user_path: User-provided path
-        base_dir: Base directory to restrict access to
+**DO NOT** create a public GitHub issue for security vulnerabilities.
 
-    Returns:
-        Safe absolute path
+Instead, please report security issues via one of these methods:
 
-    Raises:
-        ValueError: If path traversal attempt detected
-    """
-    full_path = os.path.realpath(os.path.join(base_dir, user_path))
+1. **GitHub Security Advisories** (Preferred)
+   - Go to https://github.com/danny-mio/fluxflow-ui/security/advisories
+   - Click "Report a vulnerability"
+   - Provide detailed information about the vulnerability
 
-    if not full_path.startswith(os.path.realpath(base_dir)):
-        raise ValueError("Path traversal attempt detected")
+2. **Email**
+   - Send to: danny-mio@libero.it
+   - Subject: "[SECURITY] FluxFlow UI - [Brief Description]"
+   - Include detailed information (see below)
 
-    return full_path
-```
+### What to Include
 
-**Implementation:** `src/fluxflow_ui/app_flask.py:52-72`
+When reporting a vulnerability, please include:
 
-**Note:** Currently defined but not actively used in all file operations. The file browser uses `_resolve_browse_path()` which does NOT enforce base directory restrictions.
+- **Description**: Clear description of the vulnerability
+- **Impact**: What can an attacker achieve?
+- **Affected versions**: Which versions are vulnerable?
+- **Reproduction steps**: Step-by-step instructions to reproduce
+- **Proof of concept**: Code/commands demonstrating the issue (if applicable)
+- **Suggested fix**: If you have ideas on how to fix it (optional)
+- **Your contact information**: For follow-up questions
 
-### 2. CORS Configuration
+### What to Expect
 
-CORS is restricted to localhost only:
+- **Acknowledgment**: Within 48 hours of your report
+- **Initial assessment**: Within 5 business days
+- **Status updates**: Every 7 days until resolved
+- **Credit**: You will be credited in the security advisory (unless you prefer to remain anonymous)
 
-```python
-CORS(app, origins=["http://localhost:7860", "http://127.0.0.1:7860"])
-```
+### Security Update Process
 
-**Implementation:** `src/fluxflow_ui/app_flask.py:29`
+1. **Validation**: We verify and assess the vulnerability
+2. **Fix development**: We develop and test a fix
+3. **Coordinated disclosure**: We coordinate a release timeline with you
+4. **Release**: Security patch released with advisory
+5. **Public disclosure**: After users have time to update (typically 7-14 days)
 
-**Purpose:** Prevents cross-origin requests from external domains.
+## Security Best Practices
 
-### 3. Input Validation
+When using FluxFlow UI:
 
-The `@require_json` decorator validates JSON payloads on POST endpoints:
+### Model Files
 
-```python
-def require_json(f):
-    """Decorator to require JSON body in POST requests."""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not request.json:
-            return jsonify({"status": "error", "message": "JSON body required"}), 400
-        return f(*args, **kwargs)
-    return decorated
-```
+- ✅ **Only load model files from trusted sources**
+- ✅ **Verify checksums** of downloaded models when available
+- ❌ **Never load untrusted .safetensors or .pt files**
+- ⚠️  Model files can contain malicious code or backdoors
 
-**Implementation:** `src/fluxflow_ui/app_flask.py:40-49`
+### Input Validation
 
-**Applied to:** All POST endpoints requiring JSON input.
+- ✅ **Validate all user inputs** (prompts, file paths, parameters)
+- ✅ **Sanitize file paths** to prevent directory traversal attacks
+- ❌ **Never pass unsanitized user input** to system calls or file operations
 
-## Known Limitations
+### Dependencies
 
-### Critical
+- ✅ **Keep dependencies updated** - run `pip install --upgrade fluxflow` regularly
+- ✅ **Use virtual environments** to isolate FluxFlow from system Python
+- ✅ **Review dependency security advisories** via GitHub Dependabot
 
-1. **File Browser Path Traversal Risk**
-   - The file browser (`/api/files/browse`) does NOT use `safe_path()` protection
-   - Users can browse the entire filesystem (limited by permissions)
-   - **Mitigation:** Only run on trusted local machines
+### Network Security
 
-2. **No Authentication/Authorization**
-   - No user authentication
-   - No API key protection
-   - Anyone with network access to port 7860 can use the API
+- ✅ **Use HTTPS** when downloading models or data
+- ✅ **Validate SSL certificates** - don't disable certificate verification
+- ⚠️  Be cautious when accepting model URLs from untrusted sources
 
-3. **No Rate Limiting**
-   - Endpoints can be called unlimited times
-   - Potential for resource exhaustion
+### Deployment
 
-### Moderate
+- ✅ **Run with least privilege** - don't run as root/admin
+- ✅ **Restrict file system access** using appropriate permissions
+- ✅ **Use resource limits** (memory, GPU) to prevent DoS
+- ✅ **Enable logging** for security monitoring
 
-4. **Limited Input Validation**
-   - Numeric parameters not bounds-checked
-   - String lengths not validated
-   - File paths not sanitized before subprocess calls
+## Known Security Considerations
 
-5. **Subprocess Security**
-   - Training runner passes config to subprocess without sanitization
-   - Potential for command injection if config contains malicious values
+### PyTorch Model Loading
 
-6. **No HTTPS**
-   - All communication is unencrypted HTTP
-   - Credentials/data transmitted in plaintext
+FluxFlow uses PyTorch and safetensors for model loading. Be aware:
 
-## Production Deployment Warnings
+- **Pickle vulnerability**: PyTorch `.pt` files use pickle, which can execute arbitrary code
+- **Safetensors**: We prefer `.safetensors` format which is safer
+- **Recommendation**: Only load models from trusted sources (Hugging Face official, verified creators)
 
-**DO NOT deploy FluxFlow UI to production without addressing:**
+### GPU Memory
 
-1. Add authentication (OAuth2, API keys, or basic auth)
-2. Enable HTTPS with valid certificates
-3. Implement rate limiting
-4. Add comprehensive input validation and sanitization
-5. Use `safe_path()` in ALL file operations
-6. Run behind a reverse proxy (nginx, Caddy)
-7. Use process isolation (containers, VMs)
-8. Add audit logging
-9. Implement CSP headers
-10. Regular security audits
+- Models can consume significant GPU memory
+- Out-of-memory conditions can crash applications
+- Recommendation: Validate model size vs available GPU memory before loading
 
-## Recommended Deployment
+### Code Execution
 
-For local development (current design):
-```bash
-# Only accessible from localhost
-fluxflow-ui
-# Access at http://localhost:7860
-```
+- FluxFlow executes Python code for custom models and configurations
+- Untrusted code can compromise your system
+- Recommendation: Review all custom code before execution
 
-For production (requires additional work):
-```bash
-# NOT RECOMMENDED - Additional security required
-# See warnings above
-```
+## Security Hardening Checklist
 
-## Reporting Security Issues
+When deploying FluxFlow in production:
 
-Report security vulnerabilities to: danielecamisani@inspiredthinking.group
+- [ ] Run in isolated container/VM
+- [ ] Use non-root user
+- [ ] Restrict network access (firewall rules)
+- [ ] Enable comprehensive logging
+- [ ] Implement rate limiting for API endpoints
+- [ ] Validate and sanitize all inputs
+- [ ] Use latest stable version
+- [ ] Monitor security advisories
+- [ ] Regular security audits
+- [ ] Backup critical data
 
-**Do not** open public issues for security vulnerabilities.
+## Vulnerability Disclosure Policy
 
-## Test Coverage
+We follow responsible disclosure principles:
 
-Security-related test coverage: **~2%**
+- **Coordinated disclosure**: We work with reporters to coordinate public disclosure
+- **Reasonable timeframe**: We aim to fix critical issues within 30 days
+- **Transparency**: We publish security advisories for all confirmed vulnerabilities
+- **Credit**: We credit researchers who report vulnerabilities responsibly
 
-Most security features are not covered by automated tests. Manual testing required.
+## Security Hall of Fame
+
+We recognize security researchers who help keep FluxFlow secure:
+
+<!-- This section will list researchers who have responsibly disclosed vulnerabilities -->
+
+*No vulnerabilities reported yet.*
+
+## Contact
+
+- **Security issues**: danny-mio@libero.it (use [SECURITY] prefix)
+- **General questions**: https://github.com/danny-mio/fluxflow-ui/discussions
+- **Bug reports**: https://github.com/danny-mio/fluxflow-ui/issues
+
+## Additional Resources
+
+- [OWASP Secure Coding Practices](https://owasp.org/www-project-secure-coding-practices-quick-reference-guide/)
+- [Python Security Best Practices](https://python.readthedocs.io/en/stable/library/security_warnings.html)
+- [PyTorch Security](https://pytorch.org/docs/stable/notes/security.html)
+
+---
+
+**Last Updated**: December 14, 2025
