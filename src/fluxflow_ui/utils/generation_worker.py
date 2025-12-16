@@ -266,41 +266,58 @@ class GenerationWorker:
         """Generate image with classifier-free guidance.
 
         Args:
-            noised_latent: Initial noised latent
+            noised_latent: Initial noised latent [B, T+1, D]
             text_embeddings: Conditional text embeddings
             negative_embeddings: Unconditional/negative text embeddings
             guidance_scale: CFG strength
             steps: Number of denoising steps
 
         Returns:
-            Denoised latent
+            Denoised latent [B, T+1, D]
         """
         from diffusers import DPMSolverMultistepScheduler
 
         assert self.diffuser is not None, "Diffuser must be loaded before CFG generation"
 
-        scheduler = DPMSolverMultistepScheduler(num_train_timesteps=1000)
+        scheduler = DPMSolverMultistepScheduler(
+            num_train_timesteps=1000,
+            algorithm_type="dpmsolver++",
+            solver_order=2,
+            prediction_type="v_prediction",
+            lower_order_final=True,
+            timestep_spacing="trailing",
+        )
         scheduler.set_timesteps(steps, device=self.device)  # type: ignore
 
-        latent = noised_latent
+        # Separate hw_vec (dimension info) from image latent
+        hw_vec = noised_latent[:, -1:, :].clone()
+        lat = noised_latent[:, :-1, :].clone()
 
         for t in scheduler.timesteps:  # type: ignore
             # Expand t to batch dimension
-            t_batch = t.unsqueeze(0).to(self.device)
+            t_batch = torch.full((lat.size(0),), t.item(), device=self.device, dtype=torch.long)
+
+            # Reconstruct full latent with hw_vec for model input
+            full_input = torch.cat([lat, hw_vec], dim=1)
 
             # Predict with conditional embeddings
-            v_cond = self.diffuser.flow_processor(latent, text_embeddings, t_batch)
+            v_cond = self.diffuser.flow_processor(full_input, text_embeddings, t_batch)
+            v_cond_lat = v_cond[:, :-1, :]  # Remove hw_vec from prediction
 
             # Predict with unconditional embeddings
-            v_uncond = self.diffuser.flow_processor(latent, negative_embeddings, t_batch)
+            v_uncond = self.diffuser.flow_processor(full_input, negative_embeddings, t_batch)
+            v_uncond_lat = v_uncond[:, :-1, :]  # Remove hw_vec from prediction
 
-            # Apply guidance
-            v_guided = v_uncond + guidance_scale * (v_cond - v_uncond)
+            # Apply CFG guidance
+            v_guided = v_uncond_lat + guidance_scale * (v_cond_lat - v_uncond_lat)
 
-            # Step the scheduler
-            latent = scheduler.step(v_guided, t, latent).prev_sample  # type: ignore
+            # Step the scheduler (only on image latent, not hw_vec)
+            lat = scheduler.step(
+                model_output=v_guided, timestep=int(t.item()), sample=lat
+            ).prev_sample  # type: ignore
 
-        return latent
+        # Recombine with hw_vec before returning
+        return torch.cat([lat, hw_vec], dim=1)
 
     def is_loaded(self) -> bool:
         """Check if model is loaded.

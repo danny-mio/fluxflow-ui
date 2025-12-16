@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **CFG image dimension bug** (CRITICAL)
+  - Fixed CFG-generated images always being 256x256 regardless of user-specified dimensions
+  - Root cause: `_generate_with_cfg()` wasn't properly separating `hw_vec` (dimension info) from image latent
+  - Solution: Properly extract and preserve `hw_vec` during CFG denoising loop
+  - **Impact**: CFG now correctly respects user-chosen width and height settings
+  - **Files**: `src/fluxflow_ui/utils/generation_worker.py` (lines 258-303)
+  - Users can now generate CFG images at any resolution (512x512, 768x512, 1024x1024, etc.)
+
 ## [0.3.1] - 2025-12-13
 
 ### Note
