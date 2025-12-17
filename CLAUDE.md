@@ -30,8 +30,7 @@ make format               # Format with black and isort
 # Run
 make run                  # Launch web UI
 fluxflow-ui               # Direct command
-```
-
+```text
 ### Code Quality Tools
 
 | Tool | Command | Purpose |
@@ -69,11 +68,10 @@ import gradio
 
 # Local
 from fluxflow_ui.utils import config_manager
-```
-
+```text
 ## Project Structure
 
-```
+```text
 src/fluxflow_ui/
 ├── app.py                 # Gradio application
 ├── app_flask.py           # Flask REST API (primary entry point)
@@ -89,8 +87,7 @@ src/fluxflow_ui/
 
 tests/
 └── test_ui.py             # Test suite
-```
-
+```text
 ## Key Files
 
 - **Entry point**: `src/fluxflow_ui/app_flask.py:main()`
@@ -111,8 +108,7 @@ pytest tests/test_ui.py::TestUIImports -v
 
 # Run with coverage
 pytest tests/ --cov=src/fluxflow_ui
-```
-
+```text
 ## Architecture Notes
 
 ### Flask API Endpoints
@@ -139,10 +135,9 @@ The Flask app (`app_flask.py`) provides REST endpoints for:
 ### Core Dependency
 
 The `fluxflow-training` package is installed from GitHub:
-```
+```text
 fluxflow-training @ git+https://github.com/danny-mio/fluxflow-training.git
-```
-
+```text
 This is a sibling project that provides the core training functionality.
 
 ## Pre-commit Hooks
@@ -160,9 +155,9 @@ Run manually: `pre-commit run --all-files`
 
 GitHub Actions runs on push/PR:
 1. Lint (flake8)
-2. Format check (black)
-3. Type check (mypy)
-4. Tests (pytest with coverage)
+1. Format check (black)
+1. Type check (mypy)
+1. Tests (pytest with coverage)
 
 Tests run on Python 3.10 and 3.11.
 
@@ -176,16 +171,14 @@ try:
 except ValueError as e:
     logger.error(f"Invalid data: {e}")
     raise CustomError(f"Processing failed: {e}") from e
-```
-
+```text
 ### Type Hints
 
 ```python
 def load_config(path: str) -> dict[str, Any]:
     """Load configuration from JSON file."""
     ...
-```
-
+```text
 ### Google-style Docstrings
 
 ```python
@@ -200,4 +193,4 @@ def train_model(config: dict, output_dir: str) -> None:
     Raises:
         ValueError: If config is invalid
     """
-```
+```text

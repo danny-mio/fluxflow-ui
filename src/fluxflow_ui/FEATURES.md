@@ -8,7 +8,7 @@ FluxFlow UI is a comprehensive web-based interface for training and generating i
 
 ### Core Components
 
-```
+```text
 ui/
 ├── app.py                       # Main Gradio application
 ├── tabs/
@@ -20,8 +20,7 @@ ui/
 │   └── generation_worker.py    # Image generation worker
 └── components/
     └── (future: custom Gradio components)
-```
-
+```text
 ## Phase 1 Features (Implemented)
 
 ### Training Interface

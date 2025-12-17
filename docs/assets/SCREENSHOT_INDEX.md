@@ -149,62 +149,59 @@ These screenshots are designed for creating step-by-step user documentation. The
 For a minimal user guide, use these key screenshots:
 
 1. **Getting Started**: `ui-landing-page.png`
-2. **Training Overview**: `training-tab-overview.png`
-3. **File Browser**: `file-browser-dialog.png`
-4. **CFG Training**: `training-cfg-section-expanded.png`
-5. **Start Training**: `training-start-button.png`
-6. **Generation Overview**: `generation-tab-overview.png`
-7. **Load Model**: `generation-model-loading.png`
-8. **Write Prompt**: `generation-prompt-entered.png`
-9. **CFG Generation**: `generation-cfg-expanded.png`
-10. **Responsive Design**: `ui-tablet-view.png` or `ui-mobile-view.png`
+1. **Training Overview**: `training-tab-overview.png`
+1. **File Browser**: `file-browser-dialog.png`
+1. **CFG Training**: `training-cfg-section-expanded.png`
+1. **Start Training**: `training-start-button.png`
+1. **Generation Overview**: `generation-tab-overview.png`
+1. **Load Model**: `generation-model-loading.png`
+1. **Write Prompt**: `generation-prompt-entered.png`
+1. **CFG Generation**: `generation-cfg-expanded.png`
+1. **Responsive Design**: `ui-tablet-view.png` or `ui-mobile-view.png`
 
 ---
 
 ## Suggested Documentation Structure
 
 ### Beginner Guide (5-10 pages)
-```
+```text
 1. Introduction
    - Screenshot: ui-landing-page.png
    
-2. Your First Training Run
+1. Your First Training Run
    - Screenshot: training-tab-overview.png
    - Screenshot: file-browser-dialog.png
    - Screenshot: training-start-button.png
    
-3. Your First Generation
+1. Your First Generation
    - Screenshot: generation-tab-overview.png
    - Screenshot: generation-model-loading.png
    - Screenshot: generation-prompt-entered.png
-```
-
+```text
 ### Advanced Guide (10-20 pages)
-```
-4. Classifier-Free Guidance (CFG)
+```text
+1. Classifier-Free Guidance (CFG)
    - Screenshot: training-cfg-section-expanded.png
    - Screenshot: generation-cfg-expanded.png
    
-5. Advanced Training Settings
+1. Advanced Training Settings
    - Screenshot: training-advanced-settings.png
    - Screenshot: training-full-top.png
    - Screenshot: training-full-bottom.png
    
-6. Advanced Generation Techniques
+1. Advanced Generation Techniques
    - Screenshot: generation-full-top.png
    - Screenshot: generation-full-bottom.png
-```
-
+```text
 ### Mobile/Tablet Guide (3-5 pages)
-```
-7. Using FluxFlow on Tablets
+```text
+1. Using FluxFlow on Tablets
    - Screenshot: ui-tablet-view.png
    - Screenshot: 20-layout-tablet-768x1024.png
    
-8. Using FluxFlow on Mobile
+1. Using FluxFlow on Mobile
    - Screenshot: ui-mobile-view.png
-```
-
+```text
 ---
 
 ## Screenshot Quality Notes
@@ -245,9 +242,9 @@ Examples:
 The following were not captured but could be added if needed:
 
 1. **Error States**: No error screenshots (would require triggering errors)
-2. **In-Progress States**: No training/generation in progress (would require execution)
-3. **Results**: No generated images shown (would require model execution)
-4. **Metrics**: No live training metrics (would require training execution)
+1. **In-Progress States**: No training/generation in progress (would require execution)
+1. **Results**: No generated images shown (would require model execution)
+1. **Metrics**: No live training metrics (would require training execution)
 
 **Reason**: To avoid resource-intensive operations and keep test execution fast.
 
@@ -272,9 +269,9 @@ These screenshots are part of the FluxFlow UI project and should be used for:
 
 To update screenshots:
 1. Run `/Volumes/DanieleExt/ai/ffnew/testing/scripts/capture_documentation_screenshots.py`
-2. Review new screenshots in this directory
-3. Update this index with any new screenshots
-4. Archive old screenshots if UI changed significantly
+1. Review new screenshots in this directory
+1. Update this index with any new screenshots
+1. Archive old screenshots if UI changed significantly
 
 ---
 

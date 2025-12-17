@@ -21,14 +21,12 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
 # Install other FluxFlow dependencies
 pip install transformers safetensors diffusers accelerate
-```
-
+```text
 ## Quick Start
 
 ```bash
 ./launch_ui.sh
-```
-
+```text
 Then open: **http://localhost:7860**
 
 ## Features
@@ -100,8 +98,8 @@ Then open: **http://localhost:7860**
 To add new features:
 
 1. **Backend**: Add route to `ui/app_flask.py`
-2. **Frontend**: Update `ui/templates/index.html`
-3. **API**: Use JSON for request/response
+1. **Frontend**: Update `ui/templates/index.html`
+1. **API**: Use JSON for request/response
 
 Example adding a new endpoint:
 
@@ -111,29 +109,25 @@ def custom_endpoint():
     data = request.json
     # Your logic here
     return jsonify({"status": "success", "data": result})
-```
-
+```text
 ## Troubleshooting
 
 ### Port already in use
 ```bash
 # Find process using port 7860
 lsof -ti:7860 | xargs kill -9
-```
-
+```text
 ### Import errors
 ```bash
 # Reinstall dependencies
 source venv/bin/activate
 pip install --force-reinstall -r ui/requirements_ui.txt
-```
-
+```text
 ### Torch not found
 ```bash
 # Install PyTorch from official wheel
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-```
-
+```text
 ## Future Enhancements
 
 - [ ] WebSocket support for real-time updates

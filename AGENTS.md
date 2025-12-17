@@ -18,8 +18,7 @@ make lint                 # Run flake8, black --check, isort --check
 make format               # Format with black + isort
 make run                  # Launch web UI
 make run-debug            # Launch UI in debug mode
-```
-
+```text
 ## Code Style
 - **Python >= 3.10** with type hints on public APIs
 - **Black** formatting (line-length=100), **isort** (profile=black)

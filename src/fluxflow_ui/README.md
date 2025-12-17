@@ -24,59 +24,55 @@ A user-friendly web interface for training and generating images with FluxFlow.
 1. Install UI dependencies:
 ```bash
 pip install -r ui/requirements_ui.txt
-```
-
-2. Ensure FluxFlow base requirements are installed:
+```text
+1. Ensure FluxFlow base requirements are installed:
 ```bash
 pip install -r requirements.txt
-```
-
-3. Download tokenizer cache (first time only):
+```text
+1. Download tokenizer cache (first time only):
 ```bash
 python -c "from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('distilbert-base-uncased', cache_dir='./_cache')"
-```
-
+```text
 ## Quick Start
 
 ### Launch the UI
 
 ```bash
 python ui/app.py
-```
-
+```text
 The interface will open at `http://localhost:7860`
 
 ### Training a Model
 
 1. Go to the **Train** tab
-2. Configure dataset:
+1. Configure dataset:
    - **Data Path**: Directory containing your images
    - **Captions File**: Tab-separated file with image filenames and captions
-3. Set training parameters:
+1. Set training parameters:
    - **Epochs**: Number of training epochs (start with 10)
    - **Batch Size**: Usually 1 for limited VRAM
    - **Learning Rate**: Default 1e-5 works well
-4. Choose training modes:
+1. Choose training modes:
    - **Train VAE**: Enable for initial training (recommended)
    - **Use SPADE**: Enable for better quality
    - **Train Flow**: Enable after VAE is trained
-5. Click **Start Training**
-6. Monitor progress in the console output
+1. Click **Start Training**
+1. Monitor progress in the console output
 
 ### Generating Images
 
 1. Go to the **Generate** tab
-2. Load a trained model:
+1. Load a trained model:
    - **Model Checkpoint**: Path to `.safetensors` file
    - **VAE Dimension**: Match your training config (e.g., 64)
    - **Feature Dimension**: Match your training config (e.g., 64)
-3. Click **Load Model**
-4. Enter a text prompt (e.g., "A beautiful sunset over mountains")
-5. Adjust generation parameters:
+1. Click **Load Model**
+1. Enter a text prompt (e.g., "A beautiful sunset over mountains")
+1. Adjust generation parameters:
    - **Image Size**: 512 is recommended
    - **Sampling Steps**: 50 for good quality
    - **Seed**: Enable for reproducible results
-6. Click **Generate Image**
+1. Click **Generate Image**
 
 ## Tips and Best Practices
 
@@ -94,8 +90,8 @@ The interface will open at `http://localhost:7860`
 
 **Recommended Training Flow:**
 1. Train VAE only for 50-100 epochs with SPADE enabled
-2. Then train Flow model with `--train_diff` or `--train_diff_full`
-3. Monitor loss values in console
+1. Then train Flow model with `--train_diff` or `--train_diff_full`
+1. Monitor loss values in console
 
 **Resume Training:**
 - Enter checkpoint path in "Resume from Checkpoint"
@@ -147,7 +143,7 @@ Training automatically saves:
 
 ## Architecture
 
-```
+```text
 ui/
 ├── app.py                    # Main application
 ├── tabs/
@@ -158,8 +154,7 @@ ui/
 │   ├── training_runner.py   # Background training
 │   └── generation_worker.py # Image generation
 └── requirements_ui.txt      # UI dependencies
-```
-
+```text
 ## Troubleshooting
 
 ### UI won't start

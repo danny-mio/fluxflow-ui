@@ -10,11 +10,11 @@ Complete guide for using FluxFlow UI to train and generate images with text-to-i
 ## Table of Contents
 
 1. [Getting Started](#getting-started)
-2. [Image Generation](#image-generation)
-3. [Model Training](#model-training)
-4. [File Browser](#file-browser)
-5. [Tips & Best Practices](#tips--best-practices)
-6. [Troubleshooting](#troubleshooting)
+1. [Image Generation](#image-generation)
+1. [Model Training](#model-training)
+1. [File Browser](#file-browser)
+1. [Tips & Best Practices](#tips--best-practices)
+1. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -30,8 +30,7 @@ Complete guide for using FluxFlow UI to train and generate images with text-to-i
 
 ```bash
 fluxflow-ui
-```
-
+```text
 Open your browser to: **http://localhost:7860**
 
 You'll see two main tabs:
@@ -52,9 +51,9 @@ Generate images from text prompts using trained FluxFlow models.
 
 **Load your trained checkpoint:**
 1. Click **Browse** button next to "Model Checkpoint"
-2. Navigate to your `.safetensors` checkpoint file
-3. Select the file (e.g., `flxflow_final.safetensors`)
-4. Click **Load Model** button
+1. Navigate to your `.safetensors` checkpoint file
+1. Select the file (e.g., `flxflow_final.safetensors`)
+1. Click **Load Model** button
 
 **What happens:**
 - UI automatically detects model dimensions
@@ -69,10 +68,9 @@ Generate images from text prompts using trained FluxFlow models.
 
 **In the text prompt field, type what you want to generate:**
 
-```
+```text
 A serene mountain landscape at sunset, golden hour lighting, photorealistic, 4K
-```
-
+```text
 **Tips for good prompts:**
 - Be descriptive and specific
 - Include style keywords (photorealistic, illustration, painting, etc.)
@@ -136,17 +134,17 @@ Click **Generate Image** button
 #### Using CFG
 
 1. **Expand CFG Settings** section (click to open)
-2. **Enable CFG** checkbox ☑️
-3. **Set Guidance Scale:**
+1. **Enable CFG** checkbox ☑️
+1. **Set Guidance Scale:**
    - 1.0 = No guidance (standard generation)
    - 3.0-5.0 = Subtle improvement (recommended start)
    - 5.0-7.0 = Strong guidance (balanced)
    - 7.0-15.0 = Very strong (may oversaturate)
-4. **(Optional) Add Negative Prompt:**
+1. **(Optional) Add Negative Prompt:**
    ```
    blurry, low quality, distorted, ugly, bad anatomy, watermark
    ```
-5. Click **Generate Image**
+1. Click **Generate Image**
 
 #### CFG Examples
 
@@ -174,11 +172,11 @@ Train your own text-to-image models on custom datasets.
 ### Training Workflow Overview
 
 1. Prepare dataset (images + captions)
-2. Configure training parameters
-3. Start training
-4. Monitor progress
-5. Stop when satisfied
-6. Use checkpoint for generation
+1. Configure training parameters
+1. Start training
+1. Monitor progress
+1. Stop when satisfied
+1. Use checkpoint for generation
 
 ### 1. Prepare Your Dataset
 
@@ -200,7 +198,7 @@ Train your own text-to-image models on custom datasets.
   ```
 
 **Dataset Structure:**
-```
+```text
 /my-dataset/
   ├── image_0001.jpg
   ├── image_0002.jpg
@@ -208,8 +206,7 @@ Train your own text-to-image models on custom datasets.
   └── ...
 
 /my-dataset/captions.txt  (outside or inside folder)
-```
-
+```text
 ### 2. Configure Training
 
 **Navigate to Training Pipeline tab** (second tab)
@@ -220,11 +217,11 @@ Train your own text-to-image models on custom datasets.
    - Click **Browse** → navigate to image folder
    - Or manually type path: `/path/to/images`
 
-2. **Captions File:**
+1. **Captions File:**
    - Click **Browse** → select `.txt` file
    - Or type path: `/path/to/captions.txt`
 
-3. **Output Path:**
+1. **Output Path:**
    - Click **Browse** → choose output folder
    - Default: `outputs/flux`
    - Checkpoints saved here
@@ -295,7 +292,7 @@ Click **Start Training** button
    - Large datasets: 10-20 minutes
    - Cached after first run (much faster next time)
 
-2. **Training Begins:**
+1. **Training Begins:**
    - Console shows real-time progress
    - Metrics: Loss, step time, ETA
    - Example output:
@@ -303,7 +300,7 @@ Click **Start Training** button
      Epoch 1/5 | Step 100/5000 | Loss: 0.045 | 0.5s/step
      ```
 
-3. **Checkpoints Saved:**
+1. **Checkpoints Saved:**
    - Periodic saves (every N steps)
    - Final checkpoint: `flxflow_final.safetensors`
    - Location: Your output path
@@ -349,16 +346,16 @@ Navigate server filesystem to select files and directories.
 ### Using the File Browser
 
 1. **Click Browse button** next to any path field
-2. **Modal opens** showing current directory
-3. **Navigate:**
+1. **Modal opens** showing current directory
+1. **Navigate:**
    - Click folders to enter
    - Click `..` to go up one level
    - Scroll to see all items
-4. **Select:**
+1. **Select:**
    - Click file/folder to select
    - Path auto-fills in field
    - Modal closes automatically
-5. **Close:** Press **ESC** key or click **X**
+1. **Close:** Press **ESC** key or click **X**
 
 ### File Types Shown
 
@@ -378,27 +375,25 @@ Navigate server filesystem to select files and directories.
 
 **For Best Results:**
 1. Use 512×512 or higher resolution
-2. 30-50 sampling steps
-3. Enable CFG with guidance 5.0-7.0
-4. Descriptive prompts (20-40 words)
-5. Use negative prompts to avoid artifacts
+1. 30-50 sampling steps
+1. Enable CFG with guidance 5.0-7.0
+1. Descriptive prompts (20-40 words)
+1. Use negative prompts to avoid artifacts
 
 **Common Prompt Patterns:**
-```
+```text
 [subject], [style], [lighting], [quality modifiers]
 
 Examples:
 "Portrait of a woman, oil painting, soft lighting, detailed, high quality"
 "Futuristic city, cyberpunk style, neon lights, 4K, photorealistic"
 "Mountain landscape, golden hour, misty atmosphere, professional photography"
-```
-
+```text
 **Negative Prompt Suggestions:**
-```
+```text
 blurry, low quality, distorted, bad anatomy, 
 watermark, text, signature, cropped, ugly
-```
-
+```text
 ### Training Tips
 
 **Dataset Quality:**
@@ -554,12 +549,12 @@ watermark, text, signature, cropped, ugly
    - Experiment with CFG settings
    - Compare with/without CFG
 
-2. **Evaluate Quality:**
+1. **Evaluate Quality:**
    - Do images match prompts?
    - Is quality acceptable?
    - Any common artifacts?
 
-3. **Iterate:**
+1. **Iterate:**
    - More epochs if underfit
    - Better captions if prompt adherence poor
    - More data if quality insufficient

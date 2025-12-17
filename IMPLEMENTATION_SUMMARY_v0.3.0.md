@@ -41,8 +41,7 @@ cfg_dropout_prob_input = gr.Slider(minimum=0.0, maximum=0.20, value=0.10, ...)
 # Training Runner
 if config.get("cfg_dropout_prob", 0.0) > 0.0:
     cmd.extend(["--cfg_dropout_prob", str(config["cfg_dropout_prob"])])
-```
-
+```text
 ### 3. CFG Generation Support ✅
 **Files Modified**:
 - `src/fluxflow_ui/tabs/generation.py`
@@ -69,8 +68,7 @@ def _generate_with_cfg(self, noised_latent, text_embeddings, negative_embeddings
     
     # Step scheduler
     latent = scheduler.step(v_guided, t, latent).prev_sample
-```
-
+```text
 ### 4. Pipeline Mode Support ✅
 **Files Modified**:
 - `src/fluxflow_ui/utils/training_runner.py`
@@ -93,8 +91,7 @@ def _build_pipeline_command(self, config):
         f.write(yaml_content)
     
     return ["fluxflow-train", "--config", self.temp_config_file]
-```
-
+```text
 **Note**: Full UI for YAML editor (load/save/validate buttons) not implemented in this release. Users can:
 - Manually create YAML files
 - Pass `pipeline_yaml_content` via API
@@ -121,8 +118,7 @@ if config.get("reduced_min_sizes"):
         sizes = [s.strip() for s in sizes_str.split(",")]
         for size in sizes:
             cmd.extend(["--reduced_min_sizes", size])
-```
-
+```text
 ### 6. Advanced Parameters ✅
 **Files Modified**:
 - `src/fluxflow_ui/tabs/training.py`
@@ -135,7 +131,7 @@ if config.get("reduced_min_sizes"):
    - Default: `False`
    - CLI: `--use_gradient_checkpointing`
 
-2. **LPIPS Perceptual Loss**
+1. **LPIPS Perceptual Loss**
    - `use_lpips` checkbox (default: `True`)
    - `lambda_lpips` slider (0.0-1.0, default: 0.1)
    - CLI: `--use_lpips --lambda_lpips=<value>`
@@ -150,8 +146,7 @@ if config.get("use_gradient_checkpointing"):
 if config.get("use_lpips"):
     cmd.append("--use_lpips")
     cmd.extend(["--lambda_lpips", str(config.get("lambda_lpips", 0.1))])
-```
-
+```text
 ### 7. WebDataset Support ✅
 **Files Modified**:
 - `src/fluxflow_ui/tabs/training.py`
@@ -187,17 +182,15 @@ elif config.get("use_tt2m"):
     cmd.append("--use_tt2m")
     if config.get("tt2m_token"):
         cmd.extend(["--tt2m_token", config["tt2m_token"]])
-```
-
+```text
 ---
 
 ## Testing & Validation
 
 ### Test Results ✅
-```
+```text
 ======================== 74 passed, 1 warning in 13.10s ========================
-```
-
+```text
 **Test Coverage**:
 - Config manager: 20 tests (all passing)
 - Training runner: 16 tests (all passing)
@@ -269,8 +262,7 @@ elif config.get("use_tt2m"):
 ```python
 ERROR: "DPMSolverMultistepScheduler" not exported from diffusers
 ERROR: "flow_processor" attribute access on Optional type
-```
-
+```text
 **Status**: Pre-existing, does not affect functionality
 **Reason**: Mypy overly strict, runtime works correctly
 **Impact**: None (runtime behavior correct)
@@ -299,9 +291,9 @@ ERROR: "flow_processor" attribute access on Optional type
 
 **Optional Enhancements**:
 1. Enable CFG: `cfg_dropout_prob=0.10`
-2. Use WebDataset: Replace `use_tt2m` with `use_webdataset`
-3. Enable LPIPS: Already ON by default
-4. Try multi-resolution: Enter "256,512,1024"
+1. Use WebDataset: Replace `use_tt2m` with `use_webdataset`
+1. Enable LPIPS: Already ON by default
+1. Try multi-resolution: Enter "256,512,1024"
 
 ---
 
@@ -323,18 +315,18 @@ ERROR: "flow_processor" attribute access on Optional type
 
 ### Immediate
 1. ✅ Update documentation (README, USER_GUIDE)
-2. ✅ Create CHANGELOG_v0.3.0.md
-3. ⏸️ Test with real fluxflow-training v0.3.0 install
-4. ⏸️ Validate CFG workflow end-to-end
-5. ⏸️ Create example pipeline YAML files
+1. ✅ Create CHANGELOG_v0.3.0.md
+1. ⏸️ Test with real fluxflow-training v0.3.0 install
+1. ⏸️ Validate CFG workflow end-to-end
+1. ⏸️ Create example pipeline YAML files
 
 ### v0.4.0 Planning
 1. Implement full pipeline UI editor
-2. Add CFG strength preview
-3. Multi-resolution preset buttons
-4. WebDataset URL builder
-5. Training metrics dashboard
-6. Model browser integration
+1. Add CFG strength preview
+1. Multi-resolution preset buttons
+1. WebDataset URL builder
+1. Training metrics dashboard
+1. Model browser integration
 
 ---
 
