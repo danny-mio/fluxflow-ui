@@ -6,6 +6,7 @@ import logging
 import os
 from functools import wraps
 from pathlib import Path
+from typing import Any, cast
 
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
@@ -91,7 +92,7 @@ def get_training_config():
 @require_json
 def save_training_config():
     """Save training configuration."""
-    config = request.json
+    config = cast(dict[str, Any], request.json)
     config_manager.save_training_config(config)
     return jsonify({"status": "success"})
 
@@ -109,7 +110,7 @@ def get_generation_config():
 @require_json
 def save_generation_config():
     """Save generation configuration."""
-    config = request.json
+    config = cast(dict[str, Any], request.json)
     config_manager.save_generation_config(config)
     return jsonify({"status": "success"})
 
@@ -118,7 +119,7 @@ def save_generation_config():
 @require_json
 def start_training():
     """Start training."""
-    config = request.json
+    config = cast(dict[str, Any], request.json)
 
     if training_runner.is_running:
         return jsonify({"status": "error", "message": "Training already running"}), 400
@@ -159,7 +160,7 @@ def training_status():
 @require_json
 def inspect_model():
     """Inspect model checkpoint and detect dimensions."""
-    data = request.json
+    data = cast(dict[str, Any], request.json)
     checkpoint_path = data.get("checkpoint_path")
 
     if not checkpoint_path:
@@ -217,7 +218,7 @@ def inspect_model():
 @require_json
 def load_model():
     """Load generation model."""
-    data = request.json
+    data = cast(dict[str, Any], request.json)
 
     checkpoint_path = data.get("checkpoint_path")
     if not checkpoint_path:
@@ -242,7 +243,7 @@ def load_model():
 @require_json
 def generate_image():
     """Generate image from prompt."""
-    data = request.json
+    data = cast(dict[str, Any], request.json)
 
     prompt = data.get("prompt")
     if not prompt:
@@ -329,7 +330,7 @@ def _resolve_browse_path(current_path: str) -> Path:
 @require_json
 def browse_files():
     """Browse files and directories with path traversal protection."""
-    data = request.json
+    data = cast(dict[str, Any], request.json)
     current_path = data.get("path", ".")
     file_type = data.get("type", "all")  # 'all', 'dir', 'file', 'safetensors'
 
