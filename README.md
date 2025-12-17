@@ -6,7 +6,7 @@ Web interface for FluxFlow text-to-image generation and training.
 
 **Training In Progress**: FluxFlow models are currently being trained. The UI is fully functional, but trained model checkpoints are not yet available for download.
 
-**When Available**: Trained checkpoints will be published to [MODEL_ZOO.md](https://github.com/danny-mio/fluxflow-core/blob/main/MODEL_ZOO.md) upon completion of the [TRAINING_VALIDATION_PLAN.md](https://github.com/danny-mio/fluxflow-core/blob/main/TRAINING_VALIDATION_PLAN.md).
+**When Available**: Trained checkpoints will be published to [MODEL_ZOO.md](https://github.com/danny-mio/fluxflow-core/blob/main/MODEL_ZOO.md) upon completion of training validation.
 
 **Current Capabilities**: You can use this UI to:
 - Configure and launch training runs with your own datasets
