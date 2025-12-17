@@ -312,9 +312,9 @@ class GenerationWorker:
             v_guided = v_uncond_lat + guidance_scale * (v_cond_lat - v_uncond_lat)
 
             # Step the scheduler (only on image latent, not hw_vec)
-            lat = scheduler.step(
+            lat = scheduler.step(  # type: ignore[attr-defined]
                 model_output=v_guided, timestep=int(t.item()), sample=lat
-            ).prev_sample  # type: ignore
+            ).prev_sample
 
         # Recombine with hw_vec before returning
         return torch.cat([lat, hw_vec], dim=1)
