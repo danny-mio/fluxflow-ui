@@ -17,25 +17,26 @@
 ### Training Tab
 **File/Directory Pickers:**
 1. **Data Path** - Click "📁 Browse" to select image directory
-1. **Captions File** - Click "📁 Browse" to select .txt file
-1. **Output Path** - Click "📁 Browse" to select output directory
+2. **Captions File** - Click "📁 Browse" to select .txt file
+3. **Output Path** - Click "📁 Browse" to select output directory
 
 ### Generation Tab
 **Model Loading:**
 1. **Checkpoint Path** - Click "📁 Browse" to select .safetensors file
-1. **Auto-Detect Dimensions** - Click "🔍 Auto-Detect" button
+2. **Auto-Detect Dimensions** - Click "🔍 Auto-Detect" button
    - Automatically inspects checkpoint
    - Fills in VAE Dimension
    - Fills in Feature Dimension
    - Shows detection result message
-1. Click "🔄 Load Model"
+3. Click "🔄 Load Model"
 
 ## Implementation Details
 
 ### File Browser Modal
 ```javascript
 openFileBrowser(initialPath, fileType, callback)
-```text
+```
+
 **File Types:**
 - `'all'` - All files and directories
 - `'dir'` - Directories only
@@ -53,7 +54,8 @@ openFileBrowser('.', 'dir', (path) => {
 openFileBrowser('outputs', 'safetensors', (path) => {
     document.getElementById('checkpoint_path').value = path;
 });
-```text
+```
+
 ### Auto-Detection API
 
 **Request:**
@@ -62,7 +64,8 @@ POST /api/generation/inspect
 {
   "checkpoint_path": "outputs/flux/flxflow_final.safetensors"
 }
-```text
+```
+
 **Response:**
 ```json
 {
@@ -72,7 +75,8 @@ POST /api/generation/inspect
   "text_embedding_dim": 1024,
   "message": "Detected: VAE=64, Feature=64"
 }
-```text
+```
+
 ## Manual Integration Steps
 
 Since the HTML file is large (544 lines), here are the manual steps to add file pickers:
@@ -81,7 +85,8 @@ Since the HTML file is large (544 lines), here are the manual steps to add file 
 In `<head>` section, add:
 ```html
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-```text
+```
+
 ### Step 2: Replace Text Inputs with Browse Buttons
 
 **Training Tab - Data Path:**
@@ -96,7 +101,8 @@ In `<head>` section, add:
         </button>
     </div>
 </div>
-```text
+```
+
 **Training Tab - Captions File:**
 ```html
 <div class="form-group">
@@ -109,7 +115,8 @@ In `<head>` section, add:
         </button>
     </div>
 </div>
-```text
+```
+
 **Generation Tab - Checkpoint:**
 ```html
 <div class="form-group">
@@ -122,7 +129,8 @@ In `<head>` section, add:
         </button>
     </div>
 </div>
-```text
+```
+
 ### Step 3: Add Auto-Detect Button
 
 **After the dimension inputs, before "Load Model":**
@@ -130,7 +138,8 @@ In `<head>` section, add:
 <div class="form-group">
     <button class="btn-primary" onclick="autoDetectDimensions()">🔍 Auto-Detect Dimensions</button>
 </div>
-```text
+```
+
 **Add JavaScript function:**
 ```javascript
 async function autoDetectDimensions() {
@@ -163,23 +172,25 @@ async function autoDetectDimensions() {
         showStatus('loadStatus', 'Error: ' + error.message, 'error');
     }
 }
-```text
+```
+
 ### Step 4: Include File Browser Modal
 
 At the end of `<body>`, before closing `</body>`:
 ```html
 {% include 'file_browser.html' %}
-```text
+```
+
 ## Testing
 
 1. Start the UI: `./launch_ui.sh`
-1. Go to Generation tab
-1. Click "📁 Browse" next to Model Checkpoint
-1. Navigate to your checkpoint file
-1. Select it
-1. Click "🔍 Auto-Detect Dimensions"
-1. Verify dimensions are filled automatically
-1. Click "🔄 Load Model"
+2. Go to Generation tab
+3. Click "📁 Browse" next to Model Checkpoint
+4. Navigate to your checkpoint file
+5. Select it
+6. Click "🔍 Auto-Detect Dimensions"
+7. Verify dimensions are filled automatically
+8. Click "🔄 Load Model"
 
 ## Benefits
 

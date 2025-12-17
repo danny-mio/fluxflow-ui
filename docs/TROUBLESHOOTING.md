@@ -27,24 +27,25 @@ Common issues and solutions for FluxFlow UI.
    - ✅ Click the "Load Model" button after selecting checkpoint
    - ℹ️ Path field fills automatically, but model isn't loaded until you click button
 
-1. **Invalid checkpoint file**
+2. **Invalid checkpoint file**
    - ✅ Verify file is `.safetensors` format
    - ✅ Check file isn't corrupted (re-download if needed)
    - ✅ Ensure checkpoint contains both `diffuser.*` and `text_encoder.*` weights
 
-1. **Wrong file path**
+3. **Wrong file path**
    - ✅ Use file browser to select file (avoid typos)
    - ✅ Check file actually exists at specified path
    - ✅ Verify file permissions (readable)
 
-1. **Dimension mismatch**
+4. **Dimension mismatch**
    - ℹ️ UI should auto-detect dimensions
    - ✅ If fails, manually verify VAE/feature dims match checkpoint
 
 **Verify fix:**
-```text
+```
 Status should show: "Model loaded (VAE=XX, Feature=YY)"
-```text
+```
+
 ---
 
 ### Generated Images Are Noise/Random
@@ -58,25 +59,26 @@ Status should show: "Model loaded (VAE=XX, Feature=YY)"
    - ✅ Check training loss was decreasing (not stuck)
    - ℹ️ Untrained/early checkpoints produce noise
 
-1. **Too few sampling steps**
+2. **Too few sampling steps**
    - ✅ Increase steps to 50+ (try 50-100)
    - ℹ️ 10 steps may not be enough for convergence
 
-1. **Incorrect model dimensions**
+3. **Incorrect model dimensions**
    - ✅ Verify VAE/feature dims match training config
    - ✅ Re-load model and check auto-detected dimensions
 
-1. **Corrupted checkpoint**
+4. **Corrupted checkpoint**
    - ✅ Try different checkpoint from same training run
    - ✅ Re-train if all checkpoints corrupted
 
 **Quick test:**
-```text
+```
 - Steps: 50
 - Dimensions: 512×512
 - Seed: 42 (fixed, for reproducibility)
 - Prompt: "simple test image"
-```text
+```
+
 ---
 
 ### CFG Not Working / No Effect
@@ -90,21 +92,22 @@ Status should show: "Model loaded (VAE=XX, Feature=YY)"
    - ✅ Retrain model with CFG enabled (dropout 0.10-0.15)
    - ℹ️ Cannot add CFG to already-trained model
 
-1. **Guidance scale too low**
+2. **Guidance scale too low**
    - ✅ Try guidance scale 5.0-7.0 (not 1.0-2.0)
    - ℹ️ Scale 1.0 = no guidance (same as disabled)
 
-1. **CFG not enabled**
+3. **CFG not enabled**
    - ✅ Check CFG checkbox is actually checked ☑️
    - ✅ Verify guidance scale is set
 
 **Verify CFG working:**
-```text
+```
 Generate same image twice:
 1. CFG disabled → Image A
-1. CFG enabled (scale 7.0) → Image B
+2. CFG enabled (scale 7.0) → Image B
 Images should be noticeably different
-```text
+```
+
 ---
 
 ### "Width and height must be multiples of 16"
@@ -144,16 +147,16 @@ Images should be noticeably different
    - ✅ Use file browser to avoid typos
    - ℹ️ Path should be `/path/to/folder/`, not `/path/to/folder/image.jpg`
 
-1. **No supported image formats**
+2. **No supported image formats**
    - ✅ Supported: `.jpg`, `.jpeg`, `.png`
    - ❌ Not supported: `.bmp`, `.gif`, `.webp`, `.tif`
    - ✅ Convert images to JPG/PNG if needed
 
-1. **Permission denied**
+3. **Permission denied**
    - ✅ Check folder is readable
    - ✅ On macOS: Grant Terminal/Python "Files and Folders" permission in System Preferences
 
-1. **Symlinks or network drives**
+4. **Symlinks or network drives**
    - ℹ️ Some network/remote paths may not work
    - ✅ Try copying dataset to local disk
 
@@ -169,12 +172,12 @@ Images should be noticeably different
    - ✅ Verify file exists at specified path
    - ✅ Use file browser to select file
 
-1. **Wrong extension**
+2. **Wrong extension**
    - ✅ Must be `.txt` file
    - ❌ Not `.csv`, `.json`, or other formats
    - ✅ Convert to plain text if needed
 
-1. **File format issues**
+3. **File format issues**
    - ✅ One caption per line
    - ✅ Same number of captions as images
    - ✅ UTF-8 encoding (not UTF-16 or other)
@@ -188,7 +191,8 @@ wc -l /path/to/captions.txt
 ls /path/to/images/*.jpg | wc -l
 
 # Numbers should match!
-```text
+```
+
 ---
 
 ### Training Crashes / Out of Memory
@@ -202,26 +206,27 @@ ls /path/to/images/*.jpg | wc -l
    - ℹ️ Batch size limited by VRAM
    - Recommended: 1 (<8GB VRAM), 2-4 (8-16GB), 4-8 (16GB+)
 
-1. **Model dimensions too large**
+2. **Model dimensions too large**
    - ✅ Reduce VAE dim to 32
    - ✅ Reduce feature dims to 32
    - ℹ️ Can increase later if stable
 
-1. **Other GPU processes**
+3. **Other GPU processes**
    - ✅ Close other GPU-using applications
    - ✅ Check `nvidia-smi` or Activity Monitor
 
-1. **Insufficient system RAM**
+4. **Insufficient system RAM**
    - ✅ Close browser tabs/other apps
    - ✅ Reduce data loader workers to 1
 
 **Conservative settings for limited VRAM:**
-```text
+```
 Batch size: 1
 VAE dim: 32
 Feature dim: 32
 Workers: 1
-```text
+```
+
 ---
 
 ### Dimension Scanning Takes Forever
@@ -263,9 +268,10 @@ Workers: 1
 **Symptom:** Warning message in training console
 
 **Full message:**
-```text
+```
 resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
-```text
+```
+
 **Status: NOT AN ERROR** ℹ️
 
 **Explanation:**
@@ -281,10 +287,11 @@ resource_tracker: There appear to be 1 leaked semaphore objects to clean up at s
 - ℹ️ Purely cosmetic warning
 
 **If it bothers you:**
-```text
+```
 Set workers: 0 (disables multiprocessing)
 Training slower but no warning
-```text
+```
+
 **DO NOT:**
 - ❌ Stop training due to this warning
 - ❌ Restart training
@@ -303,27 +310,28 @@ Training slower but no warning
    - ℹ️ May plateau then drop suddenly
    - ✅ Wait longer before judging
 
-1. **Learning rate too high**
+2. **Learning rate too high**
    - ✅ Default 1e-5 usually good
    - ✅ Try 5e-6 if unstable
    - ❌ Don't go below 1e-6 (too slow)
 
-1. **Bad dataset**
+3. **Bad dataset**
    - ✅ Check images load correctly
    - ✅ Verify captions are meaningful
    - ✅ Ensure sufficient diversity
 
-1. **Model capacity too small**
+4. **Model capacity too small**
    - ℹ️ VAE dim 32 has limited capacity
    - ✅ Try VAE dim 64 or 128
 
 **Normal loss curve:**
-```text
+```
 Steps 0-100:    0.5 → 0.3  (rapid drop)
 Steps 100-500:  0.3 → 0.15 (steady decline)
 Steps 500-1000: 0.15 → 0.08 (plateau)
 Steps 1000-2000: 0.08 → 0.03 (slow improvement)
-```text
+```
+
 ---
 
 ## Installation Issues
@@ -339,11 +347,11 @@ Steps 1000-2000: 0.08 → 0.03 (slow improvement)
    - ✅ Restart terminal
    - ✅ Check: `pip show fluxflow-ui` (verify installed)
 
-1. **Wrong Python environment**
+2. **Wrong Python environment**
    - ✅ Activate correct venv: `source venv/bin/activate`
    - ✅ Verify: `which python` points to venv
 
-1. **Installation failed**
+3. **Installation failed**
    - ✅ Reinstall: `pip install --force-reinstall fluxflow-ui`
    - ✅ Check for error messages during install
 
@@ -359,7 +367,7 @@ Steps 1000-2000: 0.08 → 0.03 (slow improvement)
    - ✅ `pip install -r requirements.txt`
    - ✅ `pip install fluxflow-ui` (reinstall)
 
-1. **Version conflicts**
+2. **Version conflicts**
    - ✅ Create fresh venv
    - ✅ `pip install fluxflow-ui` in clean environment
 
@@ -380,15 +388,15 @@ Steps 1000-2000: 0.08 → 0.03 (slow improvement)
    - ✅ Verify GPU/MPS is being used (check logs)
    - ℹ️ CPU fallback is 10-20× slower
 
-1. **CFG enabled**
+2. **CFG enabled**
    - ℹ️ CFG doubles generation time (expected)
    - ✅ Disable CFG for faster preview
 
-1. **Too many steps**
+3. **Too many steps**
    - ✅ Reduce to 20-30 steps for faster testing
    - ℹ️ 50-100 steps for production quality
 
-1. **Large image size**
+4. **Large image size**
    - ℹ️ 1024×1024 is 4× slower than 512×512
    - ✅ Use 256×256 for quick tests
 
@@ -407,15 +415,15 @@ Steps 1000-2000: 0.08 → 0.03 (slow improvement)
    - ✅ Batch size 4 = ~2× faster than batch size 1
    - ⚠️ Limited by VRAM
 
-1. **Use GPU instead of CPU**
+2. **Use GPU instead of CPU**
    - ℹ️ 10-30× speedup
    - ✅ Install CUDA/MPS support
 
-1. **Reduce image resolution**
+3. **Reduce image resolution**
    - ℹ️ Smaller images train faster
    - ✅ Resize dataset to 512×512 max
 
-1. **Disable unnecessary features**
+4. **Disable unnecessary features**
    - ✅ Disable SPADE if not needed
    - ✅ Reduce data loader workers if I/O bound
 
@@ -433,15 +441,15 @@ Steps 1000-2000: 0.08 → 0.03 (slow improvement)
    - ✅ Press Ctrl+R (Windows) or Cmd+R (Mac)
    - ✅ Hard refresh: Ctrl+Shift+R / Cmd+Shift+R
 
-1. **Clear browser cache**
+2. **Clear browser cache**
    - ✅ Ctrl+Shift+Delete → Clear cache
    - ✅ Restart browser
 
-1. **JavaScript disabled**
+3. **JavaScript disabled**
    - ✅ Enable JavaScript in browser settings
    - ✅ Check for script blockers (uBlock, NoScript, etc.)
 
-1. **Try different browser**
+4. **Try different browser**
    - ✅ Chrome/Chromium recommended
    - ℹ️ Safari/Firefox may have compatibility issues
 
@@ -457,12 +465,12 @@ Steps 1000-2000: 0.08 → 0.03 (slow improvement)
    - ✅ Press ESC key to close hidden modal
    - ✅ Refresh page
 
-1. **JavaScript error**
+2. **JavaScript error**
    - ✅ Open browser console (F12)
    - ✅ Check for errors
    - ✅ Screenshot and report if persistent
 
-1. **Path field disabled**
+3. **Path field disabled**
    - ℹ️ Some fields auto-populate
    - ✅ Try different browse button
 
@@ -479,11 +487,11 @@ Steps 1000-2000: 0.08 → 0.03 (slow improvement)
    - ✅ Look for Python errors/stack traces
    - ✅ Restart Flask server
 
-1. **WebSocket disconnected**
+2. **WebSocket disconnected**
    - ✅ Refresh page to reconnect
    - ✅ Check Flask server still running
 
-1. **Training hasn't started yet**
+3. **Training hasn't started yet**
    - ℹ️ Dimension scanning can take 10-20 minutes
    - ✅ Be patient
    - ✅ Check terminal for progress
@@ -502,19 +510,19 @@ Steps 1000-2000: 0.08 → 0.03 (slow improvement)
    - GPU/MPS or CPU
    - VRAM/RAM amount
 
-1. **Package versions:**
+2. **Package versions:**
    ```bash
    pip show fluxflow-ui
    pip show fluxflow-training
    pip show fluxflow
    ```
 
-1. **Full error message:**
+3. **Full error message:**
    - Copy entire error/stack trace
    - Include console output
    - Screenshot if UI issue
 
-1. **Reproduction steps:**
+4. **Reproduction steps:**
    - Exact steps to trigger issue
    - Configuration used
    - Dataset size/type
@@ -526,11 +534,11 @@ Steps 1000-2000: 0.08 → 0.03 (slow improvement)
    - [README.md](../README.md) - Quick start
    - This troubleshooting guide
 
-1. **Search existing issues:**
+2. **Search existing issues:**
    - [GitHub Issues](https://github.com/danny-mio/fluxflow-ui/issues)
    - May already be solved
 
-1. **Report new issue:**
+3. **Report new issue:**
    - [Create GitHub Issue](https://github.com/danny-mio/fluxflow-ui/issues/new)
    - Include all info from "Before Reporting" section
 

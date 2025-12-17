@@ -36,12 +36,14 @@ Web interface for FluxFlow text-to-image generation and training.
 python --version  # Should show 3.10 or higher
 pip --version     # Should be installed
 nvidia-smi        # (NVIDIA only) Should show GPU info
-```text
+```
+
 ### Production Install (v0.1.1 - Current Stable)
 
 ```bash
 pip install fluxflow-ui
-```text
+```
+
 **What gets installed:**
 - `fluxflow-ui` - Web interface for training and generation
 - `fluxflow-training` - Training capabilities (automatically installed as dependency)
@@ -58,7 +60,8 @@ pip install fluxflow-ui
 git clone https://github.com/danny-mio/fluxflow-ui.git
 cd fluxflow-ui
 pip install -e ".[dev]"
-```text
+```
+
 ## ⚠️ Security Warning
 
 **FluxFlow UI is designed for local development use only.**
@@ -90,11 +93,13 @@ FluxFlow UI supports two interfaces:
 **Flask (Primary - Recommended):**
 ```bash
 fluxflow-ui
-```text
+```
+
 **Gradio (Alternative):**
 ```bash
 python -m fluxflow_ui.app
-```text
+```
+
 Then open your browser to `http://localhost:7860`
 
 **Note:** Flask is the primary interface with full features. Gradio is provided as an alternative but may have limited functionality.
@@ -122,8 +127,8 @@ Then open your browser to `http://localhost:7860`
 To train models with CFG support:
 
 1. Navigate to the **Training** tab
-1. Expand the **CFG Training** section
-1. Set `cfg_dropout_prob` between 0.0-0.20 (recommended: 0.10-0.15)
+2. Expand the **CFG Training** section
+3. Set `cfg_dropout_prob` between 0.0-0.20 (recommended: 0.10-0.15)
    - This randomly drops text conditioning during training
    - Higher values = stronger CFG effect but may reduce unconditional quality
    - Set to 0.0 to disable CFG training
@@ -133,9 +138,9 @@ To train models with CFG support:
 To use CFG during generation:
 
 1. Navigate to the **Generation** tab
-1. Load a checkpoint trained with `cfg_dropout_prob > 0`
-1. Expand the **CFG Settings** section
-1. Enable CFG and set parameters:
+2. Load a checkpoint trained with `cfg_dropout_prob > 0`
+3. Expand the **CFG Settings** section
+4. Enable CFG and set parameters:
    - **Enable CFG**: Toggle on
    - **Guidance Scale**: 1.0-15.0 (recommended: 3.0-7.0)
      - 1.0 = no guidance
@@ -169,7 +174,8 @@ Install with development dependencies:
 
 ```bash
 pip install -e ".[dev]"
-```text
+```
+
 ## Links
 
 - [GitHub Repository](https://github.com/danny-mio/fluxflow-ui)

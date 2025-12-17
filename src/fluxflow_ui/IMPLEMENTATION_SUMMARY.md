@@ -87,7 +87,7 @@
 
 ## File Structure
 
-```text
+```
 ui/
 ├── app.py                    (52 lines)   - Main application
 ├── requirements_ui.txt       (3 lines)    - UI dependencies
@@ -106,7 +106,8 @@ ui/
 │   └── generation_worker.py  (218 lines)  - Image generation
 └── components/
     └── __init__.py           (future expansion)
-```text
+```
+
 ## Supporting Files
 
 - `launch_ui.sh` - Bash launcher script
@@ -124,10 +125,10 @@ ui/
 
 ### Architecture Choices
 1. **Tab-based layout**: Separate training and generation
-1. **Background processes**: Non-blocking training via subprocess
-1. **Config persistence**: JSON files for session continuity
-1. **Live streaming**: Real-time console output via queue
-1. **Lazy loading**: Models loaded on-demand
+2. **Background processes**: Non-blocking training via subprocess
+3. **Config persistence**: JSON files for session continuity
+4. **Live streaming**: Real-time console output via queue
+5. **Lazy loading**: Models loaded on-demand
 
 ### State Management
 - Gradio's built-in state for UI elements
@@ -153,25 +154,27 @@ ui/
 ### Installation
 ```bash
 pip install -r ui/requirements_ui.txt
-```text
+```
+
 ### Launch
 ```bash
 ./launch_ui.sh
 # or
 python ui/app.py
-```text
+```
+
 ### Training Workflow
 1. Select dataset paths
-1. Configure parameters
-1. Click "Start Training"
-1. Monitor console
-1. Stop when done
+2. Configure parameters
+3. Click "Start Training"
+4. Monitor console
+5. Stop when done
 
 ### Generation Workflow
 1. Load checkpoint
-1. Enter prompt
-1. Click "Generate"
-1. View result
+2. Enter prompt
+3. Click "Generate"
+4. View result
 
 ## Testing Performed
 
@@ -185,13 +188,13 @@ python ui/app.py
 ## Known Limitations (Phase 1)
 
 1. No live metrics visualization (console only)
-1. No batch generation queue
-1. No training graph integration
-1. No checkpoint browser UI
-1. No dataset preview
-1. Manual dimension entry (no auto-detection yet)
-1. Single generation at a time
-1. No image history/gallery
+2. No batch generation queue
+3. No training graph integration
+4. No checkpoint browser UI
+5. No dataset preview
+6. Manual dimension entry (no auto-detection yet)
+7. Single generation at a time
+8. No image history/gallery
 
 ## Phase 2 Roadmap
 
@@ -219,18 +222,18 @@ The architecture supports easy additions:
 
 ### Adding a New Tab
 1. Create file in `ui/tabs/new_tab.py`
-1. Define `create_new_tab()` function
-1. Import and call in `app.py`
+2. Define `create_new_tab()` function
+3. Import and call in `app.py`
 
 ### Adding a Component
 1. Create file in `ui/components/component.py`
-1. Use Gradio's component API
-1. Import in relevant tab
+2. Use Gradio's component API
+3. Import in relevant tab
 
 ### Adding a Utility
 1. Create file in `ui/utils/utility.py`
-1. Follow existing patterns
-1. Add unit tests
+2. Follow existing patterns
+3. Add unit tests
 
 ## Dependencies
 
@@ -273,16 +276,16 @@ The architecture supports easy additions:
 ## Deployment Options
 
 1. **Local**: `python ui/app.py` (default)
-1. **LAN**: Set `server_name="0.0.0.0"`
-1. **Public**: Use Gradio's `share=True`
-1. **Cloud**: Deploy on Hugging Face Spaces / Railway / etc.
+2. **LAN**: Set `server_name="0.0.0.0"`
+3. **Public**: Use Gradio's `share=True`
+4. **Cloud**: Deploy on Hugging Face Spaces / Railway / etc.
 
 ## Documentation Provided
 
 1. **ui/README.md** - Full user guide
-1. **ui/FEATURES.md** - Feature documentation
-1. **UI_QUICKSTART.md** - Quick start guide
-1. **ui/IMPLEMENTATION_SUMMARY.md** - This file
+2. **ui/FEATURES.md** - Feature documentation
+3. **UI_QUICKSTART.md** - Quick start guide
+4. **ui/IMPLEMENTATION_SUMMARY.md** - This file
 
 ## Success Criteria (Phase 1)
 
@@ -297,10 +300,10 @@ The architecture supports easy additions:
 ## Next Steps
 
 1. **Test with real training**: Run end-to-end training
-1. **Test generation**: Verify with actual checkpoint
-1. **User feedback**: Gather usability insights
-1. **Phase 2 planning**: Prioritize enhancements
-1. **Integration**: Consider ComfyUI compatibility
+2. **Test generation**: Verify with actual checkpoint
+3. **User feedback**: Gather usability insights
+4. **Phase 2 planning**: Prioritize enhancements
+5. **Integration**: Consider ComfyUI compatibility
 
 ## Conclusion
 
