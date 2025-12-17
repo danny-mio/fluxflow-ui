@@ -266,12 +266,12 @@ These screenshots are part of the FluxFlow UI project and should be used for:
 
 ## Updates & Maintenance
 
-**Last Updated**: December 12, 2025  
-**Application Version**: FluxFlow UI v0.3.0  
+**Last Updated**: December 17, 2025  
+**Application Version**: FluxFlow UI v0.4.0  
 **Next Review**: When UI changes significantly
 
 To update screenshots:
-1. Run `/Volumes/DanieleExt/ai/ffnew/testing/scripts/capture_documentation_screenshots.py`
+1. Run the screenshot capture script from your testing repository
 2. Review new screenshots in this directory
 3. Update this index with any new screenshots
 4. Archive old screenshots if UI changed significantly
@@ -288,6 +288,6 @@ Contact: QA Team or Documentation Manager
 
 ---
 
-**Index Generated**: December 12, 2025  
+**Index Generated**: December 17, 2025  
 **Total Screenshots**: 35  
 **Ready for Documentation**: ✅ YES

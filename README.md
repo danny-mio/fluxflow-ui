@@ -17,7 +17,7 @@ Web interface for FluxFlow text-to-image generation and training.
 
 ## Installation
 
-> **Note**: This documentation describes **v0.3.0** (upcoming release). For the current stable version (v0.1.1), see [v0.1.1 documentation](https://github.com/danny-mio/fluxflow-ui/tree/v0.1.1).
+> **Note**: This documentation describes **v0.4.0** (upcoming release). For the current stable version (v0.4.0), see [v0.4.0 documentation](https://github.com/danny-mio/fluxflow-ui/tree/v0.4.0).
 
 ### Prerequisites
 
@@ -38,7 +38,7 @@ pip --version     # Should be installed
 nvidia-smi        # (NVIDIA only) Should show GPU info
 ```
 
-### Production Install (v0.1.1 - Current Stable)
+### Production Install (v0.4.0 - Current Stable)
 
 ```bash
 pip install fluxflow-ui
@@ -50,9 +50,9 @@ pip install fluxflow-ui
 - `fluxflow` core package (transitively installed)
 - CLI command: `fluxflow-ui`
 
-**Package available on PyPI**: [fluxflow-ui v0.1.1](https://pypi.org/project/fluxflow-ui/)
+**Package available on PyPI**: [fluxflow-ui v0.4.0](https://pypi.org/project/fluxflow-ui/)
 
-⚠️ **Note**: v0.1.1 does NOT include CFG (Classifier-Free Guidance) features described below. For CFG support, use development install.
+⚠️ **Note**: v0.4.0 does NOT include CFG (Classifier-Free Guidance) features described below. For CFG support, use development install.
 
 ### Development Install
 
@@ -120,7 +120,7 @@ Then open your browser to `http://localhost:7860`
 
 ## Classifier-Free Guidance (CFG)
 
-**✨ New in v0.3.0** (upcoming release): FluxFlow UI supports training and generation with Classifier-Free Guidance.
+**✨ New in v0.4.0** (upcoming release): FluxFlow UI supports training and generation with Classifier-Free Guidance.
 
 ### Training with CFG
 
