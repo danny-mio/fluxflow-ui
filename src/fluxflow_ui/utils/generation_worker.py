@@ -107,9 +107,29 @@ class GenerationWorker:
                 print(
                     f"Versioned loading failed ({versioned_error}), falling back to legacy v0.3.0"
                 )
-                return self._load_legacy_model(
-                    checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim
-                )
+                try:
+                    return self._load_legacy_model(
+                        checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim
+                    )
+                except Exception as legacy_error:
+                    # Try one more fallback: assume v0.7.0 architecture
+                    print(f"Legacy loading failed ({legacy_error}), trying v0.7.0 architecture fallback")
+                    try:
+                        return self._load_v070_fallback(checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim)
+                    except Exception as v070_error:
+                        # If all methods fail, provide comprehensive error message
+                        return False, (
+                            f"Failed to load model with all available methods.\n\n"
+                            f"Versioned loading error: {versioned_error}\n"
+                            f"Legacy (v0.3.0) loading error: {legacy_error}\n"
+                            f"v0.7.0 fallback error: {v070_error}\n\n"
+                            f"This likely indicates:\n"
+                            f"1. The model was trained with custom architecture not matching any known version\n"
+                            f"2. The checkpoint file may be corrupted\n"
+                            f"3. Model dimensions don't match expected values\n\n"
+                            f"Try adjusting vae_dim ({vae_dim}) and feature_maps_dim ({feature_maps_dim}) parameters.\n"
+                            f"For v0.7.0+ models, ensure the checkpoint was saved with proper metadata."
+                        )
 
             # Load tokenizer (shared for all versions)
             self.tokenizer = AutoTokenizer.from_pretrained(
@@ -172,9 +192,24 @@ class GenerationWorker:
 
             # Initialize models manually (v0.3.0 defaults)
             self.text_encoder = BertTextEncoder(embed_dim=text_embedding_dim)
+
+            # Calculate appropriate attention heads to ensure d_model is divisible
+            # This handles cases where the model dimensions don't match default assumptions
+            def get_valid_n_head(d_model, preferred_heads=8):
+                """Get number of heads that evenly divides d_model."""
+                if d_model % preferred_heads == 0:
+                    return preferred_heads
+                # Find largest divisor that keeps heads reasonable
+                for heads in range(preferred_heads, 0, -1):
+                    if d_model % heads == 0:
+                        return heads
+                return 1  # Fallback, though this shouldn't happen
+
+            flow_n_head = get_valid_n_head(feature_maps_dim)
+
             self.diffuser = FluxPipeline(
                 FluxCompressor(d_model=vae_dim),
-                FluxFlowProcessor(d_model=feature_maps_dim, vae_dim=vae_dim),
+                FluxFlowProcessor(d_model=feature_maps_dim, vae_dim=vae_dim, n_head=flow_n_head),
                 FluxExpander(d_model=vae_dim),
             )
             self.pipeline = self.diffuser  # For consistency
@@ -214,6 +249,72 @@ class GenerationWorker:
 
         except Exception as e:
             return False, f"Failed to load legacy model: {str(e)}"
+
+    def _load_v070_fallback(
+        self,
+        checkpoint_path: str,
+        vae_dim: int,
+        feature_maps_dim: int,
+        text_embedding_dim: int,
+    ) -> Tuple[bool, str]:
+        """Load model assuming v0.7.0 architecture (context-enhanced)."""
+        try:
+            # Load tokenizer
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                "distilbert-base-uncased", cache_dir="./_cache", local_files_only=False
+            )
+            if self.tokenizer.pad_token is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+                self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+
+            # Import v0.7.0 components
+            from fluxflow.models.v070 import FluxCompressor, FluxExpander
+            from fluxflow.models.v070.flow import FluxFlowProcessor
+
+            # Initialize models with v0.7.0 architecture
+            self.text_encoder = BertTextEncoder(embed_dim=text_embedding_dim)
+            self.diffuser = FluxPipeline(
+                FluxCompressor(d_model=vae_dim),
+                FluxFlowProcessor(d_model=feature_maps_dim, vae_dim=vae_dim),
+                FluxExpander(d_model=vae_dim),
+            )
+            self.pipeline = self.diffuser  # For consistency
+
+            # Load checkpoint
+            state_dict = safetensors.torch.load_file(checkpoint_path)
+            self.diffuser.load_state_dict(
+                {
+                    k.replace("diffuser.", ""): v
+                    for k, v in state_dict.items()
+                    if k.startswith("diffuser.")
+                },
+                strict=False,
+            )
+            self.text_encoder.load_state_dict(
+                {
+                    k.replace("text_encoder.", ""): v
+                    for k, v in state_dict.items()
+                    if k.startswith("text_encoder.")
+                },
+                strict=False,
+            )
+
+            self.diffuser.to(self.device).eval()
+            self.text_encoder.to(self.device).eval()
+
+            self.model_checkpoint = checkpoint_path
+            self.config = {
+                "vae_dim": vae_dim,
+                "feature_maps_dim": feature_maps_dim,
+                "text_embedding_dim": text_embedding_dim,
+                "version": "0.7.0",
+                "model_info": "v0.7.0 fallback (context-enhanced)",
+            }
+
+            return True, f"Model loaded successfully on {self.device} (v0.7.0 fallback)"
+
+        except Exception as e:
+            raise Exception(f"Failed to load v0.7.0 fallback model: {str(e)}")
 
     def generate_image(
         self,
