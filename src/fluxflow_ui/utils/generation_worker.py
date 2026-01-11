@@ -178,8 +178,27 @@ class GenerationWorker:
         feature_maps_dim: int,
         text_embedding_dim: int,
     ) -> Tuple[bool, str]:
-        """Load model using legacy manual instantiation (assumes v0.3.0)."""
+        """Load model using legacy manual instantiation with automatic architecture detection."""
         try:
+            # First, inspect checkpoint to detect architecture
+            try:
+                import safetensors.torch
+                state_dict = safetensors.torch.load_file(checkpoint_path)
+                keys = list(state_dict.keys())
+
+                # Check for v0.7.0 features
+                has_v070_features = any(
+                    "ctx_mixer" in key or "context_injection" in key or "context_final" in key
+                    for key in keys
+                )
+
+                if has_v070_features:
+                    print("Detected v0.7.0 features in checkpoint, using v0.7.0 components")
+                    return self._load_v070_fallback(checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim)
+            except Exception:
+                # If inspection fails, fall back to v0.3.0
+                pass
+
             # Load tokenizer
             self.tokenizer = AutoTokenizer.from_pretrained(
                 "distilbert-base-uncased", cache_dir="./_cache", local_files_only=False
@@ -187,8 +206,7 @@ class GenerationWorker:
             if self.tokenizer.pad_token is None:  # type: ignore[union-attr]
                 self.tokenizer.pad_token = self.tokenizer.eos_token  # type: ignore[union-attr]
                 self.tokenizer.add_special_tokens(  # type: ignore[union-attr]
-                    {"pad_token": "[PAD]"}
-                )
+                    {"pad_token": "[PAD]"})
 
             # Calculate appropriate attention heads to ensure d_model is divisible
             def get_valid_n_head(d_model, preferred_heads=8):
@@ -201,12 +219,11 @@ class GenerationWorker:
                         return heads
                 return 1  # Fallback, though this shouldn't happen
 
-            # Initialize models manually (v0.3.0 defaults)
-            self.text_encoder = BertTextEncoder(embed_dim=text_embedding_dim)
-
             # Use flexible attention heads for flow processor (main source of the error)
             flow_attn_heads = get_valid_n_head(feature_maps_dim)
 
+            # Initialize models manually (v0.3.0 defaults)
+            self.text_encoder = BertTextEncoder(embed_dim=text_embedding_dim)
             self.diffuser = FluxPipeline(
                 FluxCompressor(d_model=vae_dim),
                 FluxFlowProcessor(d_model=feature_maps_dim, vae_dim=vae_dim, n_head=flow_attn_heads),
