@@ -288,17 +288,40 @@ class GenerationWorker:
             from fluxflow.models.v070 import FluxCompressor, FluxExpander
             from fluxflow.models.v070.flow import FluxFlowProcessor
 
-            # Initialize models with v0.7.0 architecture
-            self.text_encoder = BertTextEncoder(embed_dim=text_embedding_dim)
+            # Detect actual config from checkpoint instead of using provided dimensions
+            state_dict = safetensors.torch.load_file(checkpoint_path)
+            config = FluxPipeline._detect_config(state_dict)
+
+            # Adjust vae_dim for v0.7.0 (subtract context dimensions)
+            if config.get("model_version") == "0.7.0" and "vae_dim" in config:
+                from fluxflow.models.v070.vae import CONTEXT_DIMS
+                if "flow_dim" in config:
+                    config["vae_dim"] = config["vae_dim"] - CONTEXT_DIMS
+
+            # Calculate appropriate attention heads
+            def get_valid_n_head(d_model, preferred_heads=8):
+                """Get number of heads that evenly divides d_model."""
+                if d_model % preferred_heads == 0:
+                    return preferred_heads
+                # Find largest divisor that keeps heads reasonable
+                for heads in range(preferred_heads, 0, -1):
+                    if d_model % heads == 0:
+                        return heads
+                return 1  # Fallback
+
+            vae_attn_heads = get_valid_n_head(config["vae_dim"])
+            flow_attn_heads = get_valid_n_head(config["flow_dim"])
+
+            # Initialize models with detected config
+            self.text_encoder = BertTextEncoder(embed_dim=config.get("text_embed_dim", text_embedding_dim))
             self.diffuser = FluxPipeline(
-                FluxCompressor(d_model=vae_dim),
-                FluxFlowProcessor(d_model=feature_maps_dim, vae_dim=vae_dim),
-                FluxExpander(d_model=vae_dim),
+                FluxCompressor(d_model=config["vae_dim"], attn_heads=vae_attn_heads),
+                FluxFlowProcessor(d_model=config["flow_dim"], vae_dim=config["vae_dim"], n_head=flow_attn_heads),
+                FluxExpander(d_model=config["vae_dim"]),
             )
             self.pipeline = self.diffuser  # For consistency
 
             # Load checkpoint
-            state_dict = safetensors.torch.load_file(checkpoint_path)
             self.diffuser.load_state_dict(
                 {
                     k.replace("diffuser.", ""): v
@@ -321,14 +344,14 @@ class GenerationWorker:
 
             self.model_checkpoint = checkpoint_path
             self.config = {
-                "vae_dim": vae_dim,
-                "feature_maps_dim": feature_maps_dim,
-                "text_embedding_dim": text_embedding_dim,
+                "vae_dim": config["vae_dim"],
+                "feature_maps_dim": config["flow_dim"],
+                "text_embedding_dim": config.get("text_embed_dim", text_embedding_dim),
                 "version": "0.7.0",
-                "model_info": "v0.7.0 fallback (context-enhanced)",
+                "model_info": "v0.7.0 fallback (auto-detected)",
             }
 
-            return True, f"Model loaded successfully on {self.device} (v0.7.0 fallback)"
+            return True, f"Model loaded successfully on {self.device} (v0.7.0 auto-detected)"
 
         except Exception as e:
             raise Exception(f"Failed to load v0.7.0 fallback model: {str(e)}")
