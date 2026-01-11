@@ -179,26 +179,36 @@ class GenerationWorker:
         text_embedding_dim: int,
     ) -> Tuple[bool, str]:
         """Load model using legacy manual instantiation with automatic architecture detection."""
+        # First, inspect checkpoint to detect architecture
+        has_v070_features = False
         try:
-            # First, inspect checkpoint to detect architecture
-            try:
-                import safetensors.torch
-                state_dict = safetensors.torch.load_file(checkpoint_path)
-                keys = list(state_dict.keys())
+            import safetensors.torch
+            state_dict = safetensors.torch.load_file(checkpoint_path)
+            keys = list(state_dict.keys())
 
-                # Check for v0.7.0 features
-                has_v070_features = any(
-                    "ctx_mixer" in key or "context_injection" in key or "context_final" in key
-                    for key in keys
+            # Check for v0.7.0 features
+            has_v070_features = any(
+                "ctx_mixer" in key or "context_injection" in key or "context_final" in key
+                for key in keys
+            )
+        except Exception as inspect_error:
+            print(f"Checkpoint inspection failed: {inspect_error}")
+
+        # If v0.7.0 features detected, use v0.7.0 loading only
+        if has_v070_features:
+            print("Detected v0.7.0 features in checkpoint, using v0.7.0 components only")
+            try:
+                return self._load_v070_fallback(checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim)
+            except Exception as v070_error:
+                return False, (
+                    f"Failed to load v0.7.0 model. The checkpoint contains v0.7.0 architecture "
+                    f"but loading failed: {str(v070_error)}\n\n"
+                    f"This checkpoint requires proper metadata. Please re-save the model using "
+                    f"'save_versioned_checkpoint()' to add version information."
                 )
 
-                if has_v070_features:
-                    print("Detected v0.7.0 features in checkpoint, using v0.7.0 components")
-                    return self._load_v070_fallback(checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim)
-            except Exception:
-                # If inspection fails, fall back to v0.3.0
-                pass
-
+        # Fall back to v0.3.0 loading for older models
+        try:
             # Load tokenizer
             self.tokenizer = AutoTokenizer.from_pretrained(
                 "distilbert-base-uncased", cache_dir="./_cache", local_files_only=False
@@ -206,7 +216,7 @@ class GenerationWorker:
             if self.tokenizer.pad_token is None:  # type: ignore[union-attr]
                 self.tokenizer.pad_token = self.tokenizer.eos_token  # type: ignore[union-attr]
                 self.tokenizer.add_special_tokens(  # type: ignore[union-attr]
-                    {"pad_token": "[PAD]"})
+                    {"pad_token": "[PAD]"}
 
             # Calculate appropriate attention heads to ensure d_model is divisible
             def get_valid_n_head(d_model, preferred_heads=8):
@@ -230,6 +240,42 @@ class GenerationWorker:
                 FluxExpander(d_model=vae_dim),
             )
             self.pipeline = self.diffuser  # For consistency
+
+            # Load checkpoint
+            state_dict = safetensors.torch.load_file(checkpoint_path)
+            self.diffuser.load_state_dict(
+                {
+                    k.replace("diffuser.", ""): v
+                    for k, v in state_dict.items()
+                    if k.startswith("diffuser.")
+                },
+                strict=False,
+            )
+            self.text_encoder.load_state_dict(
+                {
+                    k.replace("text_encoder.", ""): v
+                    for k, v in state_dict.items()
+                    if k.startswith("text_encoder.")
+                },
+                strict=False,
+            )
+
+            self.diffuser.to(self.device).eval()
+            self.text_encoder.to(self.device).eval()
+
+            self.model_checkpoint = checkpoint_path
+            self.config = {
+                "vae_dim": vae_dim,
+                "feature_maps_dim": feature_maps_dim,
+                "text_embedding_dim": text_embedding_dim,
+                "version": "0.3.0",
+                "model_info": "Legacy v0.3.0 model (assumed)",
+            }
+
+            return True, f"Model loaded successfully on {self.device} (Legacy v0.3.0)"
+
+        except Exception as e:
+            return False, f"Failed to load legacy model: {str(e)}"
 
             # Load checkpoint
             state_dict = safetensors.torch.load_file(checkpoint_path)
