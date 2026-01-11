@@ -79,22 +79,57 @@ class GenerationWorker:
                         Path(checkpoint_path), str(self.device)
                     )
                     self.diffuser = self.pipeline
-                    self.text_encoder = self.pipeline.text_encoder
+
+                    # Load text_encoder separately (not included in versioned checkpoints)
+                    self.tokenizer = AutoTokenizer.from_pretrained(
+                        "distilbert-base-uncased", cache_dir="./_cache", local_files_only=False
+                    )
+                    if self.tokenizer.pad_token is None:
+                        self.tokenizer.pad_token = self.tokenizer.eos_token
+                        self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+                    self.text_encoder = BertTextEncoder(embed_dim=1024)  # Default for UI
+
+                    # Ensure models are on device
+                    self.pipeline.to(self.device).eval()
+                    self.text_encoder.to(self.device).eval()
+
+                    # MPS-specific initialization
+                    if self.device.type == 'mps':
+                        import torch
+                        torch.mps.empty_cache()
 
                     # Extract version info from metadata
                     version_info = getattr(self.pipeline, "version", "unknown")
                     model_info = f"Version {version_info} model"
                 else:
-                    # Try legacy versioned loading (single file with metadata)
+                    # Try legacy versioned loading (single file without metadata)
                     try:
-                        self.pipeline = FluxPipeline.from_pretrained(
-                            checkpoint_path, device=str(self.device), use_versioning=True
+                        self.pipeline = load_versioned_checkpoint(
+                            Path(checkpoint_path), str(self.device)
                         )
                         self.diffuser = self.pipeline
-                        self.text_encoder = self.pipeline.text_encoder
+
+                        # Load text_encoder separately (not included in versioned checkpoints)
+                        self.tokenizer = AutoTokenizer.from_pretrained(
+                            "distilbert-base-uncased", cache_dir="./_cache", local_files_only=False
+                        )
+                        if self.tokenizer.pad_token is None:
+                            self.tokenizer.pad_token = self.tokenizer.eos_token
+                            self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+                        self.text_encoder = BertTextEncoder(embed_dim=1024)  # Default for UI
+
+                        # Ensure models are on device
+                        self.pipeline.to(self.device).eval()
+                        self.text_encoder.to(self.device).eval()
+
+                        # MPS-specific initialization
+                        if self.device.type == 'mps':
+                            import torch
+                            torch.mps.empty_cache()
+
                         version_info = getattr(self.pipeline, "version", "legacy")
                         model_info = f"Legacy versioned model (v{version_info})"
-                    except Exception:
+                    except Exception as e:
                         # Fall back to manual loading with default v0.3.0
                         return self._load_legacy_model(
                             checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim
@@ -331,22 +366,21 @@ class GenerationWorker:
                 self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
 
             # Import v0.7.0 components
-            from fluxflow.models.v070 import FluxCompressor, FluxExpander
+            from fluxflow.models.v070.vae import FluxCompressor, FluxExpander
             from fluxflow.models.v070.flow import FluxFlowProcessor
 
             # Detect actual config from checkpoint instead of using provided dimensions
             state_dict = safetensors.torch.load_file(checkpoint_path)
             config = FluxPipeline._detect_config(state_dict)
 
-            # The config["vae_dim"] is already adjusted by _detect_config for v0.7.0
-            # It represents the VAE latent dimension (base dimension)
-            vae_latent_dim = config["vae_dim"]  # VAE components use this
-
-            # For v0.7.0 models, flow processor needs the input dimension (base + context)
+            # For v0.7.0 legacy checkpoints, the detected vae_dim includes CONTEXT_DIMS
+            # Adjust to get the actual VAE latent dimension
             if config.get("model_version") == "0.7.0":
                 from fluxflow.models.v070.vae import CONTEXT_DIMS
-                flow_vae_dim = config["vae_dim"] + CONTEXT_DIMS  # Flow processor input includes context
+                vae_latent_dim = config["vae_dim"] - CONTEXT_DIMS  # VAE latent dimension
+                flow_vae_dim = config["vae_dim"]  # Flow processor input (already includes context)
             else:
+                vae_latent_dim = config["vae_dim"]  # VAE components use this
                 flow_vae_dim = config["vae_dim"]  # For older models, same as VAE dimension
 
             # Calculate appropriate attention heads
@@ -367,7 +401,7 @@ class GenerationWorker:
             self.text_encoder = BertTextEncoder(embed_dim=config.get("text_embed_dim", text_embedding_dim))
             self.diffuser = FluxPipeline(
                 FluxCompressor(d_model=vae_latent_dim, attn_heads=vae_attn_heads),
-                FluxFlowProcessor(d_model=config["flow_dim"], vae_dim=flow_vae_dim, n_head=flow_attn_heads),
+                FluxFlowProcessor(d_model=config["flow_dim"], vae_dim=vae_latent_dim, n_head=flow_attn_heads),
                 FluxExpander(d_model=vae_latent_dim),
             )
             self.pipeline = self.diffuser  # For consistency
@@ -437,6 +471,11 @@ class GenerationWorker:
             return None, "Model not loaded. Please load a checkpoint first."
 
         try:
+            # MPS-specific preparation
+            if self.device.type == 'mps':
+                import torch
+                torch.mps.empty_cache()
+
             # Validate dimensions are multiples of 16
             if img_width % 16 != 0 or img_height % 16 != 0:
                 return (
