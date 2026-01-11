@@ -338,15 +338,16 @@ class GenerationWorker:
             state_dict = safetensors.torch.load_file(checkpoint_path)
             config = FluxPipeline._detect_config(state_dict)
 
-            # For v0.7.0 models, the detected vae_dim includes context dimensions
-            # We need to separate: flow_vae_dim (input to flow) vs vae_latent_dim (VAE components)
-            flow_vae_dim = config["vae_dim"]  # Full dimension including context
-            vae_latent_dim = config["vae_dim"]  # Will adjust for v0.7.0
+            # The config["vae_dim"] is already adjusted by _detect_config for v0.7.0
+            # It represents the VAE latent dimension (base dimension)
+            vae_latent_dim = config["vae_dim"]  # VAE components use this
 
+            # For v0.7.0 models, flow processor needs the input dimension (base + context)
             if config.get("model_version") == "0.7.0":
                 from fluxflow.models.v070.vae import CONTEXT_DIMS
-                vae_latent_dim = config["vae_dim"] - CONTEXT_DIMS  # VAE components use base dimension
-                # flow_vae_dim stays as detected (includes context)
+                flow_vae_dim = config["vae_dim"] + CONTEXT_DIMS  # Flow processor input includes context
+            else:
+                flow_vae_dim = config["vae_dim"]  # For older models, same as VAE dimension
 
             # Calculate appropriate attention heads
             def get_valid_n_head(d_model, preferred_heads=8):
@@ -394,11 +395,11 @@ class GenerationWorker:
 
             self.model_checkpoint = checkpoint_path
             self.config = {
-                "vae_dim": config["vae_dim"],
+                "vae_dim": vae_latent_dim,  # Show actual VAE latent dimension, not flow input dimension
                 "feature_maps_dim": config["flow_dim"],
                 "text_embedding_dim": config.get("text_embed_dim", text_embedding_dim),
                 "version": "0.7.0",
-                "model_info": "v0.7.0 fallback (auto-detected)",
+                "model_info": "v0.7.0 auto-detected",
             }
 
             return True, f"Model loaded successfully on {self.device} (v0.7.0 auto-detected)"
