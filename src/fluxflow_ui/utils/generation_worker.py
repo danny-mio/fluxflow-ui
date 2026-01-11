@@ -216,7 +216,7 @@ class GenerationWorker:
             if self.tokenizer.pad_token is None:  # type: ignore[union-attr]
                 self.tokenizer.pad_token = self.tokenizer.eos_token  # type: ignore[union-attr]
                 self.tokenizer.add_special_tokens(  # type: ignore[union-attr]
-                    {"pad_token": "[PAD]"}
+                    {"pad_token": "[PAD]"})
 
             # Calculate appropriate attention heads to ensure d_model is divisible
             def get_valid_n_head(d_model, preferred_heads=8):
