@@ -20,6 +20,7 @@ from fluxflow.models import (  # noqa: E402
     FluxFlowProcessor,
     FluxPipeline,
 )
+from fluxflow.models.versioning import load_versioned_checkpoint  # noqa: E402
 from fluxflow.utils import generate_latent_images  # noqa: E402
 
 
@@ -55,13 +56,13 @@ class GenerationWorker:
         feature_maps_dim: int = 64,
         text_embedding_dim: int = 1024,
     ) -> Tuple[bool, str]:
-        """Load model from checkpoint.
+        """Load model from checkpoint with automatic version detection.
 
         Args:
-            checkpoint_path: Path to model checkpoint
-            vae_dim: VAE latent dimension
-            feature_maps_dim: Flow processor dimension
-            text_embedding_dim: Text embedding dimension
+            checkpoint_path: Path to model checkpoint (versioned directory or legacy file)
+            vae_dim: VAE latent dimension (ignored for versioned checkpoints)
+            feature_maps_dim: Flow processor dimension (ignored for versioned checkpoints)
+            text_embedding_dim: Text embedding dimension (ignored for versioned checkpoints)
 
         Returns:
             Tuple of (success, message)
@@ -70,7 +71,47 @@ class GenerationWorker:
             if not Path(checkpoint_path).exists():
                 return False, f"Checkpoint not found: {checkpoint_path}"
 
-            # Load tokenizer (uses cache if present, otherwise downloads)
+            # Try versioned loading first (new format)
+            try:
+                if Path(checkpoint_path).is_dir():
+                    # Versioned checkpoint (directory with metadata)
+                    self.pipeline = load_versioned_checkpoint(
+                        Path(checkpoint_path), str(self.device)
+                    )
+                    self.diffuser = self.pipeline
+                    self.text_encoder = self.pipeline.text_encoder
+
+                    # Extract version info from metadata
+                    version_info = getattr(self.pipeline, "version", "unknown")
+                    model_info = f"Version {version_info} model"
+                else:
+                    # Try legacy versioned loading (single file with metadata)
+                    try:
+                        self.pipeline = FluxPipeline.from_pretrained(
+                            checkpoint_path, device=str(self.device), use_versioning=True
+                        )
+                        self.diffuser = self.pipeline
+                        self.text_encoder = self.pipeline.text_encoder
+                        version_info = getattr(self.pipeline, "version", "legacy")
+                        model_info = f"Legacy versioned model (v{version_info})"
+                    except Exception:
+                        # Fall back to manual loading with default v0.3.0
+                        return self._load_legacy_model(
+                            checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim
+                        )
+
+                model_info = f"Version {version_info} model"
+
+            except Exception as versioned_error:
+                # Fall back to manual loading with default v0.3.0
+                print(
+                    f"Versioned loading failed ({versioned_error}), falling back to legacy v0.3.0"
+                )
+                return self._load_legacy_model(
+                    checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim
+                )
+
+            # Load tokenizer (shared for all versions)
             self.tokenizer = AutoTokenizer.from_pretrained(
                 "distilbert-base-uncased", cache_dir="./_cache", local_files_only=False
             )
@@ -80,13 +121,63 @@ class GenerationWorker:
                     {"pad_token": "[PAD]"}
                 )
 
-            # Initialize models
+            self.model_checkpoint = checkpoint_path
+
+            # Extract config info for display
+            try:
+                vae_dim = int(self.diffuser.compressor.d_model)
+            except (AttributeError, TypeError):
+                pass
+            try:
+                feature_maps_dim = int(self.diffuser.flow_processor.d_model)
+            except (AttributeError, TypeError):
+                pass
+            try:
+                text_embedding_dim = int(self.text_encoder.embed_dim)
+            except (AttributeError, TypeError):
+                pass
+
+            self.config = {
+                "vae_dim": vae_dim,
+                "feature_maps_dim": feature_maps_dim,
+                "text_embedding_dim": text_embedding_dim,
+                "version": version_info if "version_info" in locals() else "0.3.0",
+                "model_info": model_info,
+            }
+
+            success_msg = f"Model loaded successfully on {self.device} ({model_info})"
+            return True, success_msg
+
+        except Exception as e:
+            return False, f"Failed to load model: {str(e)}"
+
+    def _load_legacy_model(
+        self,
+        checkpoint_path: str,
+        vae_dim: int,
+        feature_maps_dim: int,
+        text_embedding_dim: int,
+    ) -> Tuple[bool, str]:
+        """Load model using legacy manual instantiation (assumes v0.3.0)."""
+        try:
+            # Load tokenizer
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                "distilbert-base-uncased", cache_dir="./_cache", local_files_only=False
+            )
+            if self.tokenizer.pad_token is None:  # type: ignore[union-attr]
+                self.tokenizer.pad_token = self.tokenizer.eos_token  # type: ignore[union-attr]
+                self.tokenizer.add_special_tokens(  # type: ignore[union-attr]
+                    {"pad_token": "[PAD]"}
+                )
+
+            # Initialize models manually (v0.3.0 defaults)
             self.text_encoder = BertTextEncoder(embed_dim=text_embedding_dim)
             self.diffuser = FluxPipeline(
                 FluxCompressor(d_model=vae_dim),
                 FluxFlowProcessor(d_model=feature_maps_dim, vae_dim=vae_dim),
                 FluxExpander(d_model=vae_dim),
             )
+            self.pipeline = self.diffuser  # For consistency
 
             # Load checkpoint
             state_dict = safetensors.torch.load_file(checkpoint_path)
@@ -115,12 +206,14 @@ class GenerationWorker:
                 "vae_dim": vae_dim,
                 "feature_maps_dim": feature_maps_dim,
                 "text_embedding_dim": text_embedding_dim,
+                "version": "0.3.0",
+                "model_info": "Legacy v0.3.0 model (assumed)",
             }
 
-            return True, f"Model loaded successfully on {self.device}"
+            return True, f"Model loaded successfully on {self.device} (Legacy v0.3.0)"
 
         except Exception as e:
-            return False, f"Failed to load model: {str(e)}"
+            return False, f"Failed to load legacy model: {str(e)}"
 
     def generate_image(
         self,
