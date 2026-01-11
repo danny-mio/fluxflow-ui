@@ -190,11 +190,7 @@ class GenerationWorker:
                     {"pad_token": "[PAD]"}
                 )
 
-            # Initialize models manually (v0.3.0 defaults)
-            self.text_encoder = BertTextEncoder(embed_dim=text_embedding_dim)
-
             # Calculate appropriate attention heads to ensure d_model is divisible
-            # This handles cases where the model dimensions don't match default assumptions
             def get_valid_n_head(d_model, preferred_heads=8):
                 """Get number of heads that evenly divides d_model."""
                 if d_model % preferred_heads == 0:
@@ -205,11 +201,15 @@ class GenerationWorker:
                         return heads
                 return 1  # Fallback, though this shouldn't happen
 
-            flow_n_head = get_valid_n_head(feature_maps_dim)
+            # Initialize models manually (v0.3.0 defaults)
+            self.text_encoder = BertTextEncoder(embed_dim=text_embedding_dim)
+
+            # Use flexible attention heads for flow processor (main source of the error)
+            flow_attn_heads = get_valid_n_head(feature_maps_dim)
 
             self.diffuser = FluxPipeline(
                 FluxCompressor(d_model=vae_dim),
-                FluxFlowProcessor(d_model=feature_maps_dim, vae_dim=vae_dim, n_head=flow_n_head),
+                FluxFlowProcessor(d_model=feature_maps_dim, vae_dim=vae_dim, n_head=flow_attn_heads),
                 FluxExpander(d_model=vae_dim),
             )
             self.pipeline = self.diffuser  # For consistency
