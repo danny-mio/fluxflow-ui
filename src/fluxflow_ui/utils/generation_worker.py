@@ -292,11 +292,15 @@ class GenerationWorker:
             state_dict = safetensors.torch.load_file(checkpoint_path)
             config = FluxPipeline._detect_config(state_dict)
 
-            # Adjust vae_dim for v0.7.0 (subtract context dimensions)
-            if config.get("model_version") == "0.7.0" and "vae_dim" in config:
+            # For v0.7.0 models, the detected vae_dim includes context dimensions
+            # We need to separate: flow_vae_dim (input to flow) vs vae_latent_dim (VAE components)
+            flow_vae_dim = config["vae_dim"]  # Full dimension including context
+            vae_latent_dim = config["vae_dim"]  # Will adjust for v0.7.0
+
+            if config.get("model_version") == "0.7.0":
                 from fluxflow.models.v070.vae import CONTEXT_DIMS
-                if "flow_dim" in config:
-                    config["vae_dim"] = config["vae_dim"] - CONTEXT_DIMS
+                vae_latent_dim = config["vae_dim"] - CONTEXT_DIMS  # VAE components use base dimension
+                # flow_vae_dim stays as detected (includes context)
 
             # Calculate appropriate attention heads
             def get_valid_n_head(d_model, preferred_heads=8):
@@ -309,15 +313,15 @@ class GenerationWorker:
                         return heads
                 return 1  # Fallback
 
-            vae_attn_heads = get_valid_n_head(config["vae_dim"])
+            vae_attn_heads = get_valid_n_head(vae_latent_dim)
             flow_attn_heads = get_valid_n_head(config["flow_dim"])
 
             # Initialize models with detected config
             self.text_encoder = BertTextEncoder(embed_dim=config.get("text_embed_dim", text_embedding_dim))
             self.diffuser = FluxPipeline(
-                FluxCompressor(d_model=config["vae_dim"], attn_heads=vae_attn_heads),
-                FluxFlowProcessor(d_model=config["flow_dim"], vae_dim=config["vae_dim"], n_head=flow_attn_heads),
-                FluxExpander(d_model=config["vae_dim"]),
+                FluxCompressor(d_model=vae_latent_dim, attn_heads=vae_attn_heads),
+                FluxFlowProcessor(d_model=config["flow_dim"], vae_dim=flow_vae_dim, n_head=flow_attn_heads),
+                FluxExpander(d_model=vae_latent_dim),
             )
             self.pipeline = self.diffuser  # For consistency
 
