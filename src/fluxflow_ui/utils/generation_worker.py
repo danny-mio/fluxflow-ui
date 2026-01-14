@@ -94,8 +94,9 @@ class GenerationWorker:
                     self.text_encoder.to(self.device).eval()
 
                     # MPS-specific initialization
-                    if self.device.type == 'mps':
+                    if self.device.type == "mps":
                         import torch
+
                         torch.mps.empty_cache()
 
                     # Extract version info from metadata
@@ -123,8 +124,9 @@ class GenerationWorker:
                         self.text_encoder.to(self.device).eval()
 
                         # MPS-specific initialization
-                        if self.device.type == 'mps':
+                        if self.device.type == "mps":
                             import torch
+
                             torch.mps.empty_cache()
 
                         version_info = getattr(self.pipeline, "version", "legacy")
@@ -148,9 +150,13 @@ class GenerationWorker:
                     )
                 except Exception as legacy_error:
                     # Try one more fallback: assume v0.7.0 architecture
-                    print(f"Legacy loading failed ({legacy_error}), trying v0.7.0 architecture fallback")
+                    print(
+                        f"Legacy loading failed ({legacy_error}), trying v0.7.0 architecture fallback"
+                    )
                     try:
-                        return self._load_v070_fallback(checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim)
+                        return self._load_v070_fallback(
+                            checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim
+                        )
                     except Exception as v070_error:
                         # If all methods fail, provide comprehensive error message
                         return False, (
@@ -218,6 +224,7 @@ class GenerationWorker:
         has_v070_features = False
         try:
             import safetensors.torch
+
             state_dict = safetensors.torch.load_file(checkpoint_path)
             keys = list(state_dict.keys())
 
@@ -233,7 +240,9 @@ class GenerationWorker:
         if has_v070_features:
             print("Detected v0.7.0 features in checkpoint, using v0.7.0 components only")
             try:
-                return self._load_v070_fallback(checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim)
+                return self._load_v070_fallback(
+                    checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim
+                )
             except Exception as v070_error:
                 return False, (
                     f"Failed to load v0.7.0 model. The checkpoint contains v0.7.0 architecture "
@@ -251,7 +260,8 @@ class GenerationWorker:
             if self.tokenizer.pad_token is None:  # type: ignore[union-attr]
                 self.tokenizer.pad_token = self.tokenizer.eos_token  # type: ignore[union-attr]
                 self.tokenizer.add_special_tokens(  # type: ignore[union-attr]
-                    {"pad_token": "[PAD]"})
+                    {"pad_token": "[PAD]"}
+                )
 
             # Calculate appropriate attention heads to ensure d_model is divisible
             def get_valid_n_head(d_model, preferred_heads=8):
@@ -271,7 +281,9 @@ class GenerationWorker:
             self.text_encoder = BertTextEncoder(embed_dim=text_embedding_dim)
             self.diffuser = FluxPipeline(
                 FluxCompressor(d_model=vae_dim),
-                FluxFlowProcessor(d_model=feature_maps_dim, vae_dim=vae_dim, n_head=flow_attn_heads),
+                FluxFlowProcessor(
+                    d_model=feature_maps_dim, vae_dim=vae_dim, n_head=flow_attn_heads
+                ),
                 FluxExpander(d_model=vae_dim),
             )
             self.pipeline = self.diffuser  # For consistency
@@ -366,8 +378,8 @@ class GenerationWorker:
                 self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
 
             # Import v0.7.0 components
-            from fluxflow.models.v070.vae import FluxCompressor, FluxExpander
             from fluxflow.models.v070.flow import FluxFlowProcessor
+            from fluxflow.models.v070.vae import FluxCompressor, FluxExpander
 
             # Detect actual config from checkpoint instead of using provided dimensions
             state_dict = safetensors.torch.load_file(checkpoint_path)
@@ -377,6 +389,7 @@ class GenerationWorker:
             # Adjust to get the actual VAE latent dimension
             if config.get("model_version") == "0.7.0":
                 from fluxflow.models.v070.vae import CONTEXT_DIMS
+
                 vae_latent_dim = config["vae_dim"] - CONTEXT_DIMS  # VAE latent dimension
                 flow_vae_dim = config["vae_dim"]  # Flow processor input (already includes context)
             else:
@@ -398,10 +411,14 @@ class GenerationWorker:
             flow_attn_heads = get_valid_n_head(config["flow_dim"])
 
             # Initialize models with detected config
-            self.text_encoder = BertTextEncoder(embed_dim=config.get("text_embed_dim", text_embedding_dim))
+            self.text_encoder = BertTextEncoder(
+                embed_dim=config.get("text_embed_dim", text_embedding_dim)
+            )
             self.diffuser = FluxPipeline(
                 FluxCompressor(d_model=vae_latent_dim, attn_heads=vae_attn_heads),
-                FluxFlowProcessor(d_model=config["flow_dim"], vae_dim=vae_latent_dim, n_head=flow_attn_heads),
+                FluxFlowProcessor(
+                    d_model=config["flow_dim"], vae_dim=vae_latent_dim, n_head=flow_attn_heads
+                ),
                 FluxExpander(d_model=vae_latent_dim),
             )
             self.pipeline = self.diffuser  # For consistency
@@ -472,8 +489,9 @@ class GenerationWorker:
 
         try:
             # MPS-specific preparation
-            if self.device.type == 'mps':
+            if self.device.type == "mps":
                 import torch
+
                 torch.mps.empty_cache()
 
             # Validate dimensions are multiples of 16
