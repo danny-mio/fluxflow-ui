@@ -553,7 +553,14 @@ class GenerationWorker:
                 # Create noised latent
                 from diffusers import DPMSolverMultistepScheduler
 
-                scheduler = DPMSolverMultistepScheduler(num_train_timesteps=1000)
+                scheduler = DPMSolverMultistepScheduler(
+                    num_train_timesteps=1000,
+                    algorithm_type="dpmsolver++",
+                    solver_order=2,
+                    prediction_type="v_prediction",
+                    lower_order_final=True,
+                    timestep_spacing="trailing",
+                )
                 scheduler.set_timesteps(  # type: ignore[attr-defined]
                     ddim_steps, device=self.device
                 )
@@ -637,7 +644,9 @@ class GenerationWorker:
 
         for t in scheduler.timesteps:  # type: ignore
             # Expand t to batch dimension
-            t_batch = torch.full((lat.size(0),), t.item(), device=self.device, dtype=torch.long)
+            t_batch = torch.full(
+                (lat.size(0),), t.item() / 999.0, device=self.device, dtype=torch.float32
+            ).clamp(0.0, 1.0)
 
             # Reconstruct full latent with hw_vec for model input
             full_input = torch.cat([lat, hw_vec], dim=1)
