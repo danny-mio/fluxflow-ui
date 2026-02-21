@@ -17,7 +17,7 @@ Web interface for FluxFlow text-to-image generation and training.
 
 ## Installation
 
-> **Note**: This documentation describes **v0.3.0** (upcoming release). For the current stable version (v0.1.1), see [v0.1.1 documentation](https://github.com/danny-mio/fluxflow-ui/tree/v0.1.1).
+> **Note**: This documentation describes **v0.8.0**. For the previous stable version (v0.4.0), see [v0.4.0 documentation](https://github.com/danny-mio/fluxflow-ui/tree/v0.4.0).
 
 ### Prerequisites
 
@@ -38,7 +38,7 @@ pip --version     # Should be installed
 nvidia-smi        # (NVIDIA only) Should show GPU info
 ```
 
-### Production Install (v0.1.1 - Current Stable)
+### Production Install (v0.8.0 - Current Stable)
 
 ```bash
 pip install fluxflow-ui
@@ -50,9 +50,9 @@ pip install fluxflow-ui
 - `fluxflow` core package (transitively installed)
 - CLI command: `fluxflow-ui`
 
-**Package available on PyPI**: [fluxflow-ui v0.1.1](https://pypi.org/project/fluxflow-ui/)
+**Package available on PyPI**: [fluxflow-ui v0.8.0](https://pypi.org/project/fluxflow-ui/)
 
-⚠️ **Note**: v0.1.1 does NOT include CFG (Classifier-Free Guidance) features described below. For CFG support, use development install.
+⚠️ **Note**: v0.8.0 requires `fluxflow-training>=0.8.0` and supports the pillar-attention flow architecture introduced in v0.8.0.
 
 ### Development Install
 
@@ -79,8 +79,10 @@ See [SECURITY.md](SECURITY.md) for details on security measures, limitations, an
 ## Features
 
 - **Training Interface**: Configure and monitor training runs
-- **Generation Interface**: Generate images with various parameters
-- **Real-time Progress**: Monitor training progress with live updates
+  - Start/stop training, monitor loss curves and metrics, view sample generations
+- **Generation Interface**: Generate images from text prompts
+  - Load trained models, adjust sampling parameters, batch generation support
+- **Real-time Progress**: Live training updates and logs
 - **Model Management**: Load and manage checkpoints
 - **Interactive Controls**: Adjust generation parameters in real-time
 
@@ -104,23 +106,9 @@ Then open your browser to `http://localhost:7860`
 
 **Note:** Flask is the primary interface with full features. Gradio is provided as an alternative but may have limited functionality.
 
-### Features
-
-#### Training Tab
-- Configure training parameters
-- Start/stop training runs
-- Monitor loss curves and metrics
-- View sample generations during training
-
-#### Generation Tab
-- Load trained models
-- Generate images from text prompts
-- Adjust sampling parameters
-- Batch generation support
-
 ## Classifier-Free Guidance (CFG)
 
-**✨ New in v0.3.0** (upcoming release): FluxFlow UI supports training and generation with Classifier-Free Guidance.
+**✨ Available since v0.3.0**: FluxFlow UI supports training and generation with Classifier-Free Guidance.
 
 ### Training with CFG
 
