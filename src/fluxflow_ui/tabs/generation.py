@@ -173,11 +173,9 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
                     )
 
                 with gr.Accordion("Classifier-Free Guidance", open=False):
-                    gr.Markdown(
-                        """
+                    gr.Markdown("""
                         **CFG** increases prompt adherence. Requires model trained with CFG dropout.
-                        """
-                    )
+                        """)
                     use_cfg_checkbox = gr.Checkbox(
                         label="Enable CFG",
                         value=False,
@@ -226,15 +224,13 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
                 )
 
                 gr.Markdown("### Tips")
-                gr.Markdown(
-                    """
+                gr.Markdown("""
                 - **Model Loading**: Select a checkpoint and click Load Model first
                 - **Prompt**: Describe the image you want to generate
                 - **Image Size**: Larger sizes take longer but produce more detail
                 - **Steps**: More steps = higher quality but slower (50 is usually good)
                 - **Seed**: Enable for reproducible results
-                """
-                )
+                """)
 
         # Event handlers
         load_btn.click(
