@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+_No unreleased changes._
+
+## [0.8.0] - 2026-02-21
+
+### Changed
+- **Updated `fluxflow-training` dependency** to `>=0.8.0`
+  - Enables use of the v0.8.0 pillar-attention flow architecture
+  - No UI changes required; version routing handled by `load_versioned_checkpoint()`
+- Version bumped to 0.8.0
+
+### Fixed
+- **Type annotation** for `GenerationWorker.tokenizer`: changed from `Optional[AutoTokenizer]` to `Any` to match the dynamic type returned by `AutoTokenizer.from_pretrained()`
+- **Flaky test** in `TestStopTraining::test_terminates_process`: fixed race condition where the test assertion ran before the background thread had a chance to set `_is_running = False`
+- **Black formatting** applied to `app.py`, `tabs/generation.py`, `tabs/training.py`
+
 ## [0.4.0] - 2025-12-17
 
 ### Fixed
@@ -14,7 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Root cause: `_generate_with_cfg()` wasn't properly separating `hw_vec` (dimension info) from image latent
   - Solution: Properly extract and preserve `hw_vec` during CFG denoising loop
   - **Impact**: CFG now correctly respects user-chosen width and height settings
-  - **Files**: `src/fluxflow_ui/utils/generation_worker.py` (lines 258-303)
+  - **Files**: `src/fluxflow_ui/utils/generation_worker.py`
   - Users can now generate CFG images at any resolution (512x512, 768x512, 1024x1024, etc.)
 
 ## [0.3.1] - 2025-12-13
@@ -97,12 +112,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Multi-resolution size parsing validates comma-separated integer lists
 - Config manager properly serializes all new parameters to JSON
 
-## [0.1.1] - 2024-11-XX
+## [0.1.1] - 2024-11-01
 
 ### Fixed
 - Minor bug fixes and stability improvements
 
-## [0.1.0] - 2024-XX-XX
+## [0.1.0] - 2024-10-01
 
 ### Added
 - Initial release of FluxFlow UI
