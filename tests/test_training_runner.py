@@ -146,6 +146,11 @@ class TestStopTraining:
     def test_terminates_process(self, mock_popen):
         """Should terminate the subprocess."""
         mock_process = MagicMock()
+        hold = threading.Event()
+        # Block _read_output's wait() so _is_running stays True until stop_training() runs
+        mock_process.wait.side_effect = lambda timeout=None: (
+            hold.wait(0.2) if timeout is None else None
+        )
         mock_process.stdout = iter([])
         mock_popen.return_value = mock_process
 
@@ -153,6 +158,7 @@ class TestStopTraining:
         runner.start_training({})
 
         result = runner.stop_training()
+        hold.set()
 
         assert result is True
         mock_process.terminate.assert_called_once()

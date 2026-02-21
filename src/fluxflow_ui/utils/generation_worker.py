@@ -2,7 +2,7 @@
 
 import sys
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 import numpy as np
 import safetensors.torch
@@ -31,7 +31,7 @@ class GenerationWorker:
         self.model_checkpoint: Optional[str] = None
         self.diffuser: Optional[FluxPipeline] = None
         self.text_encoder: Optional[BertTextEncoder] = None
-        self.tokenizer: Optional[AutoTokenizer] = None
+        self.tokenizer: Any = None
         self.device = self._get_device()
         self.config = {}
 
@@ -74,11 +74,9 @@ class GenerationWorker:
             self.tokenizer = AutoTokenizer.from_pretrained(
                 "distilbert-base-uncased", cache_dir="./_cache", local_files_only=False
             )
-            if self.tokenizer.pad_token is None:  # type: ignore[union-attr]
-                self.tokenizer.pad_token = self.tokenizer.eos_token  # type: ignore[union-attr]
-                self.tokenizer.add_special_tokens(  # type: ignore[union-attr]
-                    {"pad_token": "[PAD]"}
-                )
+            if self.tokenizer.pad_token is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+                self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
 
             # Initialize models
             self.text_encoder = BertTextEncoder(embed_dim=text_embedding_dim)
@@ -167,7 +165,7 @@ class GenerationWorker:
 
             with torch.no_grad():
                 # Tokenize prompt
-                inputs = self.tokenizer(  # type: ignore[operator]
+                inputs = self.tokenizer(
                     prompt,
                     padding="max_length",
                     truncation=True,
@@ -184,7 +182,7 @@ class GenerationWorker:
                 negative_embeddings = None
                 if use_cfg and guidance_scale > 1.0:
                     if negative_prompt:
-                        neg_inputs = self.tokenizer(  # type: ignore[operator]
+                        neg_inputs = self.tokenizer(
                             negative_prompt,
                             padding="max_length",
                             truncation=True,

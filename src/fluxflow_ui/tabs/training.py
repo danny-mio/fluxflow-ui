@@ -478,12 +478,10 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                     )
 
                 with gr.Accordion("Classifier-Free Guidance (CFG)", open=False):
-                    gr.Markdown(
-                        """
+                    gr.Markdown("""
                         **CFG Training** enables guided generation at inference time.
                         Train with CFG dropout to support guidance_scale > 1.0.
-                        """
-                    )
+                        """)
                     use_cfg_checkbox = gr.Checkbox(
                         label="Enable CFG Training",
                         value=prev_config.get("cfg_dropout_prob", 0.0) > 0.0,
@@ -509,13 +507,11 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                     )
 
                 with gr.Accordion("Multi-Resolution Training", open=False):
-                    gr.Markdown(
-                        """
+                    gr.Markdown("""
                         **Progressive resolution** trains on smaller images first,
                         then gradually increases. Improves convergence and reduces
                         initial VRAM usage.
-                        """
-                    )
+                        """)
                     use_multires_checkbox = gr.Checkbox(
                         label="Enable Progressive Resolution",
                         value=bool(prev_config.get("reduced_min_sizes", "")),
@@ -577,8 +573,7 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                 )
 
                 gr.Markdown("### Quick Guide")
-                gr.Markdown(
-                    """
+                gr.Markdown("""
                 **Training Stages:**
                 1. **VAE Pretraining** (50-100 epochs)
                    - Enable: Train VAE, Use SPADE
@@ -605,8 +600,7 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                 - Use FP16 for 2-4x speedup on RTX GPUs
                 - TTI-2M streams 2M+ images (no download needed)
                 - Default optimizers: Lion (flow), AdamW (vae/discriminator)
-                """
-                )
+                """)
 
         # Toggle dataset inputs based on use_webdataset
         def toggle_dataset_inputs(use_webdataset):

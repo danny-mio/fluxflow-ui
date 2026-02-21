@@ -33,25 +33,21 @@ def create_app() -> gr.Blocks:
         title="FluxFlow UI",
         theme=gr.themes.Soft(),
     ) as app:
-        gr.Markdown(
-            """
+        gr.Markdown("""
             # 🎨 FluxFlow UI
 
             Train and generate images with FluxFlow text-to-image models
-            """
-        )
+            """)
 
         with gr.Tabs():
             create_training_tab(training_runner, config_manager)
             create_generation_tab(generation_worker, config_manager)
 
-        gr.Markdown(
-            """
+        gr.Markdown("""
             ---
             **FluxFlow** - Flow-based Text-to-Image Generation
             Made with ❤️ by Daniele Camisani
-            """
-        )
+            """)
 
     return app
 
