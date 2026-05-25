@@ -21,7 +21,7 @@ from fluxflow.models import (  # noqa: E402
     FluxPipeline,
 )
 from fluxflow.models.versioning import load_versioned_checkpoint  # noqa: E402
-from fluxflow.utils import generate_latent_images  # noqa: E402
+from fluxflow.utils import generate_latent_images, img_to_random_packet  # noqa: E402
 
 
 class GenerationWorker:
@@ -504,25 +504,16 @@ class GenerationWorker:
                         # Use null conditioning (zeros)
                         negative_embeddings = torch.zeros_like(text_embeddings)
 
-                # Create random latent with specified dimensions
-                z_img = (torch.rand((1, 3, img_height, img_width), device=self.device) * 2) - 1
-                latent_z = self.diffuser.compressor(z_img)
-
-                img_seq = latent_z[:, :-1, :].contiguous()
-                hw_vec = latent_z[:, -1:, :].contiguous()
-                noise_img = torch.randn_like(img_seq)
-
-                # Create noised latent
-                from diffusers import DPMSolverMultistepScheduler
-
-                scheduler = DPMSolverMultistepScheduler(num_train_timesteps=1000)
-                scheduler.set_timesteps(  # type: ignore[attr-defined]
-                    ddim_steps, device=self.device
-                )
-
-                t = torch.randint(0, 1000, (1,), device=self.device)
-                noised_img = scheduler.add_noise(img_seq, noise_img, t)  # type: ignore
-                noised_latent = torch.cat([noised_img, hw_vec], dim=1)
+                # Create pure Gaussian noise latent (all dims including context)
+                context_dims = self.diffuser.compressor.get_context_dims()
+                dummy = torch.zeros(1, 3, img_height, img_width, device=self.device)
+                noised_latent = img_to_random_packet(
+                    dummy,
+                    d_model=self.diffuser.compressor.d_model,
+                    context_dims=context_dims,
+                    downscales=getattr(self.diffuser.compressor, "downscales", 4),
+                    max_hw=getattr(self.diffuser.compressor, "max_hw", 1024),
+                ).to(dtype=text_embeddings.dtype)
 
                 # Denoise with or without CFG
                 if use_cfg and guidance_scale > 1.0 and negative_embeddings is not None:
@@ -599,7 +590,9 @@ class GenerationWorker:
 
         for t in scheduler.timesteps:  # type: ignore
             # Expand t to batch dimension
-            t_batch = torch.full((lat.size(0),), t.item(), device=self.device, dtype=torch.long)
+            t_batch = torch.full(
+                (lat.size(0),), t.item() / 999.0, device=self.device, dtype=torch.float32
+            )
 
             # Reconstruct full latent with hw_vec for model input
             full_input = torch.cat([lat, hw_vec], dim=1)

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fluxflow-ui"
-version = "0.8.0"
+version = "0.10.0"
 description = "Web UI for FluxFlow text-to-image generation"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -27,7 +27,8 @@ classifiers = [
 ]
 
 dependencies = [
-    "fluxflow-training>=0.8.0",
+    # Feature-branch pin — revert to "fluxflow-training>=0.10.0" after PyPI release.
+    "fluxflow-training @ git+https://github.com/danny-mio/fluxflow-training.git@feature/model-v0.10.0",
     "gradio>=4.0.0",
     "flask>=3.0.0",
     "flask-cors>=4.0.0",
