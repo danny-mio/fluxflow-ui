@@ -146,7 +146,6 @@ class ConfigManager:
             # Training modes
             "train_vae": True,
             "train_no_gan": False,
-            "train_spade": True,
             "train_diff": False,
             "train_diff_full": False,
             # KL divergence

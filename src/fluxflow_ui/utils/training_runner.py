@@ -121,7 +121,7 @@ class TrainingRunner:
             cmd.append("--use_gradient_checkpointing")
 
         # Training modes
-        for flag in ["train_vae", "train_no_gan", "train_spade", "train_diff", "train_diff_full"]:
+        for flag in ["train_vae", "train_no_gan", "train_diff", "train_diff_full"]:
             if config.get(flag):
                 cmd.append(f"--{flag}")
 

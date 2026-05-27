@@ -61,7 +61,6 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
         # Training modes
         train_vae: bool,
         train_no_gan: bool,
-        train_spade: bool,
         train_diff: bool,
         train_diff_full: bool,
         # KL divergence
@@ -140,7 +139,6 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
             # Training modes
             "train_vae": train_vae,
             "train_no_gan": train_no_gan,
-            "train_spade": train_spade,
             "train_diff": train_diff,
             "train_diff_full": train_diff_full,
             # KL divergence
@@ -384,10 +382,6 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                     train_no_gan_checkbox = gr.Checkbox(
                         label="Disable GAN",
                         value=prev_config.get("train_no_gan", False),
-                    )
-                    train_spade_checkbox = gr.Checkbox(
-                        label="Use SPADE",
-                        value=prev_config.get("train_spade", True),
                     )
 
                 with gr.Row():
@@ -654,7 +648,6 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                 # Training modes
                 train_vae_checkbox,
                 train_no_gan_checkbox,
-                train_spade_checkbox,
                 train_diff_checkbox,
                 train_diff_full_checkbox,
                 # KL divergence

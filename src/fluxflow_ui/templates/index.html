@@ -874,11 +874,6 @@
                         <label for="train_vae">Train VAE</label>
                     </div>
 
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="train_spade" checked>
-                        <label for="train_spade">Use SPADE</label>
-                    </div>
-
                     <div class="form-group">
                         <div class="btn-group" role="group" aria-label="Training controls">
                             <button class="btn btn-primary" onclick="startTraining()" aria-label="Start training with current configuration">
@@ -1163,7 +1158,6 @@
                 feature_maps_dim: parseInt(document.getElementById('feature_maps_dim').value),
                 feature_maps_dim_disc: 128,
                 train_vae: document.getElementById('train_vae').checked,
-                train_spade: document.getElementById('train_spade').checked,
                 train_no_gan: false,
                 train_diff: false,
                 train_diff_full: false,
