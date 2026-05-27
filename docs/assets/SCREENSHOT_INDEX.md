@@ -1,8 +1,8 @@
 # FluxFlow UI - Screenshot Index
 
-**Generated**: December 12, 2025  
-**Total Screenshots**: 35  
-**Purpose**: Documentation for non-technical users  
+**Generated**: December 12, 2025
+**Total Screenshots**: 35
+**Purpose**: Documentation for non-technical users
 **Format**: PNG, various resolutions
 
 ---
@@ -167,12 +167,12 @@ For a minimal user guide, use these key screenshots:
 ```
 1. Introduction
    - Screenshot: ui-landing-page.png
-   
+
 2. Your First Training Run
    - Screenshot: training-tab-overview.png
    - Screenshot: file-browser-dialog.png
    - Screenshot: training-start-button.png
-   
+
 3. Your First Generation
    - Screenshot: generation-tab-overview.png
    - Screenshot: generation-model-loading.png
@@ -184,12 +184,12 @@ For a minimal user guide, use these key screenshots:
 4. Classifier-Free Guidance (CFG)
    - Screenshot: training-cfg-section-expanded.png
    - Screenshot: generation-cfg-expanded.png
-   
+
 5. Advanced Training Settings
    - Screenshot: training-advanced-settings.png
    - Screenshot: training-full-top.png
    - Screenshot: training-full-bottom.png
-   
+
 6. Advanced Generation Techniques
    - Screenshot: generation-full-top.png
    - Screenshot: generation-full-bottom.png
@@ -200,7 +200,7 @@ For a minimal user guide, use these key screenshots:
 7. Using FluxFlow on Tablets
    - Screenshot: ui-tablet-view.png
    - Screenshot: 20-layout-tablet-768x1024.png
-   
+
 8. Using FluxFlow on Mobile
    - Screenshot: ui-mobile-view.png
 ```
@@ -266,8 +266,8 @@ These screenshots are part of the FluxFlow UI project and should be used for:
 
 ## Updates & Maintenance
 
-**Last Updated**: December 12, 2025  
-**Application Version**: FluxFlow UI v0.3.0  
+**Last Updated**: December 12, 2025
+**Application Version**: FluxFlow UI v0.3.0
 **Next Review**: When UI changes significantly
 
 To update screenshots:
@@ -280,14 +280,14 @@ To update screenshots:
 
 ## Contact
 
-**Questions about screenshots?**  
-**Need additional screenshots?**  
+**Questions about screenshots?**
+**Need additional screenshots?**
 **Found issues with screenshots?**
 
 Contact: QA Team or Documentation Manager
 
 ---
 
-**Index Generated**: December 12, 2025  
-**Total Screenshots**: 35  
+**Index Generated**: December 12, 2025
+**Total Screenshots**: 35
 **Ready for Documentation**: ✅ YES

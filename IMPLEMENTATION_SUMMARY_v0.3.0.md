@@ -63,10 +63,10 @@ def _generate_with_cfg(self, noised_latent, text_embeddings, negative_embeddings
     # Dual-pass prediction
     v_cond = self.diffuser.flow_processor(latent, text_embeddings, t)
     v_uncond = self.diffuser.flow_processor(latent, negative_embeddings, t)
-    
+
     # Guidance interpolation
     v_guided = v_uncond + guidance_scale * (v_cond - v_uncond)
-    
+
     # Step scheduler
     latent = scheduler.step(v_guided, t, latent).prev_sample
 ```
@@ -88,10 +88,10 @@ def _build_pipeline_command(self, config):
     yaml_content = config["pipeline_yaml_content"]
     output_path = config.get("output_path", "outputs")
     self.temp_config_file = str(Path(output_path) / "pipeline_config.yaml")
-    
+
     with open(self.temp_config_file, "w") as f:
         f.write(yaml_content)
-    
+
     return ["fluxflow-train", "--config", self.temp_config_file]
 ```
 
@@ -370,6 +370,6 @@ ERROR: "flow_processor" attribute access on Optional type
 
 ---
 
-**Implementation Date**: 2025-12-12  
-**Engineer**: OpenCode (Coordinator)  
+**Implementation Date**: 2025-12-12
+**Engineer**: OpenCode (Coordinator)
 **Status**: ✅ COMPLETE

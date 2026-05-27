@@ -379,7 +379,7 @@ Steps 1000-2000: 0.08 → 0.03 (slow improvement)
 
 **Expected times** (512×512, 50 steps):
 - **GPU (NVIDIA RTX 3090):** 3-5 seconds
-- **MPS (Apple M1 Max):** 8-12 seconds  
+- **MPS (Apple M1 Max):** 8-12 seconds
 - **CPU:** 60-120 seconds
 
 **If slower than expected:**
@@ -546,25 +546,25 @@ Steps 1000-2000: 0.08 → 0.03 (slow improvement)
 
 ## FAQ
 
-**Q: Can I use FluxFlow UI remotely?**  
+**Q: Can I use FluxFlow UI remotely?**
 A: Yes, but **NOT recommended without security hardening**. See [SECURITY.md](../SECURITY.md). No authentication by default.
 
-**Q: Can I train on multiple GPUs?**  
+**Q: Can I train on multiple GPUs?**
 A: Not currently supported in UI. Use CLI for distributed training.
 
-**Q: How long does training take?**  
+**Q: How long does training take?**
 A: Depends on dataset size and hardware. Example: 10K images, 5 epochs, RTX 3090 = ~8 hours.
 
-**Q: Can I pause and resume training?**  
+**Q: Can I pause and resume training?**
 A: No automatic pause/resume. Stop training and resume from last checkpoint manually.
 
-**Q: Do I need a GPU?**  
+**Q: Do I need a GPU?**
 A: No, but strongly recommended. CPU training is 10-30× slower.
 
-**Q: What's the minimum dataset size?**  
+**Q: What's the minimum dataset size?**
 A: 1,000 images minimum for testing. 10,000+ recommended for good results.
 
-**Q: Can I use my own captions?**  
+**Q: Can I use my own captions?**
 A: Yes! Plain text file, one caption per line, matching image order.
 
 ---

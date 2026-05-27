@@ -1,6 +1,6 @@
 # FluxFlow UI - User Guide
 
-**Version**: 0.3.0  
+**Version**: 0.3.0
 **Last Updated**: 2025-12-12
 
 Complete guide for using FluxFlow UI to train and generate images with text-to-image models.
@@ -395,7 +395,7 @@ Examples:
 
 **Negative Prompt Suggestions:**
 ```
-blurry, low quality, distorted, bad anatomy, 
+blurry, low quality, distorted, bad anatomy,
 watermark, text, signature, cropped, ugly
 ```
 
