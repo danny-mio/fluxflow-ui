@@ -49,6 +49,23 @@ class GenerationWorker:
         else:
             return torch.device("cpu")
 
+    def _load_text_encoder_weights(
+        self, text_encoder: BertTextEncoder, checkpoint_path: str
+    ) -> bool:
+        """Load text encoder from sibling text_encoder.safetensors; return True if loaded."""
+        cp = Path(checkpoint_path)
+        te_path = (
+            cp / "text_encoder.safetensors"
+            if cp.is_dir()
+            else cp.parent / "text_encoder.safetensors"
+        )
+        if not te_path.exists():
+            return False
+        te_state = safetensors.torch.load_file(str(te_path))
+        te_state = {k.replace("text_encoder.", ""): v for k, v in te_state.items()}
+        text_encoder.load_state_dict(te_state, strict=False)
+        return True
+
     def load_model(  # noqa: C901
         self,
         checkpoint_path: str,
@@ -88,6 +105,7 @@ class GenerationWorker:
                         self.tokenizer.pad_token = self.tokenizer.eos_token
                         self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
                     self.text_encoder = BertTextEncoder(embed_dim=1024)  # Default for UI
+                    self._load_text_encoder_weights(self.text_encoder, checkpoint_path)
 
                     # Ensure models are on device
                     self.pipeline.to(self.device).eval()
@@ -118,6 +136,7 @@ class GenerationWorker:
                             self.tokenizer.pad_token = self.tokenizer.eos_token
                             self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
                         self.text_encoder = BertTextEncoder(embed_dim=1024)  # Default for UI
+                        self._load_text_encoder_weights(self.text_encoder, checkpoint_path)
 
                         # Ensure models are on device
                         self.pipeline.to(self.device).eval()
@@ -298,14 +317,15 @@ class GenerationWorker:
                 },
                 strict=False,
             )
-            self.text_encoder.load_state_dict(
-                {
-                    k.replace("text_encoder.", ""): v
-                    for k, v in state_dict.items()
-                    if k.startswith("text_encoder.")
-                },
-                strict=False,
-            )
+            if not self._load_text_encoder_weights(self.text_encoder, checkpoint_path):
+                self.text_encoder.load_state_dict(
+                    {
+                        k.replace("text_encoder.", ""): v
+                        for k, v in state_dict.items()
+                        if k.startswith("text_encoder.")
+                    },
+                    strict=False,
+                )
 
             self.diffuser.to(self.device).eval()
             self.text_encoder.to(self.device).eval()
@@ -394,14 +414,15 @@ class GenerationWorker:
                 },
                 strict=False,
             )
-            self.text_encoder.load_state_dict(
-                {
-                    k.replace("text_encoder.", ""): v
-                    for k, v in state_dict.items()
-                    if k.startswith("text_encoder.")
-                },
-                strict=False,
-            )
+            if not self._load_text_encoder_weights(self.text_encoder, checkpoint_path):
+                self.text_encoder.load_state_dict(
+                    {
+                        k.replace("text_encoder.", ""): v
+                        for k, v in state_dict.items()
+                        if k.startswith("text_encoder.")
+                    },
+                    strict=False,
+                )
 
             self.diffuser.to(self.device).eval()
             self.text_encoder.to(self.device).eval()
