@@ -232,6 +232,16 @@ class TestGenerationEndpoints:
 class TestFileBrowserEndpoint:
     """Tests for file browser endpoint."""
 
+    @pytest.fixture(autouse=True)
+    def allow_tmp_path(self, tmp_path):
+        """Patch ALLOWED_BROWSE_ROOTS to include pytest tmp_path for browser tests."""
+        import fluxflow_ui.app_flask as flask_app
+
+        original = flask_app.ALLOWED_BROWSE_ROOTS
+        flask_app.ALLOWED_BROWSE_ROOTS = [str(tmp_path), flask_app.FILE_BROWSER_BASE_DIR]
+        yield
+        flask_app.ALLOWED_BROWSE_ROOTS = original
+
     def test_browse_files_requires_json(self, client):
         """Should require JSON body."""
         response = client.post("/api/files/browse")
@@ -316,6 +326,16 @@ class TestFileBrowserEndpoint:
 
         names = [item["name"] for item in data["items"]]
         assert ".." in names
+
+    def test_browse_files_rejects_path_outside_roots(self, client):
+        """Should return 403 for paths outside allowed roots."""
+        response = client.post(
+            "/api/files/browse",
+            data=json.dumps({"path": "/etc"}),
+            content_type="application/json",
+        )
+
+        assert response.status_code == 403
 
 
 class TestJSONValidation:

@@ -4,6 +4,7 @@ import base64
 import io
 import logging
 import os
+import secrets
 from functools import wraps
 from pathlib import Path
 
@@ -24,6 +25,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLUXFLOW_SECRET_KEY") or secrets.token_hex(32)
+if not os.environ.get("FLUXFLOW_SECRET_KEY"):
+    logging.getLogger(__name__).warning(
+        "FLUXFLOW_SECRET_KEY not set; using ephemeral key (sessions won't survive restart)"
+    )
 
 # Restrict CORS to localhost only for security
 CORS(app, origins=["http://localhost:7860", "http://127.0.0.1:7860"])
@@ -35,6 +41,12 @@ config_manager = ConfigManager()
 
 # Base directory for file browser (security: prevent path traversal)
 FILE_BROWSER_BASE_DIR = os.path.abspath(os.getcwd())
+
+# Env-var-driven allowlist for file browser roots.
+# Set FLUXFLOW_BROWSE_ROOTS to a colon-separated list of allowed absolute paths.
+ALLOWED_BROWSE_ROOTS = [p for p in os.environ.get("FLUXFLOW_BROWSE_ROOTS", "").split(":") if p]
+if not ALLOWED_BROWSE_ROOTS:
+    ALLOWED_BROWSE_ROOTS = [FILE_BROWSER_BASE_DIR]
 
 
 def require_json(f):
@@ -120,10 +132,12 @@ def start_training():
     """Start training."""
     config = request.json
 
-    if training_runner.is_running:
-        return jsonify({"status": "error", "message": "Training already running"}), 400
-
+    # start_training holds _lock internally: check + start are atomic (no TOCTOU).
+    # Returns False both when already running and on launch failure.
+    already_running = training_runner.is_running
     success = training_runner.start_training(config)
+    if not success and already_running:
+        return jsonify({"status": "error", "message": "Training already running"}), 400
 
     if success:
         logger.info("Training started successfully")
@@ -310,17 +324,26 @@ def _should_include_file(item: Path, file_type: str) -> bool:
 
 
 def _resolve_browse_path(current_path: str) -> Path:
-    """Resolve and validate browse path."""
+    """Resolve and validate browse path against allowed roots.
+
+    Raises:
+        ValueError: If resolved path is outside all allowed roots.
+    """
     if not os.path.isabs(current_path):
         path_obj = Path(current_path).expanduser().resolve()
     else:
         path_obj = Path(current_path).resolve()
 
     if not path_obj.exists():
-        path_obj = Path.cwd()
+        path_obj = Path(ALLOWED_BROWSE_ROOTS[0])
 
     if path_obj.is_file():
         path_obj = path_obj.parent
+
+    real = str(path_obj.resolve())
+    allowed = [os.path.realpath(r) for r in ALLOWED_BROWSE_ROOTS]
+    if not any(real == a or real.startswith(a + os.sep) for a in allowed):
+        raise ValueError(f"Path outside allowed roots: {current_path}")
 
     return path_obj
 
@@ -357,6 +380,12 @@ def browse_files():
 
         return jsonify({"status": "success", "current_path": str(path_obj), "items": items})
 
+    except ValueError as e:
+        logger.warning(f"Forbidden browse path: {e}")
+        return (
+            jsonify({"status": "error", "message": "Access denied: path outside allowed roots"}),
+            403,
+        )
     except PermissionError:
         logger.warning(f"Permission denied accessing path: {current_path}")
         return jsonify({"status": "error", "message": "Permission denied"}), 403

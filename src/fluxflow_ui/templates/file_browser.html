@@ -266,13 +266,21 @@ async function loadDirectory(path) {
                 }
 
                 const icon = item.type === 'dir' ? '📁' : '📄';
-                li.innerHTML = `
-                    <div class="file-item-name">
-                        <span class="file-icon" aria-hidden="true">${icon}</span>
-                        <span>${item.name}</span>
-                    </div>
-                    <span class="file-size">${item.size}</span>
-                `;
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'file-item-name';
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'file-icon';
+                iconSpan.setAttribute('aria-hidden', 'true');
+                iconSpan.textContent = icon;
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = item.name;
+                nameDiv.appendChild(iconSpan);
+                nameDiv.appendChild(nameSpan);
+                const sizeSpan = document.createElement('span');
+                sizeSpan.className = 'file-size';
+                sizeSpan.textContent = item.size;
+                li.appendChild(nameDiv);
+                li.appendChild(sizeSpan);
 
                 fileList.appendChild(li);
             });
