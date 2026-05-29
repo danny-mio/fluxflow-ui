@@ -32,7 +32,6 @@ dependencies = [
     "gradio>=4.0.0",
     "flask>=3.0.0",
     "flask-cors>=4.0.0",
-    "pyyaml>=6.0.0",
     # Core dependencies (explicit for clarity)
     "torch>=2.0.0",
     "transformers>=4.30.0",
