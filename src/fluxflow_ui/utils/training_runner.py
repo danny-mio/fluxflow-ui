@@ -236,7 +236,19 @@ class TrainingRunner:
 
             # Start process
             try:
-                logger.info(f"Starting training with command: {' '.join(cmd)}")
+                _SENSITIVE_ARGS = {"--webdataset_token", "--tt2m_token"}
+                safe_cmd: List[str] = []
+                skip_next = False
+                for part in cmd:
+                    if skip_next:
+                        safe_cmd.append("***")
+                        skip_next = False
+                    elif part in _SENSITIVE_ARGS:
+                        safe_cmd.append(part)
+                        skip_next = True
+                    else:
+                        safe_cmd.append(part)
+                logger.info(f"Starting training with command: {' '.join(safe_cmd)}")
                 self.process = subprocess.Popen(
                     cmd,
                     stdout=subprocess.PIPE,
