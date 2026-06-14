@@ -70,12 +70,18 @@ Use when: Selenium MCP is unavailable or you just need to prove the HTTP
 contract still works.
 
 ```bash
-# 1) load
-curl -s -X POST http://localhost:7860/api/generation/load \
+# 1) inspect — detects vae_dim / feature_maps_dim from the checkpoint
+curl -s -X POST http://localhost:7860/api/generation/inspect \
   -H 'Content-Type: application/json' \
   -d '{"checkpoint_path": "<absolute/path/to/checkpoint>"}'
 
-# 2) generate
+# 2) load — pass the dims returned by /inspect (defaults are 64/64, so omit
+#    them only if your checkpoint truly is 64/64).
+curl -s -X POST http://localhost:7860/api/generation/load \
+  -H 'Content-Type: application/json' \
+  -d '{"checkpoint_path": "<absolute/path/to/checkpoint>", "vae_dim": 64, "feature_maps_dim": 64}'
+
+# 3) generate
 curl -s -X POST http://localhost:7860/api/generation/generate \
   -H 'Content-Type: application/json' \
   -d '{"prompt": "a small red house at sunset", "img_width": 256, "img_height": 256, "ddim_steps": 8}' \
