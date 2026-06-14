@@ -20,15 +20,12 @@ _No unreleased changes._
 - `generation_worker.py` now unpacks `(text_seq, text_mask)` from the per-token
   `BertTextEncoder` and threads the tuple end-to-end into the flow processor,
   tracking the v0.10.0 bezier-coupled redesign in `fluxflow-core`.
-- CFG null branch built via `fluxflow.utils.visualization.build_cfg_null_pair`
-  (encoded empty prompt) instead of `torch.zeros_like` on the pooled vector,
-  preventing NaN/black-image artifacts on the null pass.
+- CFG null branch built via `fluxflow.utils.build_cfg_null_pair` (encoded empty
+  prompt) instead of `torch.zeros_like` on the pooled vector, preventing
+  NaN / black-image artifacts on the null pass.
 - Flask routes that pass conditioning to the flow processor now thread the
   per-token tuple end-to-end; the external HTTP API is unchanged (text in,
-  image out — same request and response shape).
-
-### Notes
-- External HTTP API is unchanged from v0.8.0 — internal pipeline rewiring only.
+  image out — same request and response shape) from v0.8.0.
 - Salvage path for old checkpoints lives in `fluxflow-core`; see
   [MIGRATION-v0.10.0-redesign.md](https://github.com/danny-mio/fluxflow-core/blob/develop/docs/MIGRATION-v0.10.0-redesign.md).
 
