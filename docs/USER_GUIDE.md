@@ -576,8 +576,8 @@ watermark, text, signature, cropped, ugly
 
 **Documentation:**
 - [README.md](../README.md) - Quick start
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Detailed troubleshooting
 - [SECURITY.md](../SECURITY.md) - Security considerations
+- See the Troubleshooting section earlier in this guide for common issues
 
 **Examples:**
 - Screenshot gallery: [docs/assets/](assets/)

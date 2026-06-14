@@ -184,8 +184,7 @@ pip install -e ".[dev]"
 
 - [GitHub Repository](https://github.com/danny-mio/fluxflow-ui)
 - [Security Policy](SECURITY.md)
-- [User Guide](docs/USER_GUIDE.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
+- [User Guide](docs/USER_GUIDE.md) (includes a Troubleshooting section)
 
 ## License
 

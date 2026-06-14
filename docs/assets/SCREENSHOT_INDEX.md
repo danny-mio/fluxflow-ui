@@ -271,7 +271,7 @@ These screenshots are part of the FluxFlow UI project and should be used for:
 **Next Review**: When UI changes significantly
 
 To update screenshots:
-1. Run `/Volumes/DanieleExt/ai/ffnew/testing/scripts/capture_documentation_screenshots.py`
+1. Run the screenshot-capture script under the sibling `testing/scripts/` directory (path varies by checkout)
 2. Review new screenshots in this directory
 3. Update this index with any new screenshots
 4. Archive old screenshots if UI changed significantly
