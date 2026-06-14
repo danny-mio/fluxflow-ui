@@ -3,8 +3,6 @@
 **Version**: 0.10.0
 **Last Updated**: 2026-06-14
 
-Complete guide for using FluxFlow UI to train and generate images with text-to-image models.
-
 > **v0.10.0 note**: The text-encoder path is now per-token internally
 > (`text_seq`, `text_mask`) and the CFG null branch uses an encoded empty
 > prompt. The user-facing flow below is unchanged — your prompt-in / image-out
@@ -129,13 +127,13 @@ Click **Generate Image** button
 
 #### When to Use CFG
 
-✅ **Use CFG when you want:**
+**Use CFG when you want:**
 - Better prompt adherence
 - Higher quality/detail
 - Avoid specific features (negative prompts)
 - More control over output
 
-❌ **Skip CFG when:**
+**Skip CFG when:**
 - Model wasn't trained with `cfg_dropout_prob > 0`
 - Speed is critical (CFG is 2× slower)
 - Exploring creative variations
@@ -143,7 +141,7 @@ Click **Generate Image** button
 #### Using CFG
 
 1. **Expand CFG Settings** section (click to open)
-2. **Enable CFG** checkbox ☑️
+2. **Enable CFG** checkbox
 3. **Set Guidance Scale:**
    - 1.0 = No guidance (standard generation)
    - 3.0-5.0 = Subtle improvement (recommended start)
@@ -277,12 +275,12 @@ Train your own text-to-image models on custom datasets.
 
 **Training Mode Checkboxes:**
 
-☑️ **Train VAE:**
+**Train VAE:**
 - Trains the encoder/decoder
 - Enable for: New models, improving reconstruction
 - Disable for: Fine-tuning only flow processor
 
-☑️ **Train SPADE:**
+**Train SPADE:**
 - Enables SPADE normalization training
 - Improves quality
 - Recommended: Enable
@@ -340,10 +338,10 @@ Click **Start Training** button
 Click **Stop Training** button
 
 **When to stop:**
-- ✅ Reached desired epochs
-- ✅ Loss plateaued for long time
-- ✅ Sample images look good
-- ✅ Out of time/patience
+- Reached desired epochs
+- Loss plateaued for long time
+- Sample images look good
+- Out of time/patience
 
 **Checkpoint saved:**
 - `{output_path}/flxflow_final.safetensors`
@@ -574,22 +572,6 @@ watermark, text, signature, cropped, ugly
    - More data if quality insufficient
    - Adjust architecture if needed
 
-### Advanced Topics
-
-**Not Covered in This Guide:**
-- Pipeline YAML configuration (multi-step training)
-- Custom optimizer/scheduler configs
-- LPIPS perceptual loss
-- WebDataset streaming
-- Distributed training
-
-**See:**
-- Advanced training features require YAML configs
-- Feature planned for future UI update
-- Current UI: Simple single-step training only
-
----
-
 ## Support & Resources
 
 **Documentation:**
@@ -607,7 +589,3 @@ watermark, text, signature, cropped, ugly
 
 **Community:**
 - Discussions: GitHub Discussions (coming soon)
-
----
-
-**Enjoy creating with FluxFlow!** 🎨

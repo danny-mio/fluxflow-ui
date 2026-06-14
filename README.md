@@ -22,7 +22,7 @@ have nothing to migrate on the UI side.
 For full context on the redesign and a checkpoint salvage path, see
 [fluxflow-core MIGRATION-v0.10.0-redesign.md](https://github.com/danny-mio/fluxflow-core/blob/develop/docs/MIGRATION-v0.10.0-redesign.md).
 
-## 🚧 Model Availability Notice
+## Model Availability Notice
 
 **Training In Progress**: FluxFlow models are currently being trained. The UI is fully functional, but trained model checkpoints are not yet available for download.
 
@@ -88,7 +88,7 @@ cd fluxflow-ui
 pip install -e ".[dev]"
 ```
 
-## ⚠️ Security Warning
+## Security Warning
 
 **FluxFlow UI is designed for local development use only.**
 
@@ -101,16 +101,6 @@ See [SECURITY.md](SECURITY.md) for details on security measures, limitations, an
 **Do not expose this application to the internet without additional security hardening.**
 
 ---
-
-## Features
-
-- **Training Interface**: Configure and monitor training runs
-  - Start/stop training, monitor loss curves and metrics, view sample generations
-- **Generation Interface**: Generate images from text prompts
-  - Load trained models, adjust sampling parameters, batch generation support
-- **Real-time Progress**: Live training updates and logs
-- **Model Management**: Load and manage checkpoints
-- **Interactive Controls**: Adjust generation parameters in real-time
 
 ## Quick Start
 
@@ -134,7 +124,7 @@ Then open your browser to `http://localhost:7860`
 
 ## Classifier-Free Guidance (CFG)
 
-**✨ Available since v0.3.0**: FluxFlow UI supports training and generation with Classifier-Free Guidance.
+**Available since v0.3.0**: FluxFlow UI supports training and generation with Classifier-Free Guidance.
 
 ### Training with CFG
 
