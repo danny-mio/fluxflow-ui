@@ -37,7 +37,9 @@ For full context on the redesign and a checkpoint salvage path, see
 
 ## Installation
 
-> **Note**: This documentation describes **v0.8.0**. For the previous stable version (v0.4.0), see [v0.4.0 documentation](https://github.com/danny-mio/fluxflow-ui/tree/v0.4.0).
+> **Note**: This documentation describes **v0.10.0** (current development line).
+> For the previous PyPI-published stable version (v0.8.0), see
+> [v0.8.0 documentation](https://github.com/danny-mio/fluxflow-ui/tree/v0.8.0).
 
 ### Prerequisites
 
@@ -58,7 +60,7 @@ pip --version     # Should be installed
 nvidia-smi        # (NVIDIA only) Should show GPU info
 ```
 
-### Production Install (v0.8.0 - Current Stable)
+### Production Install (latest PyPI release)
 
 ```bash
 pip install fluxflow-ui
@@ -70,9 +72,13 @@ pip install fluxflow-ui
 - `fluxflow` core package (transitively installed)
 - CLI command: `fluxflow-ui`
 
-**Package available on PyPI**: [fluxflow-ui v0.8.0](https://pypi.org/project/fluxflow-ui/)
-
-⚠️ **Note**: v0.8.0 requires `fluxflow-training>=0.8.0` and supports the pillar-attention flow architecture introduced in v0.8.0.
+**Package on PyPI**: [fluxflow-ui](https://pypi.org/project/fluxflow-ui/) —
+the v0.8.0 release is the current PyPI line and supports the pillar-attention
+flow architecture introduced in v0.8.0. v0.10.0 (this branch) is still on the
+development line; it tracks `fluxflow-training` from the matching
+`feature/model-v0.10.0` branch and will move to `>=0.10.0` once that core
+release lands on PyPI. The change is internal-API only relative to v0.8.0
+(no HTTP surface change).
 
 ### Development Install
 
@@ -134,7 +140,7 @@ Then open your browser to `http://localhost:7860`
 
 To train models with CFG support:
 
-1. Navigate to the **Training** tab
+1. Navigate to the **Training Pipeline** tab
 2. Expand the **CFG Training** section
 3. Set `cfg_dropout_prob` between 0.0-0.20 (recommended: 0.10-0.15)
    - This randomly drops text conditioning during training
@@ -145,7 +151,7 @@ To train models with CFG support:
 
 To use CFG during generation:
 
-1. Navigate to the **Generation** tab
+1. Navigate to the **Generation Studio** tab
 2. Load a checkpoint trained with `cfg_dropout_prob > 0`
 3. Expand the **CFG Settings** section
 4. Enable CFG and set parameters:

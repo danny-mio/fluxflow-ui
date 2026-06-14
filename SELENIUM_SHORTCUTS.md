@@ -8,14 +8,15 @@ new flow afterwards. Do not store credentials or sensitive data here. Always
 ## Prereqs
 
 ```bash
-# Terminal A — launch the UI
-cd fluxflow-ui
+# Terminal A — launch the UI (from the fluxflow-ui repo root)
 ./launch_ui.sh           # or: ./launch.sh
 # UI must be reachable at http://localhost:7860
 ```
 
 Default checkpoint location: any `*.safetensors` (legacy) or versioned directory
-under a path your `.fluxflow_config` exposes (or under `_cache/`).
+under a path the file browser is allowed to traverse. The allowlist is the CWD
+unless overridden by `FLUXFLOW_BROWSE_ROOTS` (colon-separated absolute paths),
+plus `_cache/` for cached models.
 
 ## SH-01 — Smoke: page loads, no console errors
 
