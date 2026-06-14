@@ -13,8 +13,9 @@ _No unreleased changes._
 ### Added
 - `SELENIUM_SHORTCUTS.md` at repo root with happy-path QA flows for the v0.10.0
   generation worker (SH-01 smoke, SH-02 generation regression, SH-03 API-only).
-- Narrow `request.json` `assert isinstance(..., dict)` asserts in `app_flask.py`
-  to satisfy mypy without changing runtime behavior.
+- Narrow `assert X is not None` asserts in `app_flask.py` after each
+  `request.json` access to satisfy mypy without changing runtime behavior
+  (the `@require_json` decorator already guarantees a non-None JSON body).
 
 ### Changed
 - `generation_worker.py` now unpacks `(text_seq, text_mask)` from the per-token

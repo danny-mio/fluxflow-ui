@@ -215,7 +215,7 @@ The UI tracks the v0.10.0 redesign shipped in `fluxflow-core` and
 
 UI-side impact lives in `src/fluxflow_ui/utils/generation_worker.py`:
 - Switched to per-token text encoding (`text_seq`, `text_mask`).
-- CFG null branch built via `fluxflow.utils.visualization.build_cfg_null_pair`
+- CFG null branch built via `fluxflow.utils.build_cfg_null_pair`
   instead of `torch.zeros_like` on the pooled vector.
 
 Plans:

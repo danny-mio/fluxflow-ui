@@ -25,8 +25,9 @@ Use when: verifying a build / config / dependency change hasn't broken the page.
 1. `selenium.start_browser` (Chrome, headless OK).
 2. `selenium.navigate` → `http://localhost:7860`.
 3. `selenium.get_console_logs` → expect no `SEVERE` entries.
-4. `selenium.find_element` by css `#generation` (the generation tab panel in
-   `templates/index.html`).
+4. `selenium.find_element` by css `#training` (the default-active tab panel in
+   `templates/index.html`; the `#generation` panel is hidden until the user
+   clicks the generation tab, so do not assert against it for smoke).
 5. `selenium.close_browser`.
 
 ## SH-02 — Generation happy path (M7 regression)
@@ -39,8 +40,11 @@ processor) after editing `generation_worker.py` or bumping `fluxflow-core`.
 1. `selenium.start_browser`.
 2. `selenium.navigate` → `http://localhost:7860`.
 3. Click the **Generation Studio** tab (button id `tab-generation`).
-4. In the checkpoint field, paste a path to a known-good v0.10.0 checkpoint
-   (directory or `.safetensors`). Click **Load Model** — the handler runs
+4. In the checkpoint field, paste a path to a known-good v0.10.0
+   `.safetensors` checkpoint file (directory paths are **not** currently
+   supported — `/api/generation/inspect` calls `safetensors.torch.load_file`
+   directly and will raise on a directory; fixing that requires a code change
+   to `app_flask.py:inspect_model`). Click **Load Model** — the handler runs
    `/api/generation/inspect` (dimension auto-detect) then `/api/generation/load`
    in sequence. Wait for the `loadStatus` element to show
    `Model loaded (VAE=…, Feature=…)`.
