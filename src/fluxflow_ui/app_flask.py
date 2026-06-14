@@ -81,6 +81,7 @@ def get_training_config():
 def save_training_config():
     """Save training configuration."""
     config = request.json
+    assert config is not None  # @require_json guarantees
     config_manager.save_training_config(config)
     return jsonify({"status": "success"})
 
@@ -99,6 +100,7 @@ def get_generation_config():
 def save_generation_config():
     """Save generation configuration."""
     config = request.json
+    assert config is not None  # @require_json guarantees
     config_manager.save_generation_config(config)
     return jsonify({"status": "success"})
 
@@ -108,6 +110,7 @@ def save_generation_config():
 def start_training():
     """Start training."""
     config = request.json
+    assert config is not None  # @require_json guarantees
 
     # start_training holds _lock internally: check + start are atomic (no TOCTOU).
     # Returns False both when already running and on launch failure.
@@ -151,6 +154,7 @@ def training_status():
 def inspect_model():
     """Inspect model checkpoint and detect dimensions."""
     data = request.json
+    assert data is not None  # @require_json guarantees
     checkpoint_path = data.get("checkpoint_path")
 
     if not checkpoint_path:
@@ -209,6 +213,7 @@ def inspect_model():
 def load_model():
     """Load generation model."""
     data = request.json
+    assert data is not None  # @require_json guarantees
 
     checkpoint_path = data.get("checkpoint_path")
     if not checkpoint_path:
@@ -234,6 +239,7 @@ def load_model():
 def generate_image():
     """Generate image from prompt."""
     data = request.json
+    assert data is not None  # @require_json guarantees
 
     prompt = data.get("prompt")
     if not prompt:
@@ -330,6 +336,7 @@ def _resolve_browse_path(current_path: str) -> Path:
 def browse_files():
     """Browse files and directories with path traversal protection."""
     data = request.json
+    assert data is not None  # @require_json guarantees
     current_path = data.get("path", ".")
     file_type = data.get("type", "all")  # 'all', 'dir', 'file', 'safetensors'
 

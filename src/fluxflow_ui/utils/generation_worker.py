@@ -21,7 +21,11 @@ from fluxflow.models import (  # noqa: E402
     FluxPipeline,
 )
 from fluxflow.models.versioning import load_versioned_checkpoint  # noqa: E402
-from fluxflow.utils import generate_latent_images, img_to_random_packet  # noqa: E402
+from fluxflow.utils import (  # noqa: E402
+    build_cfg_null_pair,
+    generate_latent_images,
+    img_to_random_packet,
+)
 
 
 class GenerationWorker:
@@ -502,11 +506,15 @@ class GenerationWorker:
                 input_ids = inputs["input_ids"].to(self.device)
                 attention_mask = inputs["attention_mask"].to(self.device)
 
-                # Encode text
-                text_embeddings = self.text_encoder(input_ids, attention_mask=attention_mask)
+                # Encode text — v0.10.0 BertTextEncoder returns per-token (seq, mask).
+                text_seq, text_mask = self.text_encoder(input_ids, attention_mask=attention_mask)
 
-                # Encode negative prompt if CFG is enabled
-                negative_embeddings = None
+                # Encode negative / null prompt if CFG is enabled.
+                # NOTE: a zeros-like null with an all-False mask would NaN-out the
+                # cross-attention softmax in the v0.10.0 flow. Use an empty-prompt
+                # encoding (via build_cfg_null_pair) when no negative prompt is given.
+                negative_seq = None
+                negative_mask = None
                 if use_cfg and guidance_scale > 1.0:
                     if negative_prompt:
                         neg_inputs = self.tokenizer(
@@ -518,12 +526,15 @@ class GenerationWorker:
                         )
                         neg_input_ids = neg_inputs["input_ids"].to(self.device)
                         neg_attention_mask = neg_inputs["attention_mask"].to(self.device)
-                        negative_embeddings = self.text_encoder(
+                        negative_seq, negative_mask = self.text_encoder(
                             neg_input_ids, attention_mask=neg_attention_mask
                         )
                     else:
-                        # Use null conditioning (zeros)
-                        negative_embeddings = torch.zeros_like(text_embeddings)
+                        null_seq, null_mask = build_cfg_null_pair(
+                            self.text_encoder, max_length=int(text_seq.size(1))
+                        )
+                        negative_seq = null_seq.to(device=self.device, dtype=text_seq.dtype)
+                        negative_mask = null_mask.to(device=self.device)
 
                 # Create pure Gaussian noise latent (all dims including context)
                 context_dims = self.diffuser.compressor.get_context_dims()
@@ -534,15 +545,22 @@ class GenerationWorker:
                     context_dims=context_dims,
                     downscales=getattr(self.diffuser.compressor, "downscales", 4),
                     max_hw=getattr(self.diffuser.compressor, "max_hw", 1024),
-                ).to(dtype=text_embeddings.dtype)
+                ).to(dtype=text_seq.dtype)
 
                 # Denoise with or without CFG
-                if use_cfg and guidance_scale > 1.0 and negative_embeddings is not None:
+                if (
+                    use_cfg
+                    and guidance_scale > 1.0
+                    and negative_seq is not None
+                    and negative_mask is not None
+                ):
                     # Use CFG-guided generation
                     denoised_latent = self._generate_with_cfg(
                         noised_latent=noised_latent,
-                        text_embeddings=text_embeddings,
-                        negative_embeddings=negative_embeddings,
+                        text_seq=text_seq,
+                        text_mask=text_mask,
+                        negative_seq=negative_seq,
+                        negative_mask=negative_mask,
                         guidance_scale=guidance_scale,
                         steps=ddim_steps,
                     )
@@ -550,7 +568,8 @@ class GenerationWorker:
                     # Standard generation
                     denoised_latent = generate_latent_images(
                         batch_z=noised_latent,
-                        text_embeddings=text_embeddings,
+                        text_seq=text_seq,
+                        text_mask=text_mask,
                         diffuser=self.diffuser,
                         steps=ddim_steps,
                         prediction_type="v_prediction",
@@ -574,8 +593,10 @@ class GenerationWorker:
     def _generate_with_cfg(
         self,
         noised_latent: torch.Tensor,
-        text_embeddings: torch.Tensor,
-        negative_embeddings: torch.Tensor,
+        text_seq: torch.Tensor,
+        text_mask: torch.Tensor,
+        negative_seq: torch.Tensor,
+        negative_mask: torch.Tensor,
         guidance_scale: float,
         steps: int,
     ) -> torch.Tensor:
@@ -583,8 +604,10 @@ class GenerationWorker:
 
         Args:
             noised_latent: Initial noised latent [B, T+1, D]
-            text_embeddings: Conditional text embeddings
-            negative_embeddings: Unconditional/negative text embeddings
+            text_seq: Conditional per-token text embeddings [B, T_txt, E]
+            text_mask: Conditional bool mask [B, T_txt]
+            negative_seq: Unconditional/negative per-token text embeddings [B, T_txt, E]
+            negative_mask: Unconditional/negative bool mask [B, T_txt]
             guidance_scale: CFG strength
             steps: Number of denoising steps
 
@@ -621,12 +644,14 @@ class GenerationWorker:
             # Reconstruct full latent with hw_vec for model input
             full_input = torch.cat([lat, hw_vec], dim=1)
 
-            # Predict with conditional embeddings
-            v_cond = self.diffuser.flow_processor(full_input, text_embeddings, t_batch)
+            # Predict with conditional per-token text
+            v_cond = self.diffuser.flow_processor(full_input, text_seq, text_mask, t_batch)
             v_cond_lat = v_cond[:, :-1, :]  # Remove hw_vec from prediction
 
-            # Predict with unconditional embeddings
-            v_uncond = self.diffuser.flow_processor(full_input, negative_embeddings, t_batch)
+            # Predict with unconditional per-token text
+            v_uncond = self.diffuser.flow_processor(
+                full_input, negative_seq, negative_mask, t_batch
+            )
             v_uncond_lat = v_uncond[:, :-1, :]  # Remove hw_vec from prediction
 
             # Apply CFG guidance
