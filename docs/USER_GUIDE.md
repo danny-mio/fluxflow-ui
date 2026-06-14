@@ -253,9 +253,9 @@ Train your own text-to-image models on custom datasets.
 - Higher = more capacity but slower
 
 **Text Embedding Dimension:**
-- Default: 1024 (DistilBERT per-token hidden size)
-- Since v0.10.0 this is the per-token dimension of `text_seq` (sequence of
-  token embeddings + mask) — not a pooled vector
+- Default: 1024 — the projected output dim of `BertTextEncoder`,
+  configured independently of the underlying transformer (DistilBERT's
+  own hidden size is 768)
 - Don't change unless using a different text encoder
 
 #### Training Parameters

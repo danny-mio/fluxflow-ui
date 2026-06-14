@@ -8,10 +8,16 @@ new flow afterwards. Do not store credentials or sensitive data here. Always
 ## Prereqs
 
 ```bash
-# Terminal A — launch the UI (from the fluxflow-ui repo root)
-./launch_ui.sh           # or: ./launch.sh
+# Terminal A — launch the UI (canonical command from the README)
+fluxflow-ui
 # UI must be reachable at http://localhost:7860
 ```
+
+The `./launch_ui.sh` / `./launch.sh` shell scripts in the repo root are
+convenience wrappers for source checkouts (`launch_ui.sh` sources `.venv` and
+runs the configured UI app; `launch.sh` activates the same console script
+with host/port flags); use them only when you are working from a clone
+without an installed package.
 
 Default checkpoint location: any `*.safetensors` (legacy) or versioned directory
 under a path the file browser is allowed to traverse. The allowlist is the CWD
