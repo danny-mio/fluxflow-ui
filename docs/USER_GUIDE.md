@@ -1,9 +1,16 @@
 # FluxFlow UI - User Guide
 
-**Version**: 0.3.0
-**Last Updated**: 2025-12-12
+**Version**: 0.10.0
+**Last Updated**: 2026-06-14
 
 Complete guide for using FluxFlow UI to train and generate images with text-to-image models.
+
+> **v0.10.0 note**: The text-encoder path is now per-token internally
+> (`text_seq`, `text_mask`) and the CFG null branch uses an encoded empty
+> prompt. The user-facing flow below is unchanged — your prompt-in / image-out
+> workflow is identical. See
+> [fluxflow-core MIGRATION-v0.10.0-redesign.md](https://github.com/danny-mio/fluxflow-core/blob/develop/docs/MIGRATION-v0.10.0-redesign.md)
+> for the architectural context and the checkpoint salvage path.
 
 ---
 
@@ -246,8 +253,10 @@ Train your own text-to-image models on custom datasets.
 - Higher = more capacity but slower
 
 **Text Embedding Dimension:**
-- Default: 1024 (DistilBERT)
-- Don't change unless using different text encoder
+- Default: 1024 (DistilBERT per-token hidden size)
+- Since v0.10.0 this is the per-token dimension of `text_seq` (sequence of
+  token embeddings + mask) — not a pooled vector
+- Don't change unless using a different text encoder
 
 #### Training Parameters
 
