@@ -10,13 +10,15 @@ walkthroughs, see the repository root:
   common issues.
 - **[../../CHANGELOG.md](../../CHANGELOG.md)** — release history.
 
-## Entry points
+## Entry points (summary)
+
+This is a pointer summary; the canonical install / launch instructions live
+in the top-level [README.md](../../README.md). Do not duplicate command
+details here.
 
 - **Flask (primary)** — `fluxflow-ui` (installed console script) or
-  `python -m fluxflow_ui.app_flask`. Serves the REST API and HTML UI on
-  `http://localhost:7860`.
-- **Gradio (alternative)** — `python -m fluxflow_ui.app`. Limited feature
-  coverage; prefer Flask.
+  `python -m fluxflow_ui.app_flask`.
+- **Gradio (alternative)** — `python -m fluxflow_ui.app`.
 
 ## Package layout
 

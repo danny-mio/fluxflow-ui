@@ -77,6 +77,9 @@ AND no console SEVERE.
 
 ## SH-03 — API-only smoke (no browser)
 
+This shortcut needs no Selenium session. Do not precede it with
+`selenium.start_browser`.
+
 Use when: Selenium MCP is unavailable or you just need to prove the HTTP
 contract still works.
 

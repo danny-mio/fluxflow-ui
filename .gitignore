@@ -58,7 +58,11 @@ checkpoints/
 .mypy_cache/
 _cache/
 
-# AI-agent scratch and intermediate planning docs
+# AI-agent scratch and intermediate planning docs.
+# NOTE: the *_SUMMARY.md / *_ENHANCEMENTS.md globs are intentionally broad to
+# catch agent-generated drafts at the repo root; if you ever add a legitimate
+# document whose name ends with these suffixes (e.g. RELEASE_SUMMARY.md), add
+# an explicit `!FILENAME.md` un-ignore line below to keep it tracked.
 docs/plans/
 TODO.md
 *_SUMMARY.md
