@@ -24,7 +24,8 @@ Use when: verifying a build / config / dependency change hasn't broken the page.
 1. `selenium.start_browser` (Chrome, headless OK).
 2. `selenium.navigate` → `http://localhost:7860`.
 3. `selenium.get_console_logs` → expect no `SEVERE` entries.
-4. `selenium.find_element` by css `#generate-tab, #generation-tab, [data-tab="generation"]` (whichever exists in `templates/index.html`).
+4. `selenium.find_element` by css `#generation` (the generation tab panel in
+   `templates/index.html`).
 5. `selenium.close_browser`.
 
 ## SH-02 — Generation happy path (M7 regression)
@@ -36,16 +37,16 @@ processor) after editing `generation_worker.py` or bumping `fluxflow-core`.
 
 1. `selenium.start_browser`.
 2. `selenium.navigate` → `http://localhost:7860`.
-3. Click the **Generation** tab.
+3. Click the **Generation Studio** tab (button id `tab-generation`).
 4. In the checkpoint field, paste a path to a known-good v0.10.0 checkpoint
    (directory or `.safetensors`). Click **Load Model** — the handler runs
    `/api/generation/inspect` (dimension auto-detect) then `/api/generation/load`
    in sequence. Wait for the `loadStatus` element to show
    `Model loaded (VAE=…, Feature=…)`.
 5. Fill the prompt field, e.g. `a small red house at sunset`.
-6. (Optional) tick **Use CFG**, leave the negative prompt empty — this exercises
-   the new `build_cfg_null_pair` null path.
-7. Click **Generate**.
+6. (Optional) tick **Enable CFG** (checkbox id `use_cfg`), leave the negative
+   prompt empty — this exercises the new `build_cfg_null_pair` null path.
+7. Click **Generate Image**.
 8. Wait for the result image to render (PNG `data:image/png;base64,...` in
    `<img>`). Timeout 5 min on CPU/MPS.
 9. `selenium.get_console_logs` → no `SEVERE` errors; HTTP `/api/generation/generate`
