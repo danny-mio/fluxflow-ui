@@ -29,6 +29,8 @@ Use when: verifying a build / config / dependency change hasn't broken the page.
 
 ## SH-02 — Generation happy path (M7 regression)
 
+_Added 2026-06-14 for v0.10.0 (`m7-ui` milestone)._
+
 Use when: verifying the **text → image** internal wiring (per-token text → flow
 processor) after editing `generation_worker.py` or bumping `fluxflow-core`.
 
