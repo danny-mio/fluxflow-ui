@@ -57,3 +57,10 @@ outputs/
 checkpoints/
 .mypy_cache/
 _cache/
+
+# AI-agent scratch and intermediate planning docs
+docs/plans/
+TODO.md
+*_SUMMARY.md
+*_ENHANCEMENTS.md
+FEATURES.md
