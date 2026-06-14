@@ -2,6 +2,26 @@
 
 Web interface for FluxFlow text-to-image generation and training.
 
+## v0.10.0 — Internal text-path rewiring (no API change)
+
+v0.10.0 tracks the **bezier-coupled redesign** shipped in `fluxflow-core` /
+`fluxflow-training`. The change is **internal-only** — your requests do not
+change:
+
+- `BertTextEncoder` now returns a per-token tuple `(text_seq, text_mask)`; the
+  generation worker unpacks it and threads the per-token signal end-to-end into
+  the flow processor.
+- The CFG null branch uses an encoded empty prompt
+  (`build_cfg_null_pair`) instead of `torch.zeros_like` on the pooled vector,
+  preventing NaN / black-image artifacts.
+
+The Flask HTTP API (`/api/generation/load`, `/api/generation/generate`, etc.)
+is unchanged from v0.8.0 — same request payload, same response shape. End users
+have nothing to migrate on the UI side.
+
+For full context on the redesign and a checkpoint salvage path, see
+[fluxflow-core MIGRATION-v0.10.0-redesign.md](https://github.com/danny-mio/fluxflow-core/blob/develop/docs/MIGRATION-v0.10.0-redesign.md).
+
 ## 🚧 Model Availability Notice
 
 **Training In Progress**: FluxFlow models are currently being trained. The UI is fully functional, but trained model checkpoints are not yet available for download.
