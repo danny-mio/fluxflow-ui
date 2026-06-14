@@ -38,8 +38,10 @@ processor) after editing `generation_worker.py` or bumping `fluxflow-core`.
 2. `selenium.navigate` → `http://localhost:7860`.
 3. Click the **Generation** tab.
 4. In the checkpoint field, paste a path to a known-good v0.10.0 checkpoint
-   (directory or `.safetensors`). Click **Inspect** then **Load Model** and wait
-   for the success toast / `/api/generation/status` to show `loaded: true`.
+   (directory or `.safetensors`). Click **Load Model** — the handler runs
+   `/api/generation/inspect` (dimension auto-detect) then `/api/generation/load`
+   in sequence. Wait for the `loadStatus` element to show
+   `Model loaded (VAE=…, Feature=…)`.
 5. Fill the prompt field, e.g. `a small red house at sunset`.
 6. (Optional) tick **Use CFG**, leave the negative prompt empty — this exercises
    the new `build_cfg_null_pair` null path.
