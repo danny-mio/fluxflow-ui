@@ -26,6 +26,7 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
         vae_dim: int,
         feature_dim: int,
         text_dim: int,
+        text_encoder_path: str,
     ) -> Tuple[str, str]:
         """Handle model loading.
 
@@ -40,6 +41,7 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
             vae_dim=vae_dim,
             feature_maps_dim=feature_dim,
             text_embedding_dim=text_dim,
+            text_encoder_path=text_encoder_path or None,
         )
 
         if success:
@@ -49,6 +51,7 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
                     "vae_dim": vae_dim,
                     "feature_maps_dim": feature_dim,
                     "text_embedding_dim": text_dim,
+                    "text_encoder_path": text_encoder_path,
                 }
             )
             return f"✅ {message}", "✅ Model Loaded"
@@ -129,6 +132,12 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
                     precision=0,
                 )
 
+                text_encoder_path_input = gr.Textbox(
+                    label="Text Encoder (optional override)",
+                    placeholder="Optional: override path to text_encoder.safetensors",
+                    value=prev_config.get("text_encoder_path", ""),
+                )
+
                 load_btn = gr.Button("🔄 Load Model", variant="primary")
                 load_status = gr.Textbox(
                     label="Status",
@@ -173,11 +182,9 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
                     )
 
                 with gr.Accordion("Classifier-Free Guidance", open=False):
-                    gr.Markdown(
-                        """
+                    gr.Markdown("""
                         **CFG** increases prompt adherence. Requires model trained with CFG dropout.
-                        """
-                    )
+                        """)
                     use_cfg_checkbox = gr.Checkbox(
                         label="Enable CFG",
                         value=False,
@@ -226,20 +233,24 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
                 )
 
                 gr.Markdown("### Tips")
-                gr.Markdown(
-                    """
+                gr.Markdown("""
                 - **Model Loading**: Select a checkpoint and click Load Model first
                 - **Prompt**: Describe the image you want to generate
                 - **Image Size**: Larger sizes take longer but produce more detail
                 - **Steps**: More steps = higher quality but slower (50 is usually good)
                 - **Seed**: Enable for reproducible results
-                """
-                )
+                """)
 
         # Event handlers
         load_btn.click(
             fn=load_model_handler,
-            inputs=[checkpoint_input, vae_dim_input, feature_dim_input, text_dim_input],
+            inputs=[
+                checkpoint_input,
+                vae_dim_input,
+                feature_dim_input,
+                text_dim_input,
+                text_encoder_path_input,
+            ],
             outputs=[load_status, load_btn],
         )
 

@@ -6,9 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-_No unreleased changes._
+Not yet released — work in progress toward v0.10.0.
 
-## [0.10.0] - 2026-06-14
+### Added (Experimental)
+- **AMD ROCm/gfx1151 support (experimental, unvalidated)**: `_get_device()`
+  now delegates to `fluxflow.utils.device.get_device()`, which distinguishes
+  ROCm from real NVIDIA CUDA. No UI-visible behavior change — ROCm-build
+  PyTorch already routed through the existing CUDA code path. See
+  `docs/ROCM.md` in fluxflow-core.
+- NPU (XDNA) acceleration was evaluated and deferred; not implemented.
 
 ### Added
 - `SELENIUM_SHORTCUTS.md` at repo root with happy-path QA flows for the v0.10.0
@@ -16,6 +22,10 @@ _No unreleased changes._
 - Narrow `assert X is not None` asserts in `app_flask.py` after each
   `request.json` access to satisfy mypy without changing runtime behavior
   (the `@require_json` decorator already guarantees a non-None JSON body).
+- Optional "Text Encoder (optional override)" field on the Generate tab and
+  a matching `text_encoder_path` field on `/api/generation/load`, letting
+  you point at an explicit `text_encoder.safetensors` instead of the
+  auto-discovered sibling file or the checkpoint's bundled copy.
 
 ### Changed
 - Updated `generation_worker.py` to unpack `(text_seq, text_mask)` from the
@@ -30,6 +40,16 @@ _No unreleased changes._
 - Documented that the salvage path for old checkpoints lives in
   `fluxflow-core`; see
   [MIGRATION-v0.10.0-redesign.md](https://github.com/danny-mio/fluxflow-core/blob/develop/docs/MIGRATION-v0.10.0-redesign.md).
+
+### Fixed
+- **v0.10.0 checkpoints were misdetected as v0.7.0** in the generation
+  worker's legacy-loading fallback, causing them to load with mismatched
+  v0.7.0 model classes (`strict=False` silently dropped most trained
+  weights). Added `GenerationWorker._load_v100_fallback`, and the version
+  heuristic now uses `fluxflow.models.detect_architecture_version`.
+- The "Version X model" status message always showed a stale/default value
+  (`getattr(pipeline, "version", ...)` — no such attribute is ever set) —
+  now re-detected from the checkpoint's own state-dict keys for display.
 
 ## [0.8.0] - 2026-02-21
 

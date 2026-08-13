@@ -227,6 +227,7 @@ class ConfigManager:
             "vae_dim": 64,
             "feature_maps_dim": 64,
             "text_embedding_dim": 1024,
+            "text_encoder_path": "",
             # CFG parameters
             "use_cfg": False,
             "guidance_scale": 5.0,

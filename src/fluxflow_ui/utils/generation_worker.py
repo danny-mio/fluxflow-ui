@@ -19,6 +19,7 @@ from fluxflow.models import (  # noqa: E402
     FluxExpander,
     FluxFlowProcessor,
     FluxPipeline,
+    detect_architecture_version,
 )
 from fluxflow.models.versioning import load_versioned_checkpoint  # noqa: E402
 from fluxflow.utils import (  # noqa: E402
@@ -41,34 +42,33 @@ class GenerationWorker:
         self.config = {}
 
     def _get_device(self) -> torch.device:
-        """Get available device.
+        """Get available device (CUDA/ROCm > MPS > CPU).
 
         Returns:
             torch device
         """
-        if torch.cuda.is_available():
-            return torch.device("cuda")
-        elif torch.backends.mps.is_available():
-            return torch.device("mps")
-        else:
-            return torch.device("cpu")
+        from fluxflow.utils.device import get_device as _core_get_device
 
-    def _load_text_encoder_weights(
-        self, text_encoder: BertTextEncoder, checkpoint_path: str
-    ) -> bool:
-        """Load text encoder from sibling text_encoder.safetensors; return True if loaded."""
-        cp = Path(checkpoint_path)
-        te_path = (
-            cp / "text_encoder.safetensors"
-            if cp.is_dir()
-            else cp.parent / "text_encoder.safetensors"
-        )
-        if not te_path.exists():
-            return False
-        te_state = safetensors.torch.load_file(str(te_path))
-        te_state = {k.replace("text_encoder.", ""): v for k, v in te_state.items()}
-        text_encoder.load_state_dict(te_state, strict=False)
-        return True
+        return _core_get_device()
+
+    def _detect_display_version(self, checkpoint_path: str) -> str:
+        """Re-detect architecture version from a checkpoint's own keys, for display only.
+
+        No `.version` attribute is ever set on a loaded FluxPipeline, so this
+        re-reads the state dict and runs the same key-marker detection used
+        during loading. Display-only; failures fall back to "unknown".
+        """
+        try:
+            cp = Path(checkpoint_path)
+            weights_path = cp
+            if cp.is_dir():
+                weights_path = cp / "model.safetensors"
+                if not weights_path.exists():
+                    weights_path = cp / "flxflow_final.safetensors"
+            state_dict = safetensors.torch.load_file(str(weights_path))
+            return detect_architecture_version(list(state_dict.keys()))
+        except Exception:
+            return "unknown"
 
     def load_model(  # noqa: C901
         self,
@@ -76,6 +76,7 @@ class GenerationWorker:
         vae_dim: int = 64,
         feature_maps_dim: int = 64,
         text_embedding_dim: int = 1024,
+        text_encoder_path: Optional[str] = None,
     ) -> Tuple[bool, str]:
         """Load model from checkpoint with automatic version detection.
 
@@ -84,6 +85,9 @@ class GenerationWorker:
             vae_dim: VAE latent dimension (ignored for versioned checkpoints)
             feature_maps_dim: Flow processor dimension (ignored for versioned checkpoints)
             text_embedding_dim: Text embedding dimension (ignored for versioned checkpoints)
+            text_encoder_path: Optional explicit path to text-encoder weights
+                (.safetensors), overriding both the sibling file and any
+                bundled copy inside the main checkpoint.
 
         Returns:
             Tuple of (success, message)
@@ -109,7 +113,9 @@ class GenerationWorker:
                         self.tokenizer.pad_token = self.tokenizer.eos_token
                         self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
                     self.text_encoder = BertTextEncoder(embed_dim=1024)  # Default for UI
-                    self._load_text_encoder_weights(self.text_encoder, checkpoint_path)
+                    self.text_encoder.load_with_override(
+                        checkpoint_path, override_path=text_encoder_path
+                    )
 
                     # Ensure models are on device
                     self.pipeline.to(self.device).eval()
@@ -121,8 +127,10 @@ class GenerationWorker:
 
                         torch.mps.empty_cache()
 
-                    # Extract version info from metadata
-                    version_info = getattr(self.pipeline, "version", "unknown")
+                    # Extract version info for display (no .version attribute is
+                    # ever set on a loaded FluxPipeline, so re-detect from the
+                    # checkpoint's own state-dict key markers).
+                    version_info = self._detect_display_version(checkpoint_path)
                     model_info = f"Version {version_info} model"
                 else:
                     # Try legacy versioned loading (single file without metadata)
@@ -140,7 +148,9 @@ class GenerationWorker:
                             self.tokenizer.pad_token = self.tokenizer.eos_token
                             self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
                         self.text_encoder = BertTextEncoder(embed_dim=1024)  # Default for UI
-                        self._load_text_encoder_weights(self.text_encoder, checkpoint_path)
+                        self.text_encoder.load_with_override(
+                            checkpoint_path, override_path=text_encoder_path
+                        )
 
                         # Ensure models are on device
                         self.pipeline.to(self.device).eval()
@@ -152,12 +162,16 @@ class GenerationWorker:
 
                             torch.mps.empty_cache()
 
-                        version_info = getattr(self.pipeline, "version", "legacy")
+                        version_info = self._detect_display_version(checkpoint_path)
                         model_info = f"Legacy versioned model (v{version_info})"
                     except Exception:
                         # Fall back to manual loading with default v0.3.0
                         return self._load_legacy_model(
-                            checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim
+                            checkpoint_path,
+                            vae_dim,
+                            feature_maps_dim,
+                            text_embedding_dim,
+                            text_encoder_path,
                         )
 
                 model_info = f"Version {version_info} model"
@@ -169,7 +183,11 @@ class GenerationWorker:
                 )
                 try:
                     return self._load_legacy_model(
-                        checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim
+                        checkpoint_path,
+                        vae_dim,
+                        feature_maps_dim,
+                        text_embedding_dim,
+                        text_encoder_path,
                     )
                 except Exception as legacy_error:
                     # Try one more fallback: assume v0.7.0 architecture
@@ -179,7 +197,11 @@ class GenerationWorker:
                     )
                     try:
                         return self._load_v070_fallback(
-                            checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim
+                            checkpoint_path,
+                            vae_dim,
+                            feature_maps_dim,
+                            text_embedding_dim,
+                            text_encoder_path,
                         )
                     except Exception as v070_error:
                         # If all methods fail, provide comprehensive error message
@@ -243,30 +265,48 @@ class GenerationWorker:
         vae_dim: int,
         feature_maps_dim: int,
         text_embedding_dim: int,
+        text_encoder_path: Optional[str] = None,
     ) -> Tuple[bool, str]:
         """Load model using legacy manual instantiation with automatic architecture detection."""
         # First, inspect checkpoint to detect architecture
-        has_v070_features = False
+        detected_version = "0.3.0"
         try:
             import safetensors.torch
 
             state_dict = safetensors.torch.load_file(checkpoint_path)
             keys = list(state_dict.keys())
-
-            # Check for v0.7.0 features
-            has_v070_features = any(
-                "ctx_mixer" in key or "context_injection" in key or "context_final" in key
-                for key in keys
-            )
+            detected_version = detect_architecture_version(keys)
         except Exception as inspect_error:
             print(f"Checkpoint inspection failed: {inspect_error}")
 
+        if detected_version == "0.10.0":
+            print("Detected v0.10.0 features in checkpoint, using v0.10.0 components")
+            try:
+                return self._load_v100_fallback(
+                    checkpoint_path,
+                    vae_dim,
+                    feature_maps_dim,
+                    text_embedding_dim,
+                    text_encoder_path,
+                )
+            except Exception as v100_error:
+                return False, (
+                    f"Failed to load v0.10.0 model. The checkpoint contains v0.10.0 architecture "
+                    f"but loading failed: {str(v100_error)}\n\n"
+                    f"This checkpoint requires proper metadata. Please re-save the model using "
+                    f"'save_versioned_checkpoint()' to add version information."
+                )
+
         # If v0.7.0 features detected, use v0.7.0 loading only
-        if has_v070_features:
+        if detected_version == "0.7.0":
             print("Detected v0.7.0 features in checkpoint, using v0.7.0 components only")
             try:
                 return self._load_v070_fallback(
-                    checkpoint_path, vae_dim, feature_maps_dim, text_embedding_dim
+                    checkpoint_path,
+                    vae_dim,
+                    feature_maps_dim,
+                    text_embedding_dim,
+                    text_encoder_path,
                 )
             except Exception as v070_error:
                 return False, (
@@ -321,15 +361,7 @@ class GenerationWorker:
                 },
                 strict=False,
             )
-            if not self._load_text_encoder_weights(self.text_encoder, checkpoint_path):
-                self.text_encoder.load_state_dict(
-                    {
-                        k.replace("text_encoder.", ""): v
-                        for k, v in state_dict.items()
-                        if k.startswith("text_encoder.")
-                    },
-                    strict=False,
-                )
+            self.text_encoder.load_with_override(checkpoint_path, override_path=text_encoder_path)
 
             self.diffuser.to(self.device).eval()
             self.text_encoder.to(self.device).eval()
@@ -354,6 +386,7 @@ class GenerationWorker:
         vae_dim: int,
         feature_maps_dim: int,
         text_embedding_dim: int,
+        text_encoder_path: Optional[str] = None,
     ) -> Tuple[bool, str]:
         """Load model assuming v0.7.0 architecture (context-enhanced)."""
         try:
@@ -418,15 +451,7 @@ class GenerationWorker:
                 },
                 strict=False,
             )
-            if not self._load_text_encoder_weights(self.text_encoder, checkpoint_path):
-                self.text_encoder.load_state_dict(
-                    {
-                        k.replace("text_encoder.", ""): v
-                        for k, v in state_dict.items()
-                        if k.startswith("text_encoder.")
-                    },
-                    strict=False,
-                )
+            self.text_encoder.load_with_override(checkpoint_path, override_path=text_encoder_path)
 
             self.diffuser.to(self.device).eval()
             self.text_encoder.to(self.device).eval()
@@ -444,6 +469,94 @@ class GenerationWorker:
 
         except Exception as e:
             raise Exception(f"Failed to load v0.7.0 fallback model: {str(e)}")
+
+    def _load_v100_fallback(
+        self,
+        checkpoint_path: str,
+        vae_dim: int,
+        feature_maps_dim: int,
+        text_embedding_dim: int,
+        text_encoder_path: Optional[str] = None,
+    ) -> Tuple[bool, str]:
+        """Load model assuming v0.10.0 architecture (2D RoPE + dual FiLM, bezier-coupled)."""
+        try:
+            # Load tokenizer
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                "distilbert-base-uncased", cache_dir="./_cache", local_files_only=False
+            )
+            if self.tokenizer.pad_token is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+                self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+
+            # Import v0.10.0 components
+            from fluxflow.models.v100.flow import FluxFlowProcessor_v100
+            from fluxflow.models.v100.vae import FluxCompressor_v100, FluxExpander_v100
+
+            # Detect actual config from checkpoint instead of using provided dimensions.
+            # Unlike v0.7.0, v0.10.0's detected vae_dim is already the true VAE
+            # latent dim (no CONTEXT_DIMS offset to subtract).
+            state_dict = safetensors.torch.load_file(checkpoint_path)
+            config = FluxPipeline._detect_config(state_dict)
+            vae_latent_dim = config["vae_dim"]
+
+            # Calculate appropriate attention heads
+            def get_valid_n_head(d_model, preferred_heads=8):
+                """Get number of heads that evenly divides d_model."""
+                if d_model % preferred_heads == 0:
+                    return preferred_heads
+                for heads in range(preferred_heads, 0, -1):
+                    if d_model % heads == 0:
+                        return heads
+                return 1  # Fallback
+
+            flow_attn_heads = get_valid_n_head(config["flow_dim"], config.get("flow_attn_heads", 8))
+
+            # Initialize models with detected config
+            self.text_encoder = BertTextEncoder(
+                embed_dim=config.get("text_embed_dim", text_embedding_dim)
+            )
+            self.diffuser = FluxPipeline(
+                FluxCompressor_v100(d_model=vae_latent_dim, downscales=config["downscales"]),
+                FluxFlowProcessor_v100(
+                    d_model=config["flow_dim"],
+                    vae_dim=vae_latent_dim,
+                    embedding_size=config.get("text_embed_dim", text_embedding_dim),
+                    n_head=flow_attn_heads,
+                    n_layers=config.get("flow_transformer_layers", 10),
+                ),
+                FluxExpander_v100(
+                    d_model=vae_latent_dim, upscales=config.get("upscales", config["downscales"])
+                ),
+            )
+            self.pipeline = self.diffuser  # For consistency
+
+            # Load checkpoint
+            self.diffuser.load_state_dict(
+                {
+                    k.replace("diffuser.", ""): v
+                    for k, v in state_dict.items()
+                    if k.startswith("diffuser.")
+                },
+                strict=False,
+            )
+            self.text_encoder.load_with_override(checkpoint_path, override_path=text_encoder_path)
+
+            self.diffuser.to(self.device).eval()
+            self.text_encoder.to(self.device).eval()
+
+            self.model_checkpoint = checkpoint_path
+            self.config = {
+                "vae_dim": vae_latent_dim,
+                "feature_maps_dim": config["flow_dim"],
+                "text_embedding_dim": config.get("text_embed_dim", text_embedding_dim),
+                "version": "0.10.0",
+                "model_info": "v0.10.0 auto-detected",
+            }
+
+            return True, f"Model loaded successfully on {self.device} (v0.10.0 auto-detected)"
+
+        except Exception as e:
+            raise Exception(f"Failed to load v0.10.0 fallback model: {str(e)}")
 
     def generate_image(
         self,
