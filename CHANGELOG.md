@@ -28,6 +28,11 @@ Not yet released — work in progress toward v0.10.0.
   auto-discovered sibling file or the checkpoint's bundled copy.
 
 ### Changed
+- Prompt/negative-prompt encoding in `generation_worker.py` now uses a
+  shared `DEFAULT_MAX_TEXT_LENGTH` constant imported from `fluxflow-core`
+  (falls back to `32` if the installed `fluxflow-core` predates it),
+  instead of a hardcoded `max_length=512`, so this repo can't silently
+  diverge from `fluxflow-training`'s actual caption cap (`32`).
 - Updated `generation_worker.py` to unpack `(text_seq, text_mask)` from the
   per-token `BertTextEncoder` and thread the tuple end-to-end into the flow
   processor, tracking the v0.10.0 bezier-coupled redesign in `fluxflow-core`.
@@ -42,6 +47,15 @@ Not yet released — work in progress toward v0.10.0.
   [MIGRATION-v0.10.0-redesign.md](https://github.com/danny-mio/fluxflow-core/blob/develop/docs/MIGRATION-v0.10.0-redesign.md).
 
 ### Fixed
+- **Generation was broken on every non-Mac device** (`UnboundLocalError:
+  cannot access local variable 'torch'...`). Three redundant
+  `import torch` statements inside `if self.device.type == "mps":` blocks
+  in `generation_worker.py` (`load_model` x2, `generate_image`) made Python
+  treat `torch` as function-local for the *entire* enclosing function, so
+  any reference to the module-level `torch` on CPU/CUDA/ROCm raised
+  `UnboundLocalError` before generation could run. Removed the redundant
+  imports; the existing module-level `import torch` is now solely relied
+  upon.
 - **v0.10.0 checkpoints were misdetected as v0.7.0** in the generation
   worker's legacy-loading fallback, causing them to load with mismatched
   v0.7.0 model classes (`strict=False` silently dropped most trained

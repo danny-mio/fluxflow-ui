@@ -28,6 +28,15 @@ from fluxflow.utils import (  # noqa: E402
     img_to_random_packet,
 )
 
+try:
+    # Shared single source of truth with training (fluxflow_training.data.datasets'
+    # max_text_length) so generation's prompt-encoding length can't silently
+    # diverge from what the model was actually trained on. Falls back to the
+    # same value if the installed fluxflow-core predates this constant.
+    from fluxflow.text_length import DEFAULT_MAX_TEXT_LENGTH  # noqa: E402
+except ImportError:  # pragma: no cover - stale fluxflow-core install
+    DEFAULT_MAX_TEXT_LENGTH = 32
+
 
 class GenerationWorker:
     """Worker for generating images from text prompts."""
@@ -123,8 +132,6 @@ class GenerationWorker:
 
                     # MPS-specific initialization
                     if self.device.type == "mps":
-                        import torch
-
                         torch.mps.empty_cache()
 
                     # Extract version info for display (no .version attribute is
@@ -158,8 +165,6 @@ class GenerationWorker:
 
                         # MPS-specific initialization
                         if self.device.type == "mps":
-                            import torch
-
                             torch.mps.empty_cache()
 
                         version_info = self._detect_display_version(checkpoint_path)
@@ -590,8 +595,6 @@ class GenerationWorker:
         try:
             # MPS-specific preparation
             if self.device.type == "mps":
-                import torch
-
                 torch.mps.empty_cache()
 
             # Validate dimensions are multiples of 16
@@ -613,7 +616,7 @@ class GenerationWorker:
                     prompt,
                     padding="max_length",
                     truncation=True,
-                    max_length=512,
+                    max_length=DEFAULT_MAX_TEXT_LENGTH,
                     return_tensors="pt",
                 )
                 input_ids = inputs["input_ids"].to(self.device)
@@ -634,7 +637,7 @@ class GenerationWorker:
                             negative_prompt,
                             padding="max_length",
                             truncation=True,
-                            max_length=512,
+                            max_length=DEFAULT_MAX_TEXT_LENGTH,
                             return_tensors="pt",
                         )
                         neg_input_ids = neg_inputs["input_ids"].to(self.device)
