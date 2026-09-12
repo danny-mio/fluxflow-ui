@@ -4,6 +4,8 @@ import queue
 import threading
 from unittest.mock import MagicMock, patch
 
+import yaml
+
 from fluxflow_ui.utils.training_runner import TrainingRunner
 
 
@@ -316,3 +318,78 @@ class TestThreadSafety:
 
         # All values should be True since we set _is_running manually
         assert all(v is True for v in values)
+
+
+class TestModelConfigFileForActivationType:
+    """Selecting model_version=0.10.0/activation_type=pade needs --config,
+    since train.py has no --model_type/--model_version CLI flag at all --
+    only a YAML config's model.model_type reaches the factory (ModelFactory)
+    code path that actually respects activation_type."""
+
+    @patch("subprocess.Popen")
+    def test_default_config_never_writes_a_config_file(self, mock_popen, tmp_path):
+        """Existing legacy-path users (no model_version/activation_type keys,
+        or explicit bezier/0.6.0) must see byte-for-byte the same command as
+        before this feature existed."""
+        mock_process = MagicMock()
+        mock_process.stdout = iter([])
+        mock_popen.return_value = mock_process
+
+        runner = TrainingRunner()
+        config = {"data_path": "/path/to/data", "output_path": str(tmp_path)}
+        runner.start_training(config)
+
+        cmd = mock_popen.call_args[0][0]
+        assert "--config" not in cmd
+
+    @patch("subprocess.Popen")
+    def test_pade_activation_type_writes_config_with_model_section(self, mock_popen, tmp_path):
+        mock_process = MagicMock()
+        mock_process.stdout = iter([])
+        mock_popen.return_value = mock_process
+
+        runner = TrainingRunner()
+        config = {
+            "data_path": "/path/to/data",
+            "output_path": str(tmp_path),
+            "model_version": "0.10.0",
+            "activation_type": "pade",
+            "vae_dim": 32,
+        }
+        runner.start_training(config)
+
+        cmd = mock_popen.call_args[0][0]
+        assert "--config" in cmd
+        config_path = cmd[cmd.index("--config") + 1]
+        with open(config_path) as f:
+            written = yaml.safe_load(f)
+
+        assert written["model"]["model_type"] == "bezier"
+        assert written["model"]["model_version"] == "0.10.0"
+        assert written["model"]["activation_type"] == "pade"
+        assert written["model"]["vae_dim"] == 32
+
+        # The individual CLI flags built by _build_model_args must still be
+        # present too (train.py reads args.vae_dim directly for non-ModelConfig
+        # purposes like discriminator sizing).
+        assert "--activation_type" in cmd
+        assert "pade" in cmd
+
+    @patch("subprocess.Popen")
+    def test_model_version_0100_with_default_bezier_still_writes_config(self, mock_popen, tmp_path):
+        """Selecting 0.10.0 alone (activation_type left at bezier) must still
+        reach the factory path -- otherwise the user can't get v0.10.0 at all."""
+        mock_process = MagicMock()
+        mock_process.stdout = iter([])
+        mock_popen.return_value = mock_process
+
+        runner = TrainingRunner()
+        config = {
+            "data_path": "/path/to/data",
+            "output_path": str(tmp_path),
+            "model_version": "0.10.0",
+        }
+        runner.start_training(config)
+
+        cmd = mock_popen.call_args[0][0]
+        assert "--config" in cmd

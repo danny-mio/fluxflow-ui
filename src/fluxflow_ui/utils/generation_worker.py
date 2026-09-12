@@ -79,6 +79,28 @@ class GenerationWorker:
         except Exception:
             return "unknown"
 
+    def _detect_activation_type(self, checkpoint_path: str) -> str:
+        """Read activation_type ('bezier'/'pade') from a checkpoint's safetensors metadata.
+
+        `safetensors.torch.load_file` only returns tensors, never the file's
+        metadata header, so this uses the lower-level `safetensors.safe_open`
+        API. Checkpoints saved before this feature (or trained via a path
+        that doesn't set it) have no `activation_type` key -- defaults to
+        "bezier", matching every other activation_type default in this stack.
+        """
+        try:
+            cp = Path(checkpoint_path)
+            weights_path = cp
+            if cp.is_dir():
+                weights_path = cp / "model.safetensors"
+                if not weights_path.exists():
+                    weights_path = cp / "flxflow_final.safetensors"
+            with safetensors.safe_open(str(weights_path), framework="pt", device="cpu") as f:
+                metadata = f.metadata() or {}
+            return metadata.get("activation_type", "bezier")
+        except Exception:
+            return "bezier"
+
     def load_model(  # noqa: C901
         self,
         checkpoint_path: str,
@@ -503,6 +525,7 @@ class GenerationWorker:
             state_dict = safetensors.torch.load_file(checkpoint_path)
             config = FluxPipeline._detect_config(state_dict)
             vae_latent_dim = config["vae_dim"]
+            activation_type = self._detect_activation_type(checkpoint_path)
 
             # Calculate appropriate attention heads
             def get_valid_n_head(d_model, preferred_heads=8):
@@ -521,16 +544,23 @@ class GenerationWorker:
                 embed_dim=config.get("text_embed_dim", text_embedding_dim)
             )
             self.diffuser = FluxPipeline(
-                FluxCompressor_v100(d_model=vae_latent_dim, downscales=config["downscales"]),
+                FluxCompressor_v100(
+                    d_model=vae_latent_dim,
+                    downscales=config["downscales"],
+                    activation_type=activation_type,
+                ),
                 FluxFlowProcessor_v100(
                     d_model=config["flow_dim"],
                     vae_dim=vae_latent_dim,
                     embedding_size=config.get("text_embed_dim", text_embedding_dim),
                     n_head=flow_attn_heads,
                     n_layers=config.get("flow_transformer_layers", 10),
+                    activation_type=activation_type,
                 ),
                 FluxExpander_v100(
-                    d_model=vae_latent_dim, upscales=config.get("upscales", config["downscales"])
+                    d_model=vae_latent_dim,
+                    upscales=config.get("upscales", config["downscales"]),
+                    activation_type=activation_type,
                 ),
             )
             self.pipeline = self.diffuser  # For consistency
@@ -556,9 +586,13 @@ class GenerationWorker:
                 "text_embedding_dim": config.get("text_embed_dim", text_embedding_dim),
                 "version": "0.10.0",
                 "model_info": "v0.10.0 auto-detected",
+                "activation_type": activation_type,
             }
 
-            return True, f"Model loaded successfully on {self.device} (v0.10.0 auto-detected)"
+            return True, (
+                f"Model loaded successfully on {self.device} "
+                f"(v0.10.0 auto-detected, activation={activation_type})"
+            )
 
         except Exception as e:
             raise Exception(f"Failed to load v0.10.0 fallback model: {str(e)}")

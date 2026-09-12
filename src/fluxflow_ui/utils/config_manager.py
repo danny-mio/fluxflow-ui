@@ -126,6 +126,8 @@ class ConfigManager:
             "feature_maps_dim": 64,
             "feature_maps_dim_disc": 128,
             "pretrained_bert_model": "",
+            "model_version": "0.6.0",
+            "activation_type": "bezier",
             # Training
             "n_epochs": 10,
             "batch_size": 1,

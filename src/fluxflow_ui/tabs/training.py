@@ -39,6 +39,8 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
         feature_dim: int,
         feature_dim_disc: int,
         pretrained_bert_model: str,
+        model_version: str,
+        activation_type: str,
         # Training
         n_epochs: int,
         batch_size: int,
@@ -119,6 +121,8 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
             "feature_maps_dim": int(feature_dim),
             "feature_maps_dim_disc": int(feature_dim_disc),
             "pretrained_bert_model": pretrained_bert_model if pretrained_bert_model else None,
+            "model_version": model_version,
+            "activation_type": activation_type,
             # Training
             "n_epochs": int(n_epochs),
             "batch_size": int(batch_size),
@@ -308,6 +312,20 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                     placeholder="path/to/bert_checkpoint.safetensors",
                     value=prev_config.get("pretrained_bert_model", ""),
                 )
+
+                with gr.Row():
+                    model_version_input = gr.Dropdown(
+                        label="Model Version",
+                        choices=["0.6.0", "0.7.0", "0.10.0"],
+                        value=prev_config.get("model_version", "0.6.0"),
+                        info="0.10.0 is required to use the Padé activation option below",
+                    )
+                    activation_type_input = gr.Dropdown(
+                        label="Activation Type",
+                        choices=["bezier", "pade"],
+                        value=prev_config.get("activation_type", "bezier"),
+                        info="Only applies to Model Version 0.10.0; ignored otherwise",
+                    )
 
                 gr.Markdown("### Training Parameters")
 
@@ -632,6 +650,8 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                 feature_dim_input,
                 feature_dim_disc_input,
                 pretrained_bert_input,
+                model_version_input,
+                activation_type_input,
                 # Training
                 n_epochs_input,
                 batch_size_input,

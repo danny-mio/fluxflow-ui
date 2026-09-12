@@ -10,6 +10,8 @@ import threading
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
+import yaml
+
 logger = logging.getLogger(__name__)
 
 
@@ -71,6 +73,50 @@ class TrainingRunner:
 
         return cmd
 
+    def _build_model_config_file_args(self, config: Dict[str, Any]) -> List[str]:
+        """Write a small YAML config with just the `model:` section and return `--config <path>`.
+
+        train.py only reaches its factory-based model construction (needed for
+        model_version="0.10.0" and activation_type="pade") when config['model']
+        has a model_type key -- and there is no --model_type/--model_version CLI
+        flag at all, only a --config YAML file can set it. This is added
+        alongside (not instead of) the individual --vae_dim/--activation_type/etc.
+        CLI flags built by `_build_model_args`, since those flags are also read
+        directly by train.py for non-ModelConfig purposes (discriminator sizing,
+        etc.) and because CLI-provided values win over this YAML's values
+        anyway (train.py's cli_provided precedence merge). Fields NOT force-
+        merged from args by train.py (vae_dim, feature_maps_dim,
+        text_embedding_dim) are included here explicitly so the factory path
+        actually respects the UI's chosen dimensions instead of falling back to
+        ModelConfig's own defaults.
+        """
+        model_version = config.get("model_version", "0.6.0")
+        if model_version == "0.6.0" and config.get("activation_type", "bezier") == "bezier":
+            # Matches the pre-existing legacy (non-factory) code path's
+            # behavior exactly -- skip writing a config file so unrelated
+            # legacy-path users see no change at all.
+            return []
+
+        output_path = config.get("output_path", "outputs")
+        os.makedirs(output_path, exist_ok=True)
+
+        model_section: Dict[str, Any] = {
+            "model_type": "bezier",
+            "model_version": model_version,
+            "activation_type": config.get("activation_type", "bezier"),
+            "vae_dim": config.get("vae_dim", 64),
+            "feature_maps_dim": config.get("feature_maps_dim", 64),
+            "text_embedding_dim": config.get("text_embedding_dim", 1024),
+        }
+        if config.get("pretrained_bert_model"):
+            model_section["pretrained_bert_model"] = config["pretrained_bert_model"]
+
+        self.temp_config_file = str(Path(output_path) / "model_config.yaml")
+        with open(self.temp_config_file, "w") as f:
+            yaml.safe_dump({"model": model_section}, f)
+
+        return ["--config", self.temp_config_file]
+
     def _build_model_args(self, config: Dict[str, Any]) -> List[str]:
         """Build model-related command arguments."""
         cmd = []
@@ -90,6 +136,8 @@ class TrainingRunner:
                 str(config.get("feature_maps_dim", 64)),
                 "--feature_maps_dim_disc",
                 str(config.get("feature_maps_dim_disc", 128)),
+                "--activation_type",
+                str(config.get("activation_type", "bezier")),
             ]
         )
         return cmd
@@ -229,6 +277,7 @@ class TrainingRunner:
                 # Build command using helper methods (simple mode)
                 cmd = ["fluxflow-train"]
                 cmd.extend(self._build_data_args(config))
+                cmd.extend(self._build_model_config_file_args(config))
                 cmd.extend(self._build_model_args(config))
                 cmd.extend(self._build_training_args(config))
                 cmd.extend(self._build_output_args(config))
