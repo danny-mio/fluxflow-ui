@@ -128,6 +128,7 @@ class ConfigManager:
             "pretrained_bert_model": "",
             "model_version": "0.6.0",
             "activation_type": "bezier",
+            "compile_activations": False,
             # Training
             "n_epochs": 10,
             "batch_size": 1,
@@ -230,6 +231,7 @@ class ConfigManager:
             "feature_maps_dim": 64,
             "text_embedding_dim": 1024,
             "text_encoder_path": "",
+            "compile_activations": False,
             # CFG parameters
             "use_cfg": False,
             "guidance_scale": 5.0,

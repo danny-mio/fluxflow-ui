@@ -140,6 +140,8 @@ class TrainingRunner:
                 str(config.get("activation_type", "bezier")),
             ]
         )
+        if config.get("compile_activations"):
+            cmd.append("--compile_activations")
         return cmd
 
     def _build_training_args(self, config: Dict[str, Any]) -> List[str]:

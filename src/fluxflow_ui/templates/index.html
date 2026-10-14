@@ -870,6 +870,11 @@
                     </div>
 
                     <div class="checkbox-group">
+                        <input type="checkbox" id="compile_activations_training">
+                        <label for="compile_activations_training">Compile activations <small>(faster after first run; Padé models only)</small></label>
+                    </div>
+
+                    <div class="checkbox-group">
                         <input type="checkbox" id="train_vae" checked>
                         <label for="train_vae">Train VAE</label>
                     </div>
@@ -922,6 +927,11 @@
                                 Browse
                             </button>
                         </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="compile_activations_gen">
+                        <label for="compile_activations_gen">Compile activations <small>(faster after first run; Padé models only)</small></label>
                     </div>
 
                     <div class="form-group">
@@ -1158,6 +1168,7 @@
                 feature_maps_dim: parseInt(document.getElementById('feature_maps_dim').value),
                 feature_maps_dim_disc: 128,
                 train_vae: document.getElementById('train_vae').checked,
+                compile_activations: document.getElementById('compile_activations_training').checked,
                 train_no_gan: false,
                 train_diff: false,
                 train_diff_full: false,
@@ -1286,7 +1297,8 @@
                     checkpoint_path: checkpoint,
                     vae_dim: inspectData.vae_dim,
                     feature_maps_dim: inspectData.feature_maps_dim,
-                    text_embedding_dim: 1024
+                    text_embedding_dim: 1024,
+                    compile_activations: document.getElementById('compile_activations_gen').checked
                 };
 
                 const loadResponse = await fetch('/api/generation/load', {

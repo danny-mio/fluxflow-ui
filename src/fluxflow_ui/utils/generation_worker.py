@@ -1,5 +1,6 @@
 """Generation worker for UI."""
 
+import logging
 import sys
 from pathlib import Path
 from typing import Any, Optional, Tuple
@@ -8,6 +9,8 @@ import numpy as np
 import safetensors.torch
 import torch
 from transformers import AutoTokenizer
+
+logger = logging.getLogger(__name__)
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -101,6 +104,17 @@ class GenerationWorker:
         except Exception:
             return "bezier"
 
+    def _compile_pade_activations(self, checkpoint_path: str) -> None:
+        """Enable process-wide Padé activation compilation if the checkpoint is Padé."""
+        if self._detect_activation_type(checkpoint_path) != "pade":
+            return
+        try:
+            from fluxflow.models.pade_activation import compile_pade_activations
+
+            compile_pade_activations()
+        except Exception as e:
+            logger.warning(f"Could not compile Pade activations: {e}")
+
     def load_model(  # noqa: C901
         self,
         checkpoint_path: str,
@@ -108,6 +122,7 @@ class GenerationWorker:
         feature_maps_dim: int = 64,
         text_embedding_dim: int = 1024,
         text_encoder_path: Optional[str] = None,
+        compile_activations: bool = False,
     ) -> Tuple[bool, str]:
         """Load model from checkpoint with automatic version detection.
 
@@ -119,6 +134,8 @@ class GenerationWorker:
             text_encoder_path: Optional explicit path to text-encoder weights
                 (.safetensors), overriding both the sibling file and any
                 bundled copy inside the main checkpoint.
+            compile_activations: torch.compile Padé activations (Padé
+                checkpoints only; faster after the first run).
 
         Returns:
             Tuple of (success, message)
@@ -126,6 +143,9 @@ class GenerationWorker:
         try:
             if not Path(checkpoint_path).exists():
                 return False, f"Checkpoint not found: {checkpoint_path}"
+
+            if compile_activations:
+                self._compile_pade_activations(checkpoint_path)
 
             # Try versioned loading first (new format)
             try:

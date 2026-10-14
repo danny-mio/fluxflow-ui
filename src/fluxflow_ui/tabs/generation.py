@@ -27,6 +27,7 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
         feature_dim: int,
         text_dim: int,
         text_encoder_path: str,
+        compile_activations: bool,
     ) -> Tuple[str, str]:
         """Handle model loading.
 
@@ -42,6 +43,7 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
             feature_maps_dim=feature_dim,
             text_embedding_dim=text_dim,
             text_encoder_path=text_encoder_path or None,
+            compile_activations=bool(compile_activations),
         )
 
         if success:
@@ -52,6 +54,7 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
                     "feature_maps_dim": feature_dim,
                     "text_embedding_dim": text_dim,
                     "text_encoder_path": text_encoder_path,
+                    "compile_activations": bool(compile_activations),
                 }
             )
             return f"✅ {message}", "✅ Model Loaded"
@@ -136,6 +139,12 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
                     label="Text Encoder (optional override)",
                     placeholder="Optional: override path to text_encoder.safetensors",
                     value=prev_config.get("text_encoder_path", ""),
+                )
+
+                compile_activations_input = gr.Checkbox(
+                    label="Compile activations",
+                    value=prev_config.get("compile_activations", False),
+                    info="Faster after first run; Padé models only",
                 )
 
                 load_btn = gr.Button("🔄 Load Model", variant="primary")
@@ -250,6 +259,7 @@ def create_generation_tab(worker: GenerationWorker, config_mgr: ConfigManager) -
                 feature_dim_input,
                 text_dim_input,
                 text_encoder_path_input,
+                compile_activations_input,
             ],
             outputs=[load_status, load_btn],
         )

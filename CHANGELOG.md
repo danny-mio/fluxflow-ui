@@ -17,6 +17,11 @@ Not yet released — work in progress toward v0.10.0.
 - NPU (XDNA) acceleration was evaluated and deferred; not implemented.
 
 ### Added
+- **Compile activations (opt-in, default off)**: checkbox on the Generate and
+  Training tabs (and `compile_activations` in `/api/generation/load` and the
+  training config). Generation calls `compile_pade_activations()` on Padé
+  checkpoints; training forwards `--compile_activations` to `fluxflow-train`.
+  Faster after the first run (one-time compile); Padé models only.
 - `SELENIUM_SHORTCUTS.md` at repo root with happy-path QA flows for the v0.10.0
   generation worker (SH-01 smoke, SH-02 generation regression, SH-03 API-only).
 - Narrow `assert X is not None` asserts in `app_flask.py` after each

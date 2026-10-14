@@ -225,6 +225,7 @@ def load_model():
         feature_maps_dim=data.get("feature_maps_dim", 64),
         text_embedding_dim=data.get("text_embedding_dim", 1024),
         text_encoder_path=data.get("text_encoder_path") or None,
+        compile_activations=bool(data.get("compile_activations", False)),
     )
 
     if success:

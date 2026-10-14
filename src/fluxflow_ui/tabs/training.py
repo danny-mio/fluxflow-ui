@@ -41,6 +41,7 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
         pretrained_bert_model: str,
         model_version: str,
         activation_type: str,
+        compile_activations: bool,
         # Training
         n_epochs: int,
         batch_size: int,
@@ -123,6 +124,7 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
             "pretrained_bert_model": pretrained_bert_model if pretrained_bert_model else None,
             "model_version": model_version,
             "activation_type": activation_type,
+            "compile_activations": bool(compile_activations),
             # Training
             "n_epochs": int(n_epochs),
             "batch_size": int(batch_size),
@@ -325,6 +327,11 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                         choices=["bezier", "pade"],
                         value=prev_config.get("activation_type", "bezier"),
                         info="Only applies to Model Version 0.10.0; ignored otherwise",
+                    )
+                    compile_activations_input = gr.Checkbox(
+                        label="Compile activations",
+                        value=prev_config.get("compile_activations", False),
+                        info="Faster after first run; Padé models only",
                     )
 
                 gr.Markdown("### Training Parameters")
@@ -652,6 +659,7 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                 pretrained_bert_input,
                 model_version_input,
                 activation_type_input,
+                compile_activations_input,
                 # Training
                 n_epochs_input,
                 batch_size_input,
