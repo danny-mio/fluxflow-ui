@@ -16,6 +16,13 @@ Not yet released — work in progress toward v0.10.0.
   `docs/ROCM.md` in fluxflow-core.
 - NPU (XDNA) acceleration was evaluated and deferred; not implemented.
 
+### Fixed
+- **ROCm SDPA crash**: `GenerationWorker` calls
+  `fluxflow.utils.disable_broken_rocm_sdpa()` for its device at init
+  (torch 2.14 + ROCm 7.16 / gfx1151 raised `hipErrorInvalidValue` in
+  attention). Cached probe; no-op off ROCm. Needs a fluxflow-core that
+  exports it. Training subprocess already handles this itself.
+
 ### Added
 - **Compile activations (opt-in, default off)**: checkbox on the Generate and
   Training tabs (and `compile_activations` in `/api/generation/load` and the

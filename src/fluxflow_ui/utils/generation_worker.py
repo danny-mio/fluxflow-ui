@@ -27,6 +27,7 @@ from fluxflow.models import (  # noqa: E402
 from fluxflow.models.versioning import load_versioned_checkpoint  # noqa: E402
 from fluxflow.utils import (  # noqa: E402
     build_cfg_null_pair,
+    disable_broken_rocm_sdpa,
     generate_latent_images,
     img_to_random_packet,
 )
@@ -51,6 +52,9 @@ class GenerationWorker:
         self.text_encoder: Optional[BertTextEncoder] = None
         self.tokenizer: Any = None
         self.device = self._get_device()
+        disabled = disable_broken_rocm_sdpa(self.device)
+        if disabled:
+            logger.info(f"ROCm: disabled broken SDPA backends {disabled}; using MATH fallback")
         self.config = {}
 
     def _get_device(self) -> torch.device:
