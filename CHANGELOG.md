@@ -16,6 +16,11 @@ Not yet released — work in progress toward v0.10.0.
   `docs/ROCM.md` in fluxflow-core.
 - NPU (XDNA) acceleration was evaluated and deferred; not implemented.
 
+### Changed
+- `GenerationWorker.load_model`: legacy-decoder checkpoints (ConvTranspose2d, kernel 16)
+  raise `IncompatibleCheckpointError` in core; the UI now returns that message directly
+  instead of falling through the legacy v0.3.0/v0.7.0 loader chain.
+
 ### Fixed
 - **ROCm SDPA crash**: `GenerationWorker` calls
   `fluxflow.utils.disable_broken_rocm_sdpa()` for its device at init

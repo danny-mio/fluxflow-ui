@@ -25,6 +25,7 @@ from fluxflow.models import (  # noqa: E402
     detect_architecture_version,
 )
 from fluxflow.models.versioning import load_versioned_checkpoint  # noqa: E402
+from fluxflow.exceptions import IncompatibleCheckpointError  # noqa: E402
 from fluxflow.utils import (  # noqa: E402
     build_cfg_null_pair,
     disable_broken_rocm_sdpa,
@@ -215,6 +216,8 @@ class GenerationWorker:
 
                         version_info = self._detect_display_version(checkpoint_path)
                         model_info = f"Legacy versioned model (v{version_info})"
+                    except IncompatibleCheckpointError:
+                        raise
                     except Exception:
                         # Fall back to manual loading with default v0.3.0
                         return self._load_legacy_model(
@@ -227,6 +230,8 @@ class GenerationWorker:
 
                 model_info = f"Version {version_info} model"
 
+            except IncompatibleCheckpointError as incompatible:
+                return False, f"Incompatible checkpoint: {incompatible}"
             except Exception as versioned_error:
                 # Fall back to manual loading with default v0.3.0
                 print(
@@ -340,6 +345,8 @@ class GenerationWorker:
                     text_embedding_dim,
                     text_encoder_path,
                 )
+            except IncompatibleCheckpointError as incompatible:
+                return False, f"Incompatible checkpoint: {incompatible}"
             except Exception as v100_error:
                 return False, (
                     f"Failed to load v0.10.0 model. The checkpoint contains v0.10.0 architecture "
