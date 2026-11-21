@@ -8,41 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Not yet released — work in progress toward v0.10.0.
 
-### Added (Experimental)
+### Added
 - **AMD ROCm/gfx1151 support (experimental, unvalidated)**: `_get_device()`
   now delegates to `fluxflow.utils.device.get_device()`, which distinguishes
   ROCm from real NVIDIA CUDA. No UI-visible behavior change — ROCm-build
   PyTorch already routed through the existing CUDA code path. See
   `docs/ROCM.md` in fluxflow-core.
 - NPU (XDNA) acceleration was evaluated and deferred; not implemented.
-
-### Changed
-- **Requires fluxflow-core with v0.10.0 latent stats and configurable VAE widths.**
-  `GenerationWorker`'s v0.10.0 fallback loader now builds compressor/expander at the
-  checkpoint's own widths (`fluxflow.models.v100.infer_vae_widths`), so wide v0.10.0
-  checkpoints load. Pre-rework v0.10.0 checkpoints (affine `ctx_final_norm`, or widths
-  that differ from the model) are rejected by core with `IncompatibleCheckpointError`.
-  Generation calls `compressor` / `expander` directly, which normalize / denormalize the
-  latent with its stored statistics; no other change.
-- numpy 2.x supported: `<2.0` pin removed; floor raised to 1.26.4 (scipy 1.17 requires it).
-- Prompt encoding length follows core `DEFAULT_MAX_TEXT_LENGTH` (now 128, was 32);
-  import-failure fallback updated to match.
-- `GenerationWorker.load_model`: legacy-decoder checkpoints (ConvTranspose2d, kernel 16)
-  raise `IncompatibleCheckpointError` in core; the UI now returns that message directly
-  instead of falling through the legacy v0.3.0/v0.7.0 loader chain.
-
-### Fixed
-- **Lion `decoupled_weight_decay` default**: `config_manager` default flow config and
-  the `index.html` Lion preset no longer force `true` (now `false`, matching
-  fluxflow-training). With lion_pytorch, true makes per-step decay `weight_decay`
-  itself, collapsing flow weights at wd 0.01-0.05.
-- **ROCm SDPA crash**: `GenerationWorker` calls
-  `fluxflow.utils.disable_broken_rocm_sdpa()` for its device at init
-  (torch 2.14 + ROCm 7.16 / gfx1151 raised `hipErrorInvalidValue` in
-  attention). Cached probe; no-op off ROCm. Needs a fluxflow-core that
-  exports it. Training subprocess already handles this itself.
-
-### Added
 - **Compile activations (opt-in, default off)**: checkbox on the Generate and
   Training tabs (and `compile_activations` in `/api/generation/load` and the
   training config). Generation calls `compile_pade_activations()` on Padé
@@ -59,6 +31,19 @@ Not yet released — work in progress toward v0.10.0.
   auto-discovered sibling file or the checkpoint's bundled copy.
 
 ### Changed
+- **Requires fluxflow-core with v0.10.0 latent stats and configurable VAE widths.**
+  `GenerationWorker`'s v0.10.0 fallback loader now builds compressor/expander at the
+  checkpoint's own widths (`fluxflow.models.v100.infer_vae_widths`), so wide v0.10.0
+  checkpoints load. Pre-rework v0.10.0 checkpoints (affine `ctx_final_norm`, or widths
+  that differ from the model) are rejected by core with `IncompatibleCheckpointError`.
+  Generation calls `compressor` / `expander` directly, which normalize / denormalize the
+  latent with its stored statistics; no other change.
+- numpy 2.x supported: `<2.0` pin removed; floor raised to 1.26.4 (scipy 1.17 requires it).
+- Prompt encoding length follows core `DEFAULT_MAX_TEXT_LENGTH` (now 128, was 32);
+  import-failure fallback updated to match.
+- `GenerationWorker.load_model`: legacy-decoder checkpoints (ConvTranspose2d, kernel 16)
+  raise `IncompatibleCheckpointError` in core; the UI now returns that message directly
+  instead of falling through the legacy v0.3.0/v0.7.0 loader chain.
 - Prompt/negative-prompt encoding in `generation_worker.py` now uses a
   shared `DEFAULT_MAX_TEXT_LENGTH` constant imported from `fluxflow-core`
   (falls back to `32` if the installed `fluxflow-core` predates it),
@@ -78,6 +63,15 @@ Not yet released — work in progress toward v0.10.0.
   [MIGRATION-v0.10.0-redesign.md](https://github.com/danny-mio/fluxflow-core/blob/develop/docs/MIGRATION-v0.10.0-redesign.md).
 
 ### Fixed
+- **Lion `decoupled_weight_decay` default**: `config_manager` default flow config and
+  the `index.html` Lion preset no longer force `true` (now `false`, matching
+  fluxflow-training). With lion_pytorch, true makes per-step decay `weight_decay`
+  itself, collapsing flow weights at wd 0.01-0.05.
+- **ROCm SDPA crash**: `GenerationWorker` calls
+  `fluxflow.utils.disable_broken_rocm_sdpa()` for its device at init
+  (torch 2.14 + ROCm 7.16 / gfx1151 raised `hipErrorInvalidValue` in
+  attention). Cached probe; no-op off ROCm. Needs a fluxflow-core that
+  exports it. Training subprocess already handles this itself.
 - **Generation was broken on every non-Mac device** (`UnboundLocalError:
   cannot access local variable 'torch'...`). Three redundant
   `import torch` statements inside `if self.device.type == "mps":` blocks

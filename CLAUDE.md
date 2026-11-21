@@ -213,10 +213,6 @@ UI-side impact lives in `src/fluxflow_ui/utils/generation_worker.py`:
 - CFG null branch built via `fluxflow.utils.build_cfg_null_pair`
   instead of `torch.zeros_like` on the pooled vector.
 
-Plans:
-- Design: `fluxflow-core/docs/plans/2026-06-13-v0.10.0-redesign-design.md`
-- Implementation: `fluxflow-core/docs/plans/2026-06-13-v0.10.0-redesign-implementation.md`
-
 Salvage path for old checkpoints (output keeps narrow legacy VAE widths; see
 [`MIGRATION-v0.10.0-redesign.md`](https://github.com/danny-mio/fluxflow-core/blob/feature/model-v0.10.0/docs/MIGRATION-v0.10.0-redesign.md)) — run from `fluxflow-core`:
 
