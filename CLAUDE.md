@@ -205,13 +205,8 @@ def train_model(config: dict, output_dir: str) -> None:
 ## v0.10.0 Bezier-Coupled Redesign (in progress on feature/model-v0.10.0)
 
 The UI tracks the v0.10.0 redesign shipped in `fluxflow-core` and
-`fluxflow-training`. Five locked decisions drive the change:
-
-1. **Per-token text** — encoder returns `(text_seq, text_mask)`.
-2. **Conditional ctx coupling** in the VAE decoder.
-3. **Full flow modernization** (2D RoPE + dual FiLM).
-4. **Multi-scale SPADE** in the VAE decoder.
-5. **Clean Gaussian z** with KL-warmup + ctx shrinkage.
+`fluxflow-training`. Five locked decisions
+(canonical list): [fluxflow-core `ARCHITECTURE.md`](https://github.com/danny-mio/fluxflow-core/blob/feature/model-v0.10.0/docs/ARCHITECTURE.md#v0100-bezier-coupled-architecture).
 
 UI-side impact lives in `src/fluxflow_ui/utils/generation_worker.py`:
 - Switched to per-token text encoding (`text_seq`, `text_mask`).
@@ -222,7 +217,8 @@ Plans:
 - Design: `fluxflow-core/docs/plans/2026-06-13-v0.10.0-redesign-design.md`
 - Implementation: `fluxflow-core/docs/plans/2026-06-13-v0.10.0-redesign-implementation.md`
 
-Salvage path for old checkpoints — run from `fluxflow-core`:
+Salvage path for old checkpoints (output keeps narrow legacy VAE widths; see
+[`MIGRATION-v0.10.0-redesign.md`](https://github.com/danny-mio/fluxflow-core/blob/feature/model-v0.10.0/docs/MIGRATION-v0.10.0-redesign.md)) — run from `fluxflow-core`:
 
 ```bash
 python scripts/migrate_v0_10_0_to_redesign.py --src OLD.safetensors --dst WARM.safetensors
