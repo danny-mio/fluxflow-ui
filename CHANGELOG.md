@@ -17,6 +17,13 @@ Not yet released — work in progress toward v0.10.0.
 - NPU (XDNA) acceleration was evaluated and deferred; not implemented.
 
 ### Changed
+- **Requires fluxflow-core with v0.10.0 latent stats and configurable VAE widths.**
+  `GenerationWorker`'s v0.10.0 fallback loader now builds compressor/expander at the
+  checkpoint's own widths (`fluxflow.models.v100.infer_vae_widths`), so wide v0.10.0
+  checkpoints load. Pre-rework v0.10.0 checkpoints (affine `ctx_final_norm`, or widths
+  that differ from the model) are rejected by core with `IncompatibleCheckpointError`.
+  Generation calls `compressor` / `expander` directly, which normalize / denormalize the
+  latent with its stored statistics; no other change.
 - numpy 2.x supported: `<2.0` pin removed; floor raised to 1.26.4 (scipy 1.17 requires it).
 - Prompt encoding length follows core `DEFAULT_MAX_TEXT_LENGTH` (now 128, was 32);
   import-failure fallback updated to match.

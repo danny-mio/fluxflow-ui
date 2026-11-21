@@ -547,6 +547,7 @@ class GenerationWorker:
                 self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
 
             # Import v0.10.0 components
+            from fluxflow.models.v100 import infer_vae_widths
             from fluxflow.models.v100.flow import FluxFlowProcessor_v100
             from fluxflow.models.v100.vae import FluxCompressor_v100, FluxExpander_v100
 
@@ -557,6 +558,16 @@ class GenerationWorker:
             config = FluxPipeline._detect_config(state_dict)
             vae_latent_dim = config["vae_dim"]
             activation_type = self._detect_activation_type(checkpoint_path)
+            # Build the VAE at the checkpoint's own widths; absent (None) -> module default.
+            widths = {
+                k: v
+                for k, v in infer_vae_widths(state_dict, prefix="diffuser.").items()
+                if v is not None
+            }
+            compressor_widths = {k: v for k, v in widths.items() if k == "encoder_channels"}
+            expander_widths = {
+                k: v for k, v in widths.items() if k in ("decoder_channels", "spade_hidden")
+            }
 
             # Calculate appropriate attention heads
             def get_valid_n_head(d_model, preferred_heads=8):
@@ -579,6 +590,7 @@ class GenerationWorker:
                     d_model=vae_latent_dim,
                     downscales=config["downscales"],
                     activation_type=activation_type,
+                    **compressor_widths,
                 ),
                 FluxFlowProcessor_v100(
                     d_model=config["flow_dim"],
@@ -592,6 +604,7 @@ class GenerationWorker:
                     d_model=vae_latent_dim,
                     upscales=config.get("upscales", config["downscales"]),
                     activation_type=activation_type,
+                    **expander_widths,
                 ),
             )
             self.pipeline = self.diffuser  # For consistency
