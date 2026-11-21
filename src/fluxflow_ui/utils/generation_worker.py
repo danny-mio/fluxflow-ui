@@ -40,7 +40,7 @@ try:
     # same value if the installed fluxflow-core predates this constant.
     from fluxflow.text_length import DEFAULT_MAX_TEXT_LENGTH  # noqa: E402
 except ImportError:  # pragma: no cover - stale fluxflow-core install
-    DEFAULT_MAX_TEXT_LENGTH = 32
+    DEFAULT_MAX_TEXT_LENGTH = 128
 
 
 class GenerationWorker:

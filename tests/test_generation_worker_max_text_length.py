@@ -24,8 +24,8 @@ def _make_worker(device_type: str = "mps"):
     return worker
 
 
-def test_default_is_32():
-    assert DEFAULT_MAX_TEXT_LENGTH == 32
+def test_default_is_128():
+    assert DEFAULT_MAX_TEXT_LENGTH == 128
 
 
 class TestGenerateImageUsesSharedDefault:

@@ -17,6 +17,8 @@ Not yet released — work in progress toward v0.10.0.
 - NPU (XDNA) acceleration was evaluated and deferred; not implemented.
 
 ### Changed
+- Prompt encoding length follows core `DEFAULT_MAX_TEXT_LENGTH` (now 128, was 32);
+  import-failure fallback updated to match.
 - `GenerationWorker.load_model`: legacy-decoder checkpoints (ConvTranspose2d, kernel 16)
   raise `IncompatibleCheckpointError` in core; the UI now returns that message directly
   instead of falling through the legacy v0.3.0/v0.7.0 loader chain.
