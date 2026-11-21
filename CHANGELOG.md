@@ -17,6 +17,7 @@ Not yet released — work in progress toward v0.10.0.
 - NPU (XDNA) acceleration was evaluated and deferred; not implemented.
 
 ### Changed
+- numpy 2.x supported: `<2.0` pin removed; floor raised to 1.26.4 (scipy 1.17 requires it).
 - Prompt encoding length follows core `DEFAULT_MAX_TEXT_LENGTH` (now 128, was 32);
   import-failure fallback updated to match.
 - `GenerationWorker.load_model`: legacy-decoder checkpoints (ConvTranspose2d, kernel 16)
