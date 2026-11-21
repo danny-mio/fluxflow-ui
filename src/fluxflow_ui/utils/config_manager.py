@@ -173,7 +173,7 @@ class ConfigManager:
                     "lr": 5e-7,
                     "betas": [0.9, 0.95],
                     "weight_decay": 0.01,
-                    "decoupled_weight_decay": True,
+                    "decoupled_weight_decay": False,
                 },
                 "vae": {
                     "type": "AdamW",

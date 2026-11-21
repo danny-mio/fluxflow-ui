@@ -24,6 +24,10 @@ Not yet released — work in progress toward v0.10.0.
   instead of falling through the legacy v0.3.0/v0.7.0 loader chain.
 
 ### Fixed
+- **Lion `decoupled_weight_decay` default**: `config_manager` default flow config and
+  the `index.html` Lion preset no longer force `true` (now `false`, matching
+  fluxflow-training). With lion_pytorch, true makes per-step decay `weight_decay`
+  itself, collapsing flow weights at wd 0.01-0.05.
 - **ROCm SDPA crash**: `GenerationWorker` calls
   `fluxflow.utils.disable_broken_rocm_sdpa()` for its device at init
   (torch 2.14 + ROCm 7.16 / gfx1151 raised `hipErrorInvalidValue` in
