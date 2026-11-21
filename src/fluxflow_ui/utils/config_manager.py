@@ -143,7 +143,7 @@ class ConfigManager:
             # Advanced training
             "use_gradient_checkpointing": False,
             "use_lpips": True,
-            "lambda_lpips": 0.1,
+            "lambda_lpips": 0.5,
             "cfg_dropout_prob": 0.0,
             "reduced_min_sizes": "",
             # Training modes

@@ -178,7 +178,7 @@ class TrainingRunner:
         # Advanced loss options
         if config.get("use_lpips"):
             cmd.append("--use_lpips")
-            cmd.extend(["--lambda_lpips", str(config.get("lambda_lpips", 0.1))])
+            cmd.extend(["--lambda_lpips", str(config.get("lambda_lpips", 0.5))])
 
         # CFG training
         if config.get("cfg_dropout_prob", 0.0) > 0.0:

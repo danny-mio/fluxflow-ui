@@ -66,6 +66,9 @@ Not yet released — work in progress toward v0.10.0.
   [MIGRATION-v0.10.0-redesign.md](https://github.com/danny-mio/fluxflow-core/blob/develop/docs/MIGRATION-v0.10.0-redesign.md).
 
 ### Fixed
+- **`lambda_lpips` default 0.1 -> 0.5** (config_manager, training_runner, training tab
+  slider): UI always passed `--lambda_lpips` explicitly, overriding the new
+  fluxflow-training default.
 - **Lion `decoupled_weight_decay` default**: `config_manager` default flow config and
   the `index.html` Lion preset no longer force `true` (now `false`, matching
   fluxflow-training). With lion_pytorch, true makes per-step decay `weight_decay`

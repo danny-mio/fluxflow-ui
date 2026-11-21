@@ -492,7 +492,7 @@ def create_training_tab(runner: TrainingRunner, config_mgr: ConfigManager) -> gr
                         minimum=0.0,
                         maximum=1.0,
                         step=0.05,
-                        value=prev_config.get("lambda_lpips", 0.1),
+                        value=prev_config.get("lambda_lpips", 0.5),
                         info="Perceptual loss strength (0.1 recommended)",
                     )
 

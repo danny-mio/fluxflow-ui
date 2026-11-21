@@ -258,3 +258,9 @@ class TestRoundTrip:
         loaded = manager.load_generation_config()
 
         assert loaded == original
+
+
+def test_default_lambda_lpips_is_0_5(tmp_path):
+    """UI default must match fluxflow-training (0.5)."""
+    cfg = ConfigManager(config_dir=str(tmp_path)).get_default_training_config()
+    assert cfg["lambda_lpips"] == 0.5
