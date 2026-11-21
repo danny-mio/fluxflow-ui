@@ -24,6 +24,7 @@ from fluxflow.models import (  # noqa: E402
     FluxPipeline,
     detect_architecture_version,
 )
+from fluxflow.models.pipeline import warn_if_latent_stats_uncalibrated  # noqa: E402
 from fluxflow.models.versioning import load_versioned_checkpoint  # noqa: E402
 from fluxflow.exceptions import IncompatibleCheckpointError  # noqa: E402
 from fluxflow.utils import (  # noqa: E402
@@ -176,6 +177,7 @@ class GenerationWorker:
                     # Ensure models are on device
                     self.pipeline.to(self.device).eval()
                     self.text_encoder.to(self.device).eval()
+                    warn_if_latent_stats_uncalibrated(self.pipeline, logger)
 
                     # MPS-specific initialization
                     if self.device.type == "mps":
@@ -209,6 +211,7 @@ class GenerationWorker:
                         # Ensure models are on device
                         self.pipeline.to(self.device).eval()
                         self.text_encoder.to(self.device).eval()
+                        warn_if_latent_stats_uncalibrated(self.pipeline, logger)
 
                         # MPS-specific initialization
                         if self.device.type == "mps":
@@ -622,6 +625,7 @@ class GenerationWorker:
 
             self.diffuser.to(self.device).eval()
             self.text_encoder.to(self.device).eval()
+            warn_if_latent_stats_uncalibrated(self.diffuser, logger)
 
             self.model_checkpoint = checkpoint_path
             self.config = {

@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Not yet released — work in progress toward v0.10.0.
 
 ### Added
+- Generation worker logs a WARNING after loading a v0.10.0 checkpoint whose latent
+  stats are uncalibrated or differ between compressor and expander (core
+  `warn_if_latent_stats_uncalibrated`; needs the matching fluxflow-core).
 - **AMD ROCm/gfx1151 support (experimental, unvalidated)**: `_get_device()`
   now delegates to `fluxflow.utils.device.get_device()`, which distinguishes
   ROCm from real NVIDIA CUDA. No UI-visible behavior change — ROCm-build
